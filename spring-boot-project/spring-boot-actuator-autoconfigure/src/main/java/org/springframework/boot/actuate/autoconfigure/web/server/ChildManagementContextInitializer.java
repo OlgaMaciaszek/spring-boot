@@ -166,7 +166,7 @@ class ChildManagementContextInitializer implements ApplicationListener<WebServer
 			ClassName generatedInitializerClassName = new ApplicationContextAotGenerator()
 					.generateApplicationContext(this.managementContext, managementGenerationContext);
 			GeneratedMethod postProcessorMethod = beanRegistrationCode.getMethods().add("addManagementInitializer",
-					method -> method.addJavadoc("Use AOT management context initialization")
+					(method) -> method.addJavadoc("Use AOT management context initialization")
 							.addModifiers(Modifier.PRIVATE, Modifier.STATIC)
 							.addParameter(RegisteredBean.class, "registeredBean")
 							.addParameter(ChildManagementContextInitializer.class, "instance")
