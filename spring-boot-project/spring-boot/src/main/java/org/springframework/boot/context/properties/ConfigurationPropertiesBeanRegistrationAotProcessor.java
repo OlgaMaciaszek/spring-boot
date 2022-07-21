@@ -73,7 +73,7 @@ class ConfigurationPropertiesBeanRegistrationAotProcessor implements BeanRegistr
 		public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
 				BeanRegistrationCode beanRegistrationCode, Executable constructorOrFactoryMethod,
 				boolean allowDirectSupplierShortcut) {
-			GeneratedMethod generatedMethod = beanRegistrationCode.getMethods().add("getInstance", method -> {
+			GeneratedMethod generatedMethod = beanRegistrationCode.getMethods().add("getInstance", (method) -> {
 				Class<?> beanClass = this.registeredBean.getBeanClass();
 				method.addJavadoc("Get the bean instance for '$L'.", this.registeredBean.getBeanName())
 						.addModifiers(Modifier.PRIVATE, Modifier.STATIC).returns(beanClass)
