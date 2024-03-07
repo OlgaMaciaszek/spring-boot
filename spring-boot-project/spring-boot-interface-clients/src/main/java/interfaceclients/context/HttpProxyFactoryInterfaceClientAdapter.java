@@ -28,20 +28,12 @@ public class HttpProxyFactoryInterfaceClientAdapter extends AbstractInterfaceCli
 	private HttpServiceProxyFactory proxyFactory;
 
 	@Override
-	public <T> T createClient(BeanFactory factory, String clientName, Class<T> type) {
-		resolveDefaultDependencies(factory);
-		HttpServiceProxyFactory proxyFactory = resolveDependency(factory, clientName,
+	public <T> T createClient(BeanFactory beanFactory, String clientName, Class<T> type) {
+		resolveDefaultDependencies(beanFactory);
+		HttpServiceProxyFactory proxyFactory = resolveDependency(beanFactory, clientName,
 				HttpServiceProxyFactory.class);
 		return proxyFactory != null ? proxyFactory.createClient(type) :
 				this.proxyFactory.createClient(type);
-	}
-
-	@Override
-	public boolean canCreateClient(BeanFactory factory, String clientName) {
-		resolveDefaultDependencies(factory);
-		HttpServiceProxyFactory proxyFactory = resolveDependency(factory, clientName,
-				HttpServiceProxyFactory.class);
-		return this.proxyFactory != null || proxyFactory != null;
 	}
 
 	@Override

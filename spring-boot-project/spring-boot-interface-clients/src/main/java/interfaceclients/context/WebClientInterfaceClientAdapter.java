@@ -35,9 +35,9 @@ public class WebClientInterfaceClientAdapter extends AbstractHttpInterfaceClient
 	private WebClient.Builder webClientBuilder;
 
 	@Override
-	public <T> T createClient(BeanFactory factory, String clientName, Class<T> type) {
+	public <T> T createClient(BeanFactory beanFactory, String clientName, Class<T> type) {
 		if (this.proxyFactory == null) {
-			this.proxyFactory = buildProxyFactory(factory, clientName);
+			this.proxyFactory = buildProxyFactory(beanFactory, clientName);
 		}
 		return this.proxyFactory.createClient(type);
 	}
@@ -58,12 +58,6 @@ public class WebClientInterfaceClientAdapter extends AbstractHttpInterfaceClient
 				WebClientAdapter.create(webClient) : WebClientAdapter.create(webClientBuilder.build());
 		HttpServiceProxyFactory.Builder builder = getServiceProxyFactoryBuilder(beanFactory, clientName);
 		return builder.exchangeAdapter(webClientAdapter).build();
-	}
-
-	@Override
-	public boolean canCreateClient(BeanFactory factory, String clientName) {
-		resolveDefaultDependencies(factory, clientName);
-		return this.webClient != null || this.webClientBuilder != null;
 	}
 
 	protected void resolveDefaultDependencies(BeanFactory factory, String clientName) {

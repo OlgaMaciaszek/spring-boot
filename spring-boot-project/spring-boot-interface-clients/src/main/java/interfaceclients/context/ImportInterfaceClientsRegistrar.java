@@ -90,6 +90,7 @@ abstract class ImportInterfaceClientsRegistrar implements ImportBeanDefinitionRe
 				ListableBeanFactory beanFactory = (ListableBeanFactory) registry;
 				// TODO: initialise in autoconfig
 				InterfaceClientAdapter adapter = beanFactory.getBean(AggregateInterfaceClientAdapter.class);
+				// TODO: consider against  genericBeanDefinition and handle issues
 				BeanDefinition definition = BeanDefinitionBuilder
 						.rootBeanDefinition(ResolvableType.forClass(beanClass),
 								() -> adapter.createClient(beanFactory, clientName, beanClass))
@@ -161,26 +162,5 @@ abstract class ImportInterfaceClientsRegistrar implements ImportBeanDefinitionRe
 	}
 
 	protected abstract Class<? extends Annotation> getAnnotation();
-
-	protected <T> Supplier<T> supplyClient(BeanDefinitionRegistry registry, String beanClassName, Class<T> beanClass) {
-		return new Supplier<T>() {
-			@Override
-			public T get() {
-				return createClient(registry, beanClassName, beanClass);
-			}
-		};
-	}
-
-	protected abstract <T> T createClient();
-
-	protected <T> T createClient(BeanDefinitionRegistry registry, String beanClassName, Class<T> beanClass) {
-		Assert.isInstanceOf(ListableBeanFactory.class, registry, registry.getClass().getSimpleName()
-				+ " is not an instance of " + ListableBeanFactory.class.getSimpleName());
-		ListableBeanFactory beanFactory = (ListableBeanFactory) registry;
-		// TODO: handle many beans
-		// FIXME
-		InterfaceClientAdapter adapter = beanFactory.getBeansOfType(InterfaceClientAdapter.class).values().stream().findAny().get();
-		return adapter.createClient(registry, beanClassName, beanClass);
-	}
 
 }

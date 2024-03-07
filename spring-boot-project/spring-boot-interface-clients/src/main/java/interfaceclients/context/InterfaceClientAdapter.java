@@ -22,11 +22,11 @@ import org.springframework.core.Ordered;
 /**
  * @author Olga Maciaszek-Sharma
  */
+@FunctionalInterface
 public interface InterfaceClientAdapter extends Ordered {
 
 	String DEFAULT_QUALIFIER = "interfaceClients";
 
-	<T> T createClient(BeanFactory factory, String clientName, Class<T> type);
+	<T> T createClient(BeanFactory beanFactory, String clientName, Class<T> type);
 
-	boolean canCreateClient(BeanFactory factory, String clientName);
 }

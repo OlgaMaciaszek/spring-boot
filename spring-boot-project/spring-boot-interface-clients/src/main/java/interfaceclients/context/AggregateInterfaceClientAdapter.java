@@ -19,28 +19,33 @@ package interfaceclients.context;
 import java.util.List;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.core.OrderComparator;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
+// TODO: consider moving away from the common interface
 public class AggregateInterfaceClientAdapter implements InterfaceClientAdapter {
 
 	private final List<InterfaceClientAdapter> adapters;
 
 	public AggregateInterfaceClientAdapter(List<InterfaceClientAdapter> adapters) {
+		OrderComparator.sort(adapters);
 		this.adapters = adapters;
 	}
 
 	@Override
-	public <T> T createClient(BeanFactory factory, String clientName, Class<T> type) {
-		throw new UnsupportedOperationException("Please, implement me.");
+	public <T> T createClient(BeanFactory beanFactory, String clientName, Class<T> type) {
+		for (InterfaceClientAdapter adapter : this.adapters) {
+			T client = adapter.createClient(beanFactory, clientName, type);
+			if (client != null) {
+				return client;
+			}
+		}
+		return null;
 	}
 
-	@Override
-	public boolean canCreateClient(BeanFactory factory, String clientName) {
-		throw new UnsupportedOperationException("Please, implement me.");
-	}
-
+	// FIXME
 	@Override
 	public int getOrder() {
 		throw new UnsupportedOperationException("Please, implement me.");
