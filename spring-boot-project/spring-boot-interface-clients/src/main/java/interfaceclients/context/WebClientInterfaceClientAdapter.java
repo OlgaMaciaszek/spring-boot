@@ -21,7 +21,6 @@ import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
-import org.springframework.web.service.invoker.HttpServiceArgumentResolver;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
@@ -45,20 +44,20 @@ public class WebClientInterfaceClientAdapter extends AbstractHttpInterfaceClient
 
 
 	// TODO: later move up
-	private HttpServiceProxyFactory buildProxyFactory(BeanFactory factory, String clientName) {
-		resolveDefaultDependencies(factory, clientName);
-		Assert.isTrue(this.webClient != null || this.webClientBuilder != null,
+	private HttpServiceProxyFactory buildProxyFactory(BeanFactory beanFactory, String clientName) {
+		resolveDefaultDependencies(beanFactory);
+		WebClient webClient = resolveDependency(beanFactory, clientName, WebClient.class) != null
+				? resolveDependency(beanFactory, clientName, WebClient.class) : this.webClient;
+		WebClient.Builder webClientBuilder = resolveDependency(beanFactory, WebClient.Builder.class) != null
+				? resolveDependency(beanFactory, WebClient.Builder.class) : this.webClientBuilder;
+		Assert.isTrue(webClient != null || webClientBuilder != null,
 				"No qualified WebClient or WebClient.Builder instance found.");
 		// TODO: test with load-balanced WebClient.Builder
 		// TODO: customise adapters
-		WebClientAdapter webClientAdapter = this.webClient != null ?
-				WebClientAdapter.create(this.webClient) : WebClientAdapter.create(this.webClientBuilder.build());
-		HttpServiceProxyFactory.Builder builder = HttpServiceProxyFactory.builderFor(webClientAdapter);
-		for (HttpServiceArgumentResolver resolver : this.customArgumentResolvers) {
-			builder.customArgumentResolver(resolver);
-		}
-		return builder.conversionService(this.conversionService).embeddedValueResolver(this.embeddedValueResolver)
-				.build();
+		WebClientAdapter webClientAdapter = webClient != null ?
+				WebClientAdapter.create(webClient) : WebClientAdapter.create(webClientBuilder.build());
+		HttpServiceProxyFactory.Builder builder = getServiceProxyFactoryBuilder(beanFactory, clientName);
+		return builder.exchangeAdapter(webClientAdapter).build();
 	}
 
 	@Override
@@ -68,16 +67,21 @@ public class WebClientInterfaceClientAdapter extends AbstractHttpInterfaceClient
 	}
 
 	protected void resolveDefaultDependencies(BeanFactory factory, String clientName) {
-		if (this.webClient != null || this.webClientBuilder != null) {
-			return;
-		}
-		this.webClient = resolveDependency(factory, clientName, WebClient.class);
-		this.webClientBuilder = resolveDependency(factory, clientName, WebClient.Builder.class);
+
 	}
 
 	@Override
 	public int getOrder() {
 		return Ordered.HIGHEST_PRECEDENCE + 11;
+	}
+
+	@Override
+	protected void resolveDefaultDependencies(BeanFactory factory) {
+		if (this.webClient != null || this.webClientBuilder != null) {
+			return;
+		}
+		this.webClient = resolveDependency(factory, WebClient.class);
+		this.webClientBuilder = resolveDependency(factory, WebClient.Builder.class);
 	}
 }
 

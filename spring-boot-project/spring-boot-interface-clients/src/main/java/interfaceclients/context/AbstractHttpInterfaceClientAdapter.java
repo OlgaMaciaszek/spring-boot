@@ -22,6 +22,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.service.invoker.HttpServiceArgumentResolver;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
  * @author Olga Maciaszek-Sharma
@@ -29,20 +30,39 @@ import org.springframework.web.service.invoker.HttpServiceArgumentResolver;
 // TODO: rename as not base for HttpProxyFactoryInterfaceClientAdapter?
 abstract class AbstractHttpInterfaceClientAdapter extends AbstractInterfaceClientAdapter {
 
-	protected List<HttpServiceArgumentResolver> customArgumentResolvers;
+	private List<HttpServiceArgumentResolver> customArgumentResolvers;
 
-	protected ConversionService conversionService;
+	private ConversionService conversionService;
 
-	protected StringValueResolver embeddedValueResolver;
+	private StringValueResolver embeddedValueResolver;
 
 	@Override
-	protected void resolveDefaultDependencies(BeanFactory factory, String clientName) {
+	protected void resolveDefaultDependencies(BeanFactory factory) {
+		// TODO: this is not good enough - ensure init once at the beginning, check if constructor would not be too early
 		if (this.customArgumentResolvers != null || this.conversionService != null
 				|| this.embeddedValueResolver != null) {
 			return;
 		}
-		this.customArgumentResolvers = resolveListDependency(factory, clientName, HttpServiceArgumentResolver.class);
-		this.conversionService = resolveDependency(factory, clientName, ConversionService.class);
-		this.embeddedValueResolver = resolveDependency(factory, clientName, StringValueResolver.class);
+		this.customArgumentResolvers = resolveListDependency(factory, HttpServiceArgumentResolver.class);
+		this.conversionService = resolveDependency(factory, ConversionService.class);
+		this.embeddedValueResolver = resolveDependency(factory, StringValueResolver.class);
+	}
+
+	protected HttpServiceProxyFactory.Builder getServiceProxyFactoryBuilder(BeanFactory beanFactory, String clientName) {
+		resolveDefaultDependencies(beanFactory);
+		List<HttpServiceArgumentResolver> customArgumentResolvers = !resolveListDependency(beanFactory, clientName, HttpServiceArgumentResolver.class).isEmpty()
+				? resolveListDependency(beanFactory, clientName, HttpServiceArgumentResolver.class) :
+				this.customArgumentResolvers;
+		ConversionService conversionService = resolveDependency(beanFactory, clientName, ConversionService.class) != null
+				? resolveDependency(beanFactory, clientName, ConversionService.class) : this.conversionService;
+		StringValueResolver embeddedValueResolver = resolveDependency(beanFactory, clientName, StringValueResolver.class) != null
+				? resolveDependency(beanFactory, clientName, StringValueResolver.class) : this.embeddedValueResolver;
+		HttpServiceProxyFactory.Builder builder = HttpServiceProxyFactory.builder();
+		for (HttpServiceArgumentResolver resolver : customArgumentResolvers) {
+			builder.customArgumentResolver(resolver);
+		}
+		builder.conversionService(conversionService)
+				.embeddedValueResolver(embeddedValueResolver);
+		return builder;
 	}
 }

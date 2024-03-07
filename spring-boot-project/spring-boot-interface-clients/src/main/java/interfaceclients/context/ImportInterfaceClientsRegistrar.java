@@ -36,6 +36,7 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.OrderComparator;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
@@ -84,14 +85,14 @@ abstract class ImportInterfaceClientsRegistrar implements ImportBeanDefinitionRe
 					}
 					throw new RuntimeException(e);
 				}
-				String clientName = annotation.getString(MergedAnnotation.VALUE);
-				if (ObjectUtils.isEmpty(clientName)) {
-					clientName = StringUtils.uncapitalize(beanClassName);
-				}
+				String clientName = !ObjectUtils.isEmpty(annotation.getString(MergedAnnotation.VALUE))
+						? annotation.getString(MergedAnnotation.VALUE) : StringUtils.uncapitalize(beanClassName);
 				ListableBeanFactory beanFactory = (ListableBeanFactory) registry;
-				InterfaceClientAdapter adapter = getInterfaceClientAdapter(beanFactory, clientName);
+				// TODO: initialise in autoconfig
+				InterfaceClientAdapter adapter = beanFactory.getBean(AggregateInterfaceClientAdapter.class);
 				BeanDefinition definition = BeanDefinitionBuilder
-						.genericBeanDefinition(beanClass, adapter.createClient() )
+						.rootBeanDefinition(ResolvableType.forClass(beanClass),
+								() -> adapter.createClient(beanFactory, clientName, beanClass))
 						.getBeanDefinition();
 				registry.registerBeanDefinition(clientName, definition);
 			}
