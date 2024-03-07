@@ -1613,7 +1613,7 @@ bom {
 				"spring-boot-devtools",
 				"spring-boot-docker-compose",
 				"spring-boot-interface-clients",
-				"spring-boot-jarmode-layertools",
+				"spring-boot-jarmode-tools",
 				"spring-boot-loader",
 				"spring-boot-loader-classic",
 				"spring-boot-loader-tools",
