@@ -1,6 +1,6 @@
 plugins {
 	id "java-library"
-	id "org.asciidoctor.jvm.convert"
+	id "org.antora"
 	id "org.springframework.boot.auto-configuration"
 	id "org.springframework.boot.configuration-properties"
 	id "org.springframework.boot.conventions"
@@ -11,13 +11,10 @@ plugins {
 description = "Spring Boot Actuator AutoConfigure"
 
 configurations {
-	documentation
+	antoraContent
 }
 
 dependencies {
-	asciidoctorExtensions("org.springframework.restdocs:spring-restdocs-asciidoctor")
-	asciidoctorExtensions("io.spring.asciidoctor:spring-asciidoctor-extensions-section-ids")
-
 	api(project(":spring-boot-project:spring-boot-actuator"))
 	api(project(":spring-boot-project:spring-boot"))
 	api(project(":spring-boot-project:spring-boot-autoconfigure"))
@@ -26,7 +23,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
 	optional("ch.qos.logback:logback-classic")
-	optional("com.datastax.oss:java-driver-core") {
+	optional("org.apache.cassandra:java-driver-core") {
 		exclude group: "org.slf4j", module: "jcl-over-slf4j"
 	}
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
@@ -57,6 +54,7 @@ dependencies {
 	optional("io.micrometer:micrometer-registry-new-relic")
 	optional("io.micrometer:micrometer-registry-otlp")
 	optional("io.micrometer:micrometer-registry-prometheus")
+	optional("io.micrometer:micrometer-registry-prometheus-simpleclient")
 	optional("io.micrometer:micrometer-registry-stackdriver") {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "javax.annotation", module: "javax.annotation-api"
@@ -79,7 +77,7 @@ dependencies {
 	optional("jakarta.persistence:jakarta.persistence-api")
 	optional("jakarta.servlet:jakarta.servlet-api")
 	optional("javax.cache:cache-api")
-	optional("org.apache.activemq:activemq-client-jakarta")
+	optional("org.apache.activemq:activemq-client")
 	optional("org.apache.commons:commons-dbcp2") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
@@ -144,6 +142,7 @@ dependencies {
 	testImplementation(project(":spring-boot-project:spring-boot-tools:spring-boot-test-support"))
 	testImplementation("io.micrometer:micrometer-observation-test")
 	testImplementation("io.projectreactor:reactor-test")
+	testImplementation("io.prometheus:prometheus-metrics-exposition-formats")
 	testImplementation("io.r2dbc:r2dbc-h2")
 	testImplementation("com.squareup.okhttp3:mockwebserver")
 	testImplementation("com.jayway.jsonpath:json-path")
@@ -195,38 +194,6 @@ dependencies {
 	}
 }
 
-task dependencyVersions(type: org.springframework.boot.build.constraints.ExtractVersionConstraints) {
-	enforcedPlatform(":spring-boot-project:spring-boot-dependencies")
-}
-
-asciidoctor {
-	sources {
-		include "index.adoc"
-	}
-}
-
-task asciidoctorPdf(type: org.asciidoctor.gradle.jvm.AsciidoctorTask) {
-	sources {
-		include "index.adoc"
-	}
-}
-
-task zip(type: Zip) {
-	dependsOn asciidoctor, asciidoctorPdf
-	duplicatesStrategy "fail"
-	from(asciidoctorPdf.outputDir) {
-		into "pdf"
-		rename { "spring-boot-actuator-web-api.pdf" }
-	}
-	from(asciidoctor.outputDir) {
-		into "htmlsingle"
-	}
-}
-
-artifacts {
-	documentation zip
-}
-
 tasks.named("test") {
 	jvmArgs += "--add-opens=java.base/java.net=ALL-UNNAMED"
 	filter {
@@ -235,28 +202,48 @@ tasks.named("test") {
 }
 
 def documentationTest = tasks.register("documentationTest", Test) {
+	jvmArgs += "--add-opens=java.base/java.net=ALL-UNNAMED"
 	filter {
 		includeTestsMatching("org.springframework.boot.actuate.autoconfigure.endpoint.web.documentation.*")
 	}
-	jvmArgs += "--add-opens=java.base/java.net=ALL-UNNAMED"
 	outputs.dir("${buildDir}/generated-snippets")
-	predictiveSelection {
-		enabled = false
+	develocity {
+		predictiveTestSelection {
+			enabled = false
+		}
 	}
 }
 
-tasks.withType(org.asciidoctor.gradle.jvm.AbstractAsciidoctorTask) {
-	dependsOn dependencyVersions
-	doFirst {
-		def versionConstraints = dependencyVersions.versionConstraints
-		def toAntoraVersion = version -> {
-			String formatted = version.split("\\.").take(2).join('.')
-			return version.endsWith("-SNAPSHOT") ? formatted + "-SNAPSHOT" : formatted
-		}
-		def integrationVersion = versionConstraints["org.springframework.integration:spring-integration-core"]
-		String integrationDocs = String.format("https://docs.spring.io/spring-integration/reference/%s", toAntoraVersion(integrationVersion))
-		attributes "spring-integration-docs": integrationDocs
+def antoraActuatorRestApiLocalAggregateContent  = tasks.register("antoraActuatorRestApiLocalAggregateContent", Zip) {
+	destinationDirectory = layout.buildDirectory.dir('generated/docs/antora-content')
+	archiveClassifier = "actuator-rest-api-local-aggregate-content"
+	from(tasks.getByName("generateAntoraYml")) {
+		into "modules"
 	}
-	dependsOn documentationTest
-	inputs.dir("${buildDir}/generated-snippets").withPathSensitivity(PathSensitivity.RELATIVE).withPropertyName("generatedSnippets")
 }
+
+def antoraActuatorRestApiAggregateContent = tasks.register("antoraActuatorRestApiAggregateContent", Zip) {
+	dependsOn documentationTest
+	inputs.dir("${buildDir}/generated-snippets")
+		.withPathSensitivity(PathSensitivity.RELATIVE)
+		.withPropertyName("generatedSnippets")
+	destinationDirectory = layout.buildDirectory.dir('generated/docs/antora-content')
+	archiveClassifier = "actuator-rest-api-aggregate-content"
+	from("${buildDir}/generated-snippets") {
+		into "modules/api/partials/rest/actuator"
+	}
+}
+
+tasks.named("generateAntoraPlaybook") {
+	alwaysInclude = [name: "actuator-rest-api", classifier: "local-aggregate-content"]
+	dependsOn antoraActuatorRestApiLocalAggregateContent
+}
+
+tasks.named("antora") {
+	inputs.files(antoraActuatorRestApiAggregateContent)
+}
+
+artifacts {
+	antoraContent antoraActuatorRestApiAggregateContent
+}
+

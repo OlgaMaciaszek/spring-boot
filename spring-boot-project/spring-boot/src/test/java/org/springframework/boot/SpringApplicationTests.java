@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.boot.context.event.SpringApplicationEvent;
 import org.springframework.boot.convert.ApplicationConversionService;
+import org.springframework.boot.testsupport.classpath.ForkedClassPath;
 import org.springframework.boot.testsupport.system.CapturedOutput;
 import org.springframework.boot.testsupport.system.OutputCaptureExtension;
 import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory;
@@ -754,6 +755,53 @@ class SpringApplicationTests {
 	}
 
 	@Test
+	void failureOnTheJvmLogsApplicationRunFailed(CapturedOutput output) {
+		SpringApplication application = new SpringApplication(ExampleConfig.class);
+		application.setWebApplicationType(WebApplicationType.NONE);
+		ExitCodeListener exitCodeListener = new ExitCodeListener();
+		application.addListeners(exitCodeListener);
+		@SuppressWarnings("unchecked")
+		ApplicationListener<SpringApplicationEvent> listener = mock(ApplicationListener.class);
+		application.addListeners(listener);
+		ExitStatusException failure = new ExitStatusException();
+		willThrow(failure).given(listener).onApplicationEvent(isA(ApplicationReadyEvent.class));
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(application::run);
+		then(listener).should().onApplicationEvent(isA(ApplicationReadyEvent.class));
+		then(listener).should(never()).onApplicationEvent(isA(ApplicationFailedEvent.class));
+		assertThat(exitCodeListener.getExitCode()).isEqualTo(11);
+		// Leading space only happens when logging
+		assertThat(output).contains(" Application run failed").contains("ExitStatusException");
+	}
+
+	@Test
+	@ForkedClassPath
+	void failureInANativeImageWritesFailureToSystemOut(CapturedOutput output) {
+		System.setProperty("org.graalvm.nativeimage.imagecode", "true");
+		try {
+			SpringApplication application = new SpringApplication(ExampleConfig.class);
+			application.setWebApplicationType(WebApplicationType.NONE);
+			ExitCodeListener exitCodeListener = new ExitCodeListener();
+			application.addListeners(exitCodeListener);
+			@SuppressWarnings("unchecked")
+			ApplicationListener<SpringApplicationEvent> listener = mock(ApplicationListener.class);
+			application.addListeners(listener);
+			ExitStatusException failure = new ExitStatusException();
+			willThrow(failure).given(listener).onApplicationEvent(isA(ApplicationReadyEvent.class));
+			assertThatExceptionOfType(RuntimeException.class).isThrownBy(application::run);
+			then(listener).should().onApplicationEvent(isA(ApplicationReadyEvent.class));
+			then(listener).should(never()).onApplicationEvent(isA(ApplicationFailedEvent.class));
+			assertThat(exitCodeListener.getExitCode()).isEqualTo(11);
+			// Leading space only happens when logging
+			assertThat(output).doesNotContain(" Application run failed")
+				.contains("Application run failed")
+				.contains("ExitStatusException");
+		}
+		finally {
+			System.clearProperty("org.graalvm.nativeimage.imagecode");
+		}
+	}
+
+	@Test
 	void loadSources() {
 		Class<?>[] sources = { ExampleConfig.class, TestCommandLineRunner.class };
 		TestSpringApplication application = new TestSpringApplication(sources);
@@ -1397,8 +1445,8 @@ class SpringApplicationTests {
 		application.setMainApplicationClass(TestSpringApplication.class);
 		System.setProperty(AotDetector.AOT_ENABLED, "true");
 		try {
-			assertThatIllegalStateException().isThrownBy(application::run)
-				.withMessageContaining("but AOT processing hasn't happened");
+			assertThatExceptionOfType(AotInitializerNotFoundException.class).isThrownBy(application::run)
+				.withMessageMatching("^.+AOT initializer .+ could not be found$");
 		}
 		finally {
 			System.clearProperty(AotDetector.AOT_ENABLED);
@@ -1462,8 +1510,8 @@ class SpringApplicationTests {
 
 	private <S extends AvailabilityState> ArgumentMatcher<ApplicationEvent> isAvailabilityChangeEventWithState(
 			S state) {
-		return (argument) -> (argument instanceof AvailabilityChangeEvent<?>)
-				&& ((AvailabilityChangeEvent<?>) argument).getState().equals(state);
+		return (argument) -> (argument instanceof AvailabilityChangeEvent<?> availabilityChangeEvent)
+				&& availabilityChangeEvent.getState().equals(state);
 	}
 
 	private <E extends ApplicationEvent> AtomicReference<E> addListener(SpringApplication application,

@@ -48,6 +48,13 @@ bom {
 			]
 		}
 	}
+	library("CycloneDX Gradle Plugin", "1.8.2") {
+		group("org.cyclonedx") {
+			modules = [
+				"cyclonedx-gradle-plugin"
+			]
+		}
+	}
 	library("Janino", "3.1.10") {
 		group("org.codehaus.janino") {
 			imports = [
@@ -191,14 +198,6 @@ bom {
 		group("org.testng") {
 			modules = [
 				"testng"
-			]
-		}
-	}
-	library("Spring Asciidoctor Extensions", "0.6.3") {
-		group("io.spring.asciidoctor") {
-			modules = [
-				"spring-asciidoctor-extensions-spring-boot",
-				"spring-asciidoctor-extensions-section-ids"
 			]
 		}
 	}

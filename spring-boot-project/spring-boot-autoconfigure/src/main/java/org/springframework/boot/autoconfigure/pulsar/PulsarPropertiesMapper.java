@@ -39,6 +39,7 @@ import org.apache.pulsar.client.api.ServiceUrlProvider;
 import org.apache.pulsar.client.impl.AutoClusterFailover.AutoClusterFailoverBuilderImpl;
 
 import org.springframework.boot.context.properties.PropertyMapper;
+import org.springframework.pulsar.core.PulsarTemplate;
 import org.springframework.pulsar.listener.PulsarContainerProperties;
 import org.springframework.pulsar.reader.PulsarReaderContainerProperties;
 import org.springframework.util.StringUtils;
@@ -64,6 +65,7 @@ final class PulsarPropertiesMapper {
 		map.from(properties::getConnectionTimeout).to(timeoutProperty(clientBuilder::connectionTimeout));
 		map.from(properties::getOperationTimeout).to(timeoutProperty(clientBuilder::operationTimeout));
 		map.from(properties::getLookupTimeout).to(timeoutProperty(clientBuilder::lookupTimeout));
+		map.from(this.properties.getTransaction()::isEnabled).whenTrue().to(clientBuilder::enableTransaction);
 		customizeAuthentication(properties.getAuthentication(), clientBuilder::authentication);
 		customizeServiceUrlProviderBuilder(clientBuilder::serviceUrl, clientBuilder::serviceUrlProvider, properties,
 				connectionDetails);
@@ -82,8 +84,8 @@ final class PulsarPropertiesMapper {
 		PropertyMapper map = PropertyMapper.get().alwaysApplyingWhenNonNull();
 		map.from(connectionDetails::getBrokerUrl).to(autoClusterFailoverBuilder::primary);
 		map.from(secondaryAuths::keySet).as(ArrayList::new).to(autoClusterFailoverBuilder::secondary);
-		map.from(failoverProperties::getFailoverPolicy).to(autoClusterFailoverBuilder::failoverPolicy);
-		map.from(failoverProperties::getFailOverDelay).to(timeoutProperty(autoClusterFailoverBuilder::failoverDelay));
+		map.from(failoverProperties::getPolicy).to(autoClusterFailoverBuilder::failoverPolicy);
+		map.from(failoverProperties::getDelay).to(timeoutProperty(autoClusterFailoverBuilder::failoverDelay));
 		map.from(failoverProperties::getSwitchBackDelay)
 			.to(timeoutProperty(autoClusterFailoverBuilder::switchBackDelay));
 		map.from(failoverProperties::getCheckInterval).to(timeoutProperty(autoClusterFailoverBuilder::checkInterval));
@@ -135,7 +137,7 @@ final class PulsarPropertiesMapper {
 		try {
 			return sortedParams.entrySet()
 				.stream()
-				.map((e) -> "\"%s\":\"%s\"".formatted(e.getKey(), e.getValue()))
+				.map((entry) -> "\"%s\":\"%s\"".formatted(entry.getKey(), entry.getValue()))
 				.collect(Collectors.joining(",", "{", "}"));
 		}
 		catch (Exception ex) {
@@ -155,6 +157,10 @@ final class PulsarPropertiesMapper {
 		map.from(properties::isChunkingEnabled).to(producerBuilder::enableChunking);
 		map.from(properties::getCompressionType).to(producerBuilder::compressionType);
 		map.from(properties::getAccessMode).to(producerBuilder::accessMode);
+	}
+
+	<T> void customizeTemplate(PulsarTemplate<T> template) {
+		template.transactions().setEnabled(this.properties.getTransaction().isEnabled());
 	}
 
 	<T> void customizeConsumerBuilder(ConsumerBuilder<T> consumerBuilder) {
@@ -183,6 +189,7 @@ final class PulsarPropertiesMapper {
 	void customizeContainerProperties(PulsarContainerProperties containerProperties) {
 		customizePulsarContainerConsumerSubscriptionProperties(containerProperties);
 		customizePulsarContainerListenerProperties(containerProperties);
+		containerProperties.transactions().setEnabled(this.properties.getTransaction().isEnabled());
 	}
 
 	private void customizePulsarContainerConsumerSubscriptionProperties(PulsarContainerProperties containerProperties) {

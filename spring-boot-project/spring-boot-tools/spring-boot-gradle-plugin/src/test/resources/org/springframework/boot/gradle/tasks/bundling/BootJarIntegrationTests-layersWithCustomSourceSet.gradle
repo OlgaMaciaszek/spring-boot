@@ -13,7 +13,7 @@ bootJar {
 
 repositories {
 	mavenCentral()
-	maven { url "file:repository" }
+	maven { url 'repository' }
 }
 
 dependencies {
@@ -31,5 +31,5 @@ task listLayers(type: JavaExec) {
 task extractLayers(type: JavaExec) {
 	classpath = bootJar.outputs.files
 	systemProperties = [ "jarmode": "tools" ]
-	args "extract", "--layers", "--launcher"
+	args "extract", "--layers", "--launcher", "--destination", ".", "--force"
 }

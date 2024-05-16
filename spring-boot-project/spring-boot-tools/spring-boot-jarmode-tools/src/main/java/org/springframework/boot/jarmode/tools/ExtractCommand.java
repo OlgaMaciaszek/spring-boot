@@ -20,16 +20,21 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileTime;
+import java.util.EnumSet;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
@@ -52,7 +57,7 @@ class ExtractCommand extends Command {
 	/**
 	 * Option to create a launcher.
 	 */
-	static final Option LAUNCHER_OPTION = Option.of("launcher", null, "Whether to extract the Spring Boot launcher");
+	static final Option LAUNCHER_OPTION = Option.flag("launcher", "Whether to extract the Spring Boot launcher");
 
 	/**
 	 * Option to extract layers.
@@ -63,13 +68,18 @@ class ExtractCommand extends Command {
 	 * Option to specify the destination to write to.
 	 */
 	static final Option DESTINATION_OPTION = Option.of("destination", "string",
-			"Directory to extract files to. Defaults to the current working directory");
+			"Directory to extract files to. Defaults to a directory named after the uber JAR (without the file extension)");
+
+	/**
+	 * Option to ignore non-empty directory error.
+	 */
+	static final Option FORCE_OPTION = Option.flag("force", "Whether to ignore non-empty directories, extract anyway");
 
 	private static final Option LIBRARIES_DIRECTORY_OPTION = Option.of("libraries", "string",
 			"Name of the libraries directory. Only applicable when not using --launcher. Defaults to lib/");
 
-	private static final Option RUNNER_FILENAME_OPTION = Option.of("runner-filename", "string",
-			"Name of the runner JAR file. Only applicable when not using --launcher. Defaults to runner.jar");
+	private static final Option APPLICATION_FILENAME_OPTION = Option.of("application-filename", "string",
+			"Name of the application JAR file. Only applicable when not using --launcher. Defaults to the uber JAR filename");
 
 	private final Context context;
 
@@ -81,7 +91,8 @@ class ExtractCommand extends Command {
 
 	ExtractCommand(Context context, Layers layers) {
 		super("extract", "Extract the contents from the jar", Options.of(LAUNCHER_OPTION, LAYERS_OPTION,
-				DESTINATION_OPTION, LIBRARIES_DIRECTORY_OPTION, RUNNER_FILENAME_OPTION), Parameters.none());
+				DESTINATION_OPTION, LIBRARIES_DIRECTORY_OPTION, APPLICATION_FILENAME_OPTION, FORCE_OPTION),
+				Parameters.none());
 		this.context = context;
 		this.layers = layers;
 	}
@@ -90,7 +101,8 @@ class ExtractCommand extends Command {
 	void run(PrintStream out, Map<Option, String> options, List<String> parameters) {
 		try {
 			checkJarCompatibility();
-			File destination = getWorkingDirectory(options);
+			File destination = getDestination(options);
+			checkDirectoryIsEmpty(options, destination);
 			FileResolver fileResolver = getFileResolver(destination, options);
 			fileResolver.createDirectories();
 			if (options.containsKey(LAUNCHER_OPTION)) {
@@ -99,7 +111,7 @@ class ExtractCommand extends Command {
 			else {
 				JarStructure jarStructure = getJarStructure();
 				extractLibraries(fileResolver, jarStructure, options);
-				createRunner(jarStructure, fileResolver, options);
+				createApplication(jarStructure, fileResolver, options);
 			}
 		}
 		catch (IOException ex) {
@@ -108,15 +120,36 @@ class ExtractCommand extends Command {
 		catch (LayersNotEnabledException ex) {
 			printError(out, "Layers are not enabled");
 		}
+		catch (AbortException ex) {
+			printError(out, ex.getMessage());
+		}
+	}
+
+	private static void checkDirectoryIsEmpty(Map<Option, String> options, File destination) {
+		if (options.containsKey(FORCE_OPTION)) {
+			return;
+		}
+		if (!destination.exists()) {
+			return;
+		}
+		if (!destination.isDirectory()) {
+			throw new AbortException(destination.getAbsoluteFile() + " already exists and is not a directory");
+		}
+		File[] files = destination.listFiles();
+		if (files != null && files.length > 0) {
+			throw new AbortException(destination.getAbsoluteFile() + " already exists and is not empty");
+		}
 	}
 
 	private void checkJarCompatibility() throws IOException {
 		File file = this.context.getArchiveFile();
 		try (ZipInputStream stream = new ZipInputStream(new FileInputStream(file))) {
 			ZipEntry entry = stream.getNextEntry();
-			Assert.state(entry != null,
-					() -> "File '%s' is not compatible; ensure jar file is valid and launch script is not enabled"
-						.formatted(file));
+			if (entry == null) {
+				throw new AbortException(
+						"File '%s' is not compatible; ensure jar file is valid and launch script is not enabled"
+							.formatted(file));
+			}
 		}
 	}
 
@@ -128,8 +161,8 @@ class ExtractCommand extends Command {
 	private void extractLibraries(FileResolver fileResolver, JarStructure jarStructure, Map<Option, String> options)
 			throws IOException {
 		String librariesDirectory = getLibrariesDirectory(options);
-		extractArchive(fileResolver, (zipEntry) -> {
-			Entry entry = jarStructure.resolve(zipEntry);
+		extractArchive(fileResolver, (jarEntry) -> {
+			Entry entry = jarStructure.resolve(jarEntry);
 			if (isType(entry, Type.LIBRARY)) {
 				return librariesDirectory + entry.location();
 			}
@@ -149,20 +182,31 @@ class ExtractCommand extends Command {
 	}
 
 	private FileResolver getFileResolver(File destination, Map<Option, String> options) {
-		String runnerFilename = getRunnerFilename(options);
+		String applicationFilename = getApplicationFilename(options);
 		if (!options.containsKey(LAYERS_OPTION)) {
-			return new NoLayersFileResolver(destination, runnerFilename);
+			return new NoLayersFileResolver(destination, applicationFilename);
 		}
 		Layers layers = getLayers();
 		Set<String> layersToExtract = StringUtils.commaDelimitedListToSet(options.get(LAYERS_OPTION));
-		return new LayersFileResolver(destination, layers, layersToExtract, runnerFilename);
+		return new LayersFileResolver(destination, layers, layersToExtract, applicationFilename);
 	}
 
-	private File getWorkingDirectory(Map<Option, String> options) {
+	private File getDestination(Map<Option, String> options) {
 		if (options.containsKey(DESTINATION_OPTION)) {
-			return new File(options.get(DESTINATION_OPTION));
+			File destination = new File(options.get(DESTINATION_OPTION));
+			if (destination.isAbsolute()) {
+				return destination;
+			}
+			return new File(this.context.getWorkingDir(), destination.getPath());
 		}
-		return this.context.getWorkingDir();
+		return new File(this.context.getWorkingDir(), stripExtension(this.context.getArchiveFile().getName()));
+	}
+
+	private static String stripExtension(String name) {
+		if (name.toLowerCase(Locale.ROOT).endsWith(".jar") || name.toLowerCase(Locale.ROOT).endsWith(".war")) {
+			return name.substring(0, name.length() - 4);
+		}
+		return name;
 	}
 
 	private JarStructure getJarStructure() {
@@ -172,48 +216,46 @@ class ExtractCommand extends Command {
 	}
 
 	private void extractArchive(FileResolver fileResolver) throws IOException {
-		extractArchive(fileResolver, ZipEntry::getName);
+		extractArchive(fileResolver, JarEntry::getName);
 	}
 
 	private void extractArchive(FileResolver fileResolver, EntryNameTransformer entryNameTransformer)
 			throws IOException {
-		withZipEntries(this.context.getArchiveFile(), (stream, zipEntry) -> {
-			if (zipEntry.isDirectory()) {
+		withJarEntries(this.context.getArchiveFile(), (stream, jarEntry) -> {
+			if (jarEntry.isDirectory()) {
 				return;
 			}
-			String name = entryNameTransformer.getName(zipEntry);
+			String name = entryNameTransformer.getName(jarEntry);
 			if (name == null) {
 				return;
 			}
-			File file = fileResolver.resolve(zipEntry, name);
+			File file = fileResolver.resolve(jarEntry, name);
 			if (file != null) {
-				extractEntry(stream, zipEntry, file);
+				extractEntry(stream, jarEntry, file);
 			}
 		});
 	}
 
 	private Layers getLayers() {
-		if (this.layers != null) {
-			return this.layers;
-		}
-		return Layers.get(this.context);
+		return (this.layers != null) ? this.layers : Layers.get(this.context);
 	}
 
-	private void createRunner(JarStructure jarStructure, FileResolver fileResolver, Map<Option, String> options)
+	private void createApplication(JarStructure jarStructure, FileResolver fileResolver, Map<Option, String> options)
 			throws IOException {
-		File file = fileResolver.resolveRunner();
+		File file = fileResolver.resolveApplication();
 		if (file == null) {
 			return;
 		}
 		String librariesDirectory = getLibrariesDirectory(options);
 		Manifest manifest = jarStructure.createLauncherManifest((library) -> librariesDirectory + library);
-		mkDirs(file.getParentFile());
+		mkdirs(file.getParentFile());
 		try (JarOutputStream output = new JarOutputStream(new FileOutputStream(file), manifest)) {
-			withZipEntries(this.context.getArchiveFile(), ((stream, zipEntry) -> {
-				Entry entry = jarStructure.resolve(zipEntry);
-				if (isType(entry, Type.APPLICATION_CLASS_OR_RESOURCE) && StringUtils.hasLength(entry.location())) {
-					JarEntry jarEntry = createJarEntry(entry.location(), zipEntry);
-					output.putNextEntry(jarEntry);
+			EnumSet<Type> allowedTypes = EnumSet.of(Type.APPLICATION_CLASS_OR_RESOURCE, Type.META_INF);
+			withJarEntries(this.context.getArchiveFile(), ((stream, jarEntry) -> {
+				Entry entry = jarStructure.resolve(jarEntry);
+				if (entry != null && allowedTypes.contains(entry.type()) && StringUtils.hasLength(entry.location())) {
+					JarEntry newJarEntry = createJarEntry(entry.location(), jarEntry);
+					output.putNextEntry(newJarEntry);
 					StreamUtils.copy(stream, output);
 					output.closeEntry();
 				}
@@ -221,65 +263,76 @@ class ExtractCommand extends Command {
 		}
 	}
 
-	private String getRunnerFilename(Map<Option, String> options) {
-		if (options.containsKey(RUNNER_FILENAME_OPTION)) {
-			return options.get(RUNNER_FILENAME_OPTION);
+	private String getApplicationFilename(Map<Option, String> options) {
+		if (options.containsKey(APPLICATION_FILENAME_OPTION)) {
+			return options.get(APPLICATION_FILENAME_OPTION);
 		}
-		return "runner.jar";
+		return this.context.getArchiveFile().getName();
 	}
 
 	private static boolean isType(Entry entry, Type type) {
-		if (entry == null) {
-			return false;
-		}
-		return entry.type() == type;
+		return (entry != null) && entry.type() == type;
 	}
 
-	private static void extractEntry(ZipInputStream zip, ZipEntry entry, File file) throws IOException {
-		mkDirs(file.getParentFile());
+	private static void extractEntry(InputStream stream, JarEntry entry, File file) throws IOException {
+		mkdirs(file.getParentFile());
 		try (OutputStream out = new FileOutputStream(file)) {
-			StreamUtils.copy(zip, out);
+			StreamUtils.copy(stream, out);
 		}
 		try {
 			Files.getFileAttributeView(file.toPath(), BasicFileAttributeView.class)
-				.setTimes(entry.getLastModifiedTime(), entry.getLastAccessTime(), entry.getCreationTime());
+				.setTimes(getLastModifiedTime(entry), getLastAccessTime(entry), getCreationTime(entry));
 		}
 		catch (IOException ex) {
 			// File system does not support setting time attributes. Continue.
 		}
 	}
 
-	private static void mkDirs(File file) throws IOException {
+	private static FileTime getCreationTime(JarEntry entry) {
+		return (entry.getCreationTime() != null) ? entry.getCreationTime() : entry.getLastModifiedTime();
+	}
+
+	private static FileTime getLastAccessTime(JarEntry entry) {
+		return (entry.getLastAccessTime() != null) ? entry.getLastAccessTime() : getLastModifiedTime(entry);
+	}
+
+	private static FileTime getLastModifiedTime(JarEntry entry) {
+		return (entry.getLastModifiedTime() != null) ? entry.getLastModifiedTime() : entry.getCreationTime();
+	}
+
+	private static void mkdirs(File file) throws IOException {
 		if (!file.exists() && !file.mkdirs()) {
 			throw new IOException("Unable to create directory " + file);
 		}
 	}
 
-	private static JarEntry createJarEntry(String location, ZipEntry originalEntry) {
+	private static JarEntry createJarEntry(String location, JarEntry originalEntry) {
 		JarEntry jarEntry = new JarEntry(location);
-		FileTime lastModifiedTime = originalEntry.getLastModifiedTime();
+		FileTime lastModifiedTime = getLastModifiedTime(originalEntry);
 		if (lastModifiedTime != null) {
 			jarEntry.setLastModifiedTime(lastModifiedTime);
 		}
-		FileTime lastAccessTime = originalEntry.getLastAccessTime();
+		FileTime lastAccessTime = getLastAccessTime(originalEntry);
 		if (lastAccessTime != null) {
 			jarEntry.setLastAccessTime(lastAccessTime);
 		}
-		FileTime creationTime = originalEntry.getCreationTime();
+		FileTime creationTime = getCreationTime(originalEntry);
 		if (creationTime != null) {
 			jarEntry.setCreationTime(creationTime);
 		}
 		return jarEntry;
 	}
 
-	private static void withZipEntries(File file, ThrowingConsumer callback) throws IOException {
-		try (ZipInputStream stream = new ZipInputStream(new FileInputStream(file))) {
-			ZipEntry entry = stream.getNextEntry();
-			while (entry != null) {
+	private static void withJarEntries(File file, ThrowingConsumer callback) throws IOException {
+		try (JarFile jarFile = new JarFile(file)) {
+			Enumeration<JarEntry> entries = jarFile.entries();
+			while (entries.hasMoreElements()) {
+				JarEntry entry = entries.nextElement();
 				if (StringUtils.hasLength(entry.getName())) {
-					callback.accept(stream, entry);
+					try (InputStream stream = jarFile.getInputStream(entry)) {
+						callback.accept(stream, entry);
+					}
 				}
-				entry = stream.getNextEntry();
 			}
 		}
 	}
@@ -296,14 +349,14 @@ class ExtractCommand extends Command {
 	@FunctionalInterface
 	private interface EntryNameTransformer {
 
-		String getName(ZipEntry entry);
+		String getName(JarEntry entry);
 
 	}
 
 	@FunctionalInterface
 	private interface ThrowingConsumer {
 
-		void accept(ZipInputStream stream, ZipEntry entry) throws IOException;
+		void accept(InputStream stream, JarEntry entry) throws IOException;
 
 	}
 
@@ -316,14 +369,14 @@ class ExtractCommand extends Command {
 		void createDirectories() throws IOException;
 
 		/**
-		 * Resolves the given {@link ZipEntry} to a file.
-		 * @param entry the zip entry
+		 * Resolves the given {@link JarEntry} to a file.
+		 * @param entry the jar entry
 		 * @param newName the new name of the file
 		 * @return file where the contents should be written or {@code null} if this entry
 		 * should be skipped
 		 * @throws IOException if something went wrong
 		 */
-		default File resolve(ZipEntry entry, String newName) throws IOException {
+		default File resolve(JarEntry entry, String newName) throws IOException {
 			return resolve(entry.getName(), newName);
 		}
 
@@ -338,11 +391,12 @@ class ExtractCommand extends Command {
 		File resolve(String originalName, String newName) throws IOException;
 
 		/**
-		 * Resolves the file for the runner.
-		 * @return the file for the runner or {@code null} if the runner should be skipped
+		 * Resolves the file for the application.
+		 * @return the file for the application or {@code null} if the application should
+		 * be skipped
 		 * @throws IOException if something went wrong
 		 */
-		File resolveRunner() throws IOException;
+		File resolveApplication() throws IOException;
 
 	}
 
@@ -350,11 +404,11 @@ class ExtractCommand extends Command {
 
 		private final File directory;
 
-		private final String runnerFilename;
+		private final String applicationFilename;
 
-		private NoLayersFileResolver(File directory, String runnerFilename) {
+		private NoLayersFileResolver(File directory, String applicationFilename) {
 			this.directory = directory;
-			this.runnerFilename = runnerFilename;
+			this.applicationFilename = applicationFilename;
 		}
 
 		@Override
@@ -367,8 +421,8 @@ class ExtractCommand extends Command {
 		}
 
 		@Override
-		public File resolveRunner() throws IOException {
-			return resolve(this.runnerFilename, this.runnerFilename);
+		public File resolveApplication() throws IOException {
+			return resolve(this.applicationFilename, this.applicationFilename);
 		}
 
 	}
@@ -381,20 +435,20 @@ class ExtractCommand extends Command {
 
 		private final File directory;
 
-		private final String runnerFilename;
+		private final String applicationFilename;
 
-		LayersFileResolver(File directory, Layers layers, Set<String> layersToExtract, String runnerFilename) {
+		LayersFileResolver(File directory, Layers layers, Set<String> layersToExtract, String applicationFilename) {
 			this.layers = layers;
 			this.layersToExtract = layersToExtract;
 			this.directory = directory;
-			this.runnerFilename = runnerFilename;
+			this.applicationFilename = applicationFilename;
 		}
 
 		@Override
 		public void createDirectories() throws IOException {
 			for (String layer : this.layers) {
 				if (shouldExtractLayer(layer)) {
-					mkDirs(getLayerDirectory(layer));
+					mkdirs(getLayerDirectory(layer));
 				}
 			}
 		}
@@ -410,12 +464,12 @@ class ExtractCommand extends Command {
 		}
 
 		@Override
-		public File resolveRunner() throws IOException {
+		public File resolveApplication() throws IOException {
 			String layer = this.layers.getApplicationLayerName();
 			if (shouldExtractLayer(layer)) {
 				File directory = getLayerDirectory(layer);
-				return assertFileIsContainedInDirectory(directory, new File(directory, this.runnerFilename),
-						this.runnerFilename);
+				return assertFileIsContainedInDirectory(directory, new File(directory, this.applicationFilename),
+						this.applicationFilename);
 			}
 			return null;
 		}
@@ -425,10 +479,15 @@ class ExtractCommand extends Command {
 		}
 
 		private boolean shouldExtractLayer(String layer) {
-			if (this.layersToExtract.isEmpty()) {
-				return true;
-			}
-			return this.layersToExtract.contains(layer);
+			return this.layersToExtract.isEmpty() || this.layersToExtract.contains(layer);
+		}
+
+	}
+
+	private static final class AbortException extends RuntimeException {
+
+		AbortException(String message) {
+			super(message);
 		}
 
 	}

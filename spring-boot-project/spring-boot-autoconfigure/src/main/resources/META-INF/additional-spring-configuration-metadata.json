@@ -338,6 +338,10 @@
       "defaultValue": "TLS"
     },
     {
+      "name": "server.ssl.server-name-bundles",
+      "description": "Mapping of host names to SSL bundles for SNI configuration."
+    },
+    {
       "name": "server.ssl.trust-certificate",
       "description": "Path to a PEM-encoded SSL certificate authority file."
     },
@@ -1336,6 +1340,14 @@
       }
     },
     {
+      "name": "spring.flyway.cherry-pick",
+      "description": "Migrations that Flyway should consider when migrating or undoing. When empty all available migrations are considered. Requires Flyway Teams.",
+      "deprecation": {
+        "level": "error",
+        "reason": "Removed in Flyway 10"
+      }
+    },
+    {
       "name": "spring.flyway.dry-run-output",
       "type": "java.io.OutputStream",
       "deprecation": {
@@ -1392,6 +1404,14 @@
       }
     },
     {
+      "name": "spring.flyway.license-key",
+      "description": "License key for Flyway Teams.",
+      "deprecation": {
+        "level": "error",
+        "reason": "Removed in Flyway 10"
+      }
+    },
+    {
       "name": "spring.flyway.locations",
       "sourceType": "org.springframework.boot.autoconfigure.flyway.FlywayProperties",
       "defaultValue": [
@@ -1426,7 +1446,7 @@
       "type": "java.lang.String",
       "deprecation": {
         "level": "error",
-        "reason": "Flyway Teams only."
+        "reason": "Removed in Flyway 10"
       }
     },
     {
@@ -2061,6 +2081,10 @@
       "defaultValue": "bolt://localhost:7687"
     },
     {
+      "name": "spring.pulsar.client.failover.policy",
+      "defaultValue": "order"
+    },
+    {
       "name": "spring.pulsar.function.enabled",
       "type": "java.lang.Boolean",
       "description": "Whether to enable function support.",
@@ -2655,6 +2679,10 @@
       "name": "spring.rsocket.server.ssl.protocol",
       "description": "SSL protocol to use.",
       "defaultValue": "TLS"
+    },
+    {
+      "name": "spring.rsocket.server.ssl.server-name-bundles",
+      "description": "Mapping of host names to SSL bundles for SNI configuration."
     },
     {
       "name": "spring.rsocket.server.ssl.trust-certificate",

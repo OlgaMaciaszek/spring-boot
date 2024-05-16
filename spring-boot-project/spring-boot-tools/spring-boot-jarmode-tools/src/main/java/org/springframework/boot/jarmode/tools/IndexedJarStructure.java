@@ -24,6 +24,7 @@ import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
@@ -48,6 +49,9 @@ class IndexedJarStructure implements JarStructure {
 	private static final List<String> MANIFEST_DENY_LIST = List.of("Start-Class", "Spring-Boot-Classes",
 			"Spring-Boot-Lib", "Spring-Boot-Classpath-Index", "Spring-Boot-Layers-Index");
 
+	private static final Set<String> ENTRY_IGNORE_LIST = Set.of("META-INF/", "META-INF/MANIFEST.MF",
+			"META-INF/services/java.nio.file.spi.FileSystemProvider");
+
 	private final Manifest originalManifest;
 
 	private final String libLocation;
@@ -65,10 +69,7 @@ class IndexedJarStructure implements JarStructure {
 
 	private static String getLocation(Manifest manifest, String attribute) {
 		String location = getMandatoryAttribute(manifest, attribute);
-		if (!location.endsWith("/")) {
-			location = location + "/";
-		}
-		return location;
+		return (!location.endsWith("/")) ? location + "/" : location;
 	}
 
 	private static List<String> readIndexFile(String indexFile) {
@@ -78,12 +79,8 @@ class IndexedJarStructure implements JarStructure {
 			.toArray(String[]::new);
 		List<String> classpathEntries = new ArrayList<>();
 		for (String line : lines) {
-			if (line.startsWith("- ")) {
-				classpathEntries.add(line.substring(3, line.length() - 1));
-			}
-			else {
-				throw new IllegalStateException("Classpath index file is malformed");
-			}
+			Assert.state(line.startsWith("- "), "Classpath index file is malformed");
+			classpathEntries.add(line.substring(3, line.length() - 1));
 		}
 		Assert.state(!classpathEntries.isEmpty(), "Empty classpath index file loaded");
 		return classpathEntries;
@@ -96,14 +93,20 @@ class IndexedJarStructure implements JarStructure {
 
 	@Override
 	public Entry resolve(String name) {
+		if (ENTRY_IGNORE_LIST.contains(name)) {
+			return null;
+		}
 		if (this.classpathEntries.contains(name)) {
 			return new Entry(name, toStructureDependency(name), Type.LIBRARY);
 		}
-		else if (name.startsWith(this.classesLocation)) {
+		if (name.startsWith(this.classesLocation)) {
 			return new Entry(name, name.substring(this.classesLocation.length()), Type.APPLICATION_CLASS_OR_RESOURCE);
 		}
-		else if (name.startsWith("org/springframework/boot/loader")) {
+		if (name.startsWith("org/springframework/boot/loader")) {
 			return new Entry(name, name, Type.LOADER);
+		}
+		if (name.startsWith("META-INF/")) {
+			return new Entry(name, name, Type.META_INF);
 		}
 		return null;
 	}

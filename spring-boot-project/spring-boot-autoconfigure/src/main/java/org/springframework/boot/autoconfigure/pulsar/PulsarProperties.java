@@ -67,6 +67,8 @@ public class PulsarProperties {
 
 	private final Template template = new Template();
 
+	private final Transaction transaction = new Transaction();
+
 	public Client getClient() {
 		return this.client;
 	}
@@ -101,6 +103,10 @@ public class PulsarProperties {
 
 	public Template getTemplate() {
 		return this.template;
+	}
+
+	public Transaction getTransaction() {
+		return this.transaction;
 	}
 
 	public static class Client {
@@ -868,6 +874,23 @@ public class PulsarProperties {
 
 	}
 
+	public static class Transaction {
+
+		/**
+		 * Whether transaction support is enabled.
+		 */
+		private boolean enabled;
+
+		public boolean isEnabled() {
+			return this.enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
+	}
+
 	public static class Authentication {
 
 		/**
@@ -901,15 +924,15 @@ public class PulsarProperties {
 	public static class Failover {
 
 		/**
-		 * Cluster Failover Policy.
+		 * Cluster failover policy.
 		 */
-		private FailoverPolicy failoverPolicy = FailoverPolicy.ORDER;
+		private FailoverPolicy policy = FailoverPolicy.ORDER;
 
 		/**
 		 * Delay before the Pulsar client switches from the primary cluster to the backup
 		 * cluster.
 		 */
-		private Duration failOverDelay;
+		private Duration delay;
 
 		/**
 		 * Delay before the Pulsar client switches from the backup cluster to the primary
@@ -923,26 +946,26 @@ public class PulsarProperties {
 		private Duration checkInterval;
 
 		/**
-		 * List of backupClusters The backup cluster is chosen in the sequence of the
+		 * List of backup clusters. The backup cluster is chosen in the sequence of the
 		 * given list. If all backup clusters are available, the Pulsar client chooses the
 		 * first backup cluster.
 		 */
 		private List<BackupCluster> backupClusters = new ArrayList<>();
 
-		public FailoverPolicy getFailoverPolicy() {
-			return this.failoverPolicy;
+		public FailoverPolicy getPolicy() {
+			return this.policy;
 		}
 
-		public void setFailoverPolicy(FailoverPolicy failoverPolicy) {
-			this.failoverPolicy = failoverPolicy;
+		public void setPolicy(FailoverPolicy policy) {
+			this.policy = policy;
 		}
 
-		public Duration getFailOverDelay() {
-			return this.failOverDelay;
+		public Duration getDelay() {
+			return this.delay;
 		}
 
-		public void setFailOverDelay(Duration failOverDelay) {
-			this.failOverDelay = failOverDelay;
+		public void setDelay(Duration delay) {
+			this.delay = delay;
 		}
 
 		public Duration getSwitchBackDelay() {

@@ -40,7 +40,6 @@ import ch.qos.logback.core.encoder.LayoutWrappingEncoder;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import ch.qos.logback.core.util.DynamicClassLoadingException;
-import ch.qos.logback.core.util.StatusPrinter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -121,7 +120,7 @@ class LogbackLoggingSystemTests extends AbstractLoggingSystemTests {
 		ConversionService conversionService = ApplicationConversionService.getSharedInstance();
 		this.environment.setConversionService((ConfigurableConversionService) conversionService);
 		this.initializationContext = new LoggingInitializationContext(this.environment);
-		StatusPrinter.setPrintStream(System.out);
+		this.loggingSystem.setStatusPrinterStream(System.out);
 	}
 
 	@AfterEach
@@ -588,7 +587,7 @@ class LogbackLoggingSystemTests extends AbstractLoggingSystemTests {
 		initialize(loggingInitializationContext, null, null);
 		this.logger.info("Hello world");
 		assertThat(getLineWithText(output, "Hello world"))
-			.containsPattern("\\d{4}-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}([-+]\\d{2}:\\d{2}|Z)");
+			.containsPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}([-+]\\d{2}:\\d{2}|Z)");
 	}
 
 	@Test
@@ -875,6 +874,14 @@ class LogbackLoggingSystemTests extends AbstractLoggingSystemTests {
 			.addFirst(new MapPropertySource("test", Map.of("logging.pattern.console", "[CONSOLE]%m")));
 		this.loggingSystem.initialize(this.initializationContext, "classpath:logback-nondefault.xml", null);
 		assertThat(output).doesNotContain("WARN");
+	}
+
+	@Test
+	void shouldNotContainAnsiEscapeCodes(CapturedOutput output) {
+		this.loggingSystem.beforeInitialize();
+		initialize(this.initializationContext, null, null);
+		this.logger.info("Hello world");
+		assertThat(output).doesNotContain("\033[");
 	}
 
 	private void initialize(LoggingInitializationContext context, String configLocation, LogFile logFile) {

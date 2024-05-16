@@ -61,14 +61,12 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
-import org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.test.City;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizationAutoConfiguration;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.jdbc.init.DataSourceScriptDatabaseInitializer;
-import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.sql.init.DatabaseInitializationMode;
 import org.springframework.boot.sql.init.DatabaseInitializationSettings;
 import org.springframework.boot.test.context.FilteredClassLoader;
@@ -86,10 +84,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.support.AbstractPlatformTransactionManager;
-import org.springframework.transaction.support.DefaultTransactionStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -117,8 +111,7 @@ class BatchAutoConfigurationTests {
 
 	@Test
 	void testDefaultContext() {
-		this.contextRunner.withInitializer(ConditionEvaluationReportLoggingListener.forLogLevel(LogLevel.INFO))
-			.withUserConfiguration(TestConfiguration.class, EmbeddedDataSourceConfiguration.class)
+		this.contextRunner.withUserConfiguration(TestConfiguration.class, EmbeddedDataSourceConfiguration.class)
 			.run((context) -> {
 				assertThat(context).hasSingleBean(JobRepository.class);
 				assertThat(context).hasSingleBean(JobLauncher.class);
@@ -520,61 +513,40 @@ class BatchAutoConfigurationTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	protected static class BatchDataSourceConfiguration {
+	static class BatchDataSourceConfiguration {
 
 		@Bean
 		@Primary
-		public DataSource normalDataSource() {
+		DataSource normalDataSource() {
 			return DataSourceBuilder.create().url("jdbc:hsqldb:mem:normal").username("sa").build();
 		}
 
 		@BatchDataSource
 		@Bean
-		public DataSource batchDataSource() {
+		DataSource batchDataSource() {
 			return DataSourceBuilder.create().url("jdbc:hsqldb:mem:batchdatasource").username("sa").build();
 		}
 
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	protected static class BatchTransactionManagerConfiguration {
+	static class BatchTransactionManagerConfiguration {
 
 		@Bean
-		public DataSource dataSource() {
+		DataSource dataSource() {
 			return DataSourceBuilder.create().url("jdbc:hsqldb:mem:database").username("sa").build();
 		}
 
 		@Bean
 		@Primary
-		public PlatformTransactionManager normalTransactionManager() {
-			return new TestTransactionManager();
+		PlatformTransactionManager normalTransactionManager() {
+			return mock(PlatformTransactionManager.class);
 		}
 
 		@BatchTransactionManager
 		@Bean
-		public PlatformTransactionManager batchTransactionManager() {
-			return new TestTransactionManager();
-		}
-
-	}
-
-	static class TestTransactionManager extends AbstractPlatformTransactionManager {
-
-		@Override
-		protected Object doGetTransaction() throws TransactionException {
-			return null;
-		}
-
-		@Override
-		protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException {
-		}
-
-		@Override
-		protected void doCommit(DefaultTransactionStatus status) throws TransactionException {
-		}
-
-		@Override
-		protected void doRollback(DefaultTransactionStatus status) throws TransactionException {
+		PlatformTransactionManager batchTransactionManager() {
+			return mock(PlatformTransactionManager.class);
 		}
 
 	}

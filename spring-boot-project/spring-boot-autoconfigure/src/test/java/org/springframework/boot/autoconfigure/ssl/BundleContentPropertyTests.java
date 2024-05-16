@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.springframework.boot.autoconfigure.ssl;
 
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
@@ -36,9 +38,6 @@ class BundleContentPropertyTests {
 			-----BEGIN CERTIFICATE-----
 			-----END CERTIFICATE-----
 			""";
-
-	@TempDir
-	Path temp;
 
 	@Test
 	void isPemContentWhenValueIsPemTextReturnsTrue() {
@@ -78,10 +77,18 @@ class BundleContentPropertyTests {
 	}
 
 	@Test
-	void toWatchPathWhenPathReturnsPath() {
-		Path file = this.temp.toAbsolutePath().resolve("file.txt");
+	void toWatchPathWhenPathReturnsPath() throws URISyntaxException {
+		URL resource = getClass().getResource("keystore.jks");
+		Path file = Path.of(resource.toURI()).toAbsolutePath();
 		BundleContentProperty property = new BundleContentProperty("name", file.toString());
 		assertThat(property.toWatchPath()).isEqualTo(file);
+	}
+
+	@Test
+	void shouldThrowBundleContentNotWatchableExceptionIfContentIsNotWatchable() {
+		BundleContentProperty property = new BundleContentProperty("name", "https://example.com/");
+		assertThatExceptionOfType(BundleContentNotWatchableException.class).isThrownBy(property::toWatchPath)
+			.withMessageContaining("Only 'file:' resources are watchable");
 	}
 
 }

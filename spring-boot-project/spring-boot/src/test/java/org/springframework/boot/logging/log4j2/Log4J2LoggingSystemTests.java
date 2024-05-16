@@ -493,6 +493,20 @@ class Log4J2LoggingSystemTests extends AbstractLoggingSystemTests {
 	}
 
 	@Test
+	void environmentIsUpdatedUponReinitialization() {
+		MockEnvironment environment = new MockEnvironment();
+		environment.setProperty("spring", "boot: one");
+		this.loggingSystem.beforeInitialize();
+		this.loggingSystem.initialize(new LoggingInitializationContext(environment), null, null);
+		assertThat(PropertiesUtil.getProperties().getStringProperty("spring")).isEqualTo("boot: one");
+		this.loggingSystem.cleanUp();
+		this.environment.setProperty("spring", "boot: two");
+		this.loggingSystem.beforeInitialize();
+		this.loggingSystem.initialize(this.initializationContext, null, null);
+		assertThat(PropertiesUtil.getProperties().getStringProperty("spring")).isEqualTo("boot: two");
+	}
+
+	@Test
 	void nonFileUrlsAreResolvedUsingLog4J2UrlConnectionFactory() {
 		this.loggingSystem.beforeInitialize();
 		assertThatIllegalStateException()
@@ -635,6 +649,14 @@ class Log4J2LoggingSystemTests extends AbstractLoggingSystemTests {
 		this.logger.info("Hello world");
 		assertThat(getLineWithText(file, "Hello world")).doesNotContain("${sys:LOGGED_APPLICATION_NAME}")
 			.doesNotContain("myapp");
+	}
+
+	@Test
+	void shouldNotContainAnsiEscapeCodes(CapturedOutput output) {
+		this.loggingSystem.beforeInitialize();
+		this.loggingSystem.initialize(this.initializationContext, null, null);
+		this.logger.info("Hello world");
+		assertThat(output).doesNotContain("\033[");
 	}
 
 	private String getRelativeClasspathLocation(String fileName) {
