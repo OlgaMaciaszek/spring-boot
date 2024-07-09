@@ -60,7 +60,7 @@ This will defer data source initialization until after any `EntityManagerFactory
 NOTE: The initialization scripts support `--` for single line comments and `/++*++ ++*++/` for block comments.
 Other comment formats are not supported.
 
-If you are using a xref:data-initialization.adoc#howto.data-initialization.migration-tool[Higher-level Database Migration Tool], like Flyway or Liquibase, you should use them alone to create and initialize the schema.
+If you are using a xref:data-initialization.adoc#howto.data-initialization.migration-tool[higher-level database migration tool], like Flyway or Liquibase, you should use them alone to create and initialize the schema.
 Using the basic `schema.sql` and `data.sql` scripts alongside Flyway or Liquibase is not recommended and support will be removed in a future release.
 
 If you need to initialize test data using a higher-level database migration tool, please see the sections about xref:data-initialization.adoc#howto.data-initialization.migration-tool.flyway-tests[Flyway] and xref:data-initialization.adoc#howto.data-initialization.migration-tool.liquibase-tests[Liquibase].
@@ -187,10 +187,12 @@ If any of the three properties has not been set, the value of its equivalent `sp
 
 See xref:api:java/org/springframework/boot/autoconfigure/liquibase/LiquibaseProperties.html[`LiquibaseProperties`] for details about available settings such as contexts, the default schema, and others.
 
+You can also use a `Customizer<Liquibase>` bean if you want to customize the `Liquibase` instance before it is being used.
+
 
 
 [[howto.data-initialization.migration-tool.flyway-tests]]
-=== Use Flyway for test-only migrations
+=== Use Flyway for Test-only Migrations
 
 If you want to create Flyway migrations which populate your test database, place them in `src/test/resources/db/migration`.
 A file named, for example, `src/test/resources/db/migration/V9999__test-data.sql` will be executed after your production migrations and only if you're running the tests.
@@ -200,7 +202,7 @@ This file will not be packaged in your uber jar or your container.
 
 
 [[howto.data-initialization.migration-tool.liquibase-tests]]
-=== Use Liquibase for test-only migrations
+=== Use Liquibase for Test-only Migrations
 
 If you want to create Liquibase migrations which populate your test database, you have to create a test changelog which also includes the production changelog.
 

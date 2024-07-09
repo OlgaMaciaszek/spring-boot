@@ -32,7 +32,7 @@ spring:
     default: "none"
 ----
 
-`spring.profiles.active` and `spring.profiles.default` can only be used in non-profile specific documents.
+`spring.profiles.active` and `spring.profiles.default` can only be used in non-profile-specific documents.
 This means they cannot be included in xref:features/external-config.adoc#features.external-config.files.profile-specific[profile specific files] or xref:features/external-config.adoc#features.external-config.files.activation-properties[documents activated] by `spring.config.activate.on-profile`.
 
 For example, the second document configuration is invalid:
@@ -64,7 +64,7 @@ This means that you can specify active profiles in `application.properties` and 
 Sometimes, it is useful to have properties that *add* to the active profiles rather than replace them.
 The `spring.profiles.include` property can be used to add active profiles on top of those activated by the configprop:spring.profiles.active[] property.
 The `SpringApplication` entry point also has a Java API for setting additional profiles.
-See the `setAdditionalProfiles()` method in xref:api:java/org/springframework/boot/SpringApplication.html[SpringApplication].
+See the `setAdditionalProfiles()` method in xref:api:java/org/springframework/boot/SpringApplication.html[`SpringApplication`].
 
 For example, when an application with the following properties is run, the common and local profiles will be activated even when it runs using the `--spring.profiles.active` switch:
 
@@ -77,7 +77,7 @@ spring:
       - "local"
 ----
 
-WARNING: Similar to `spring.profiles.active`, `spring.profiles.include` can only be used in non-profile specific documents.
+WARNING: Similar to `spring.profiles.active`, `spring.profiles.include` can only be used in non-profile-specific documents.
 This means it cannot be included in xref:features/external-config.adoc#features.external-config.files.profile-specific[profile specific files] or xref:features/external-config.adoc#features.external-config.files.activation-properties[documents activated] by `spring.config.activate.on-profile`.
 
 Profile groups, which are described in the xref:features/profiles.adoc#features.profiles.groups[next section] can also be used to add active profiles if a given profile is active.
@@ -107,6 +107,8 @@ spring:
 
 Our application can now be started using `--spring.profiles.active=production` to activate the `production`, `proddb` and `prodmq` profiles in one hit.
 
+WARNING: Similar to `spring.profiles.active` and `spring.profiles.include`, `spring.profiles.group` can only be used in non-profile-specific documents.
+This means it cannot be included in xref:features/external-config.adoc#features.external-config.files.profile-specific[profile specific files] or xref:features/external-config.adoc#features.external-config.files.activation-properties[documents activated] by `spring.config.activate.on-profile`.
 
 
 [[features.profiles.programmatically-setting-profiles]]
@@ -121,4 +123,4 @@ It is also possible to activate profiles by using Spring's `ConfigurableEnvironm
 == Profile-specific Configuration Files
 
 Profile-specific variants of both `application.properties` (or `application.yaml`) and files referenced through `@ConfigurationProperties` are considered as files and loaded.
-See "xref:features/external-config.adoc#features.external-config.files.profile-specific[Profile Specific Files]" for details.
+See xref:features/external-config.adoc#features.external-config.files.profile-specific[] for details.

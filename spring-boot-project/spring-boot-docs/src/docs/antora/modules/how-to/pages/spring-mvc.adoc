@@ -125,7 +125,7 @@ If you provide any `@Beans` of type `MappingJackson2HttpMessageConverter`, they 
 Also, a convenience bean of type `HttpMessageConverters` is provided (and is always available if you use the default MVC configuration).
 It has some useful methods to access the default and user-enhanced message converters.
 
-See the "`xref:spring-mvc.adoc#howto.spring-mvc.customize-responsebody-rendering[Customize the @ResponseBody Rendering]`" section and the {code-spring-boot-autoconfigure-src}/web/servlet/WebMvcAutoConfiguration.java[`WebMvcAutoConfiguration`] source code for more details.
+See the xref:spring-mvc.adoc#howto.spring-mvc.customize-responsebody-rendering[] section and the {code-spring-boot-autoconfigure-src}/web/servlet/WebMvcAutoConfiguration.java[`WebMvcAutoConfiguration`] source code for more details.
 
 
 
@@ -140,7 +140,7 @@ It has some useful methods to access the default and user-enhanced message conve
 
 As in normal MVC usage, any `WebMvcConfigurer` beans that you provide can also contribute converters by overriding the `configureMessageConverters` method.
 However, unlike with normal MVC, you can supply only additional converters that you need (because Spring Boot uses the same mechanism to contribute its defaults).
-Finally, if you opt out of the Spring Boot default MVC configuration by providing your own `@EnableWebMvc` configuration, you can take control completely and do everything manually by using `getMessageConverters` from `WebMvcConfigurationSupport`.
+Finally, if you opt out of the default Spring Boot MVC configuration by providing your own `@EnableWebMvc` configuration, you can take control completely and do everything manually by using `getMessageConverters` from `WebMvcConfigurationSupport`.
 
 See the {code-spring-boot-autoconfigure-src}/web/servlet/WebMvcAutoConfiguration.java[`WebMvcAutoConfiguration`] source code for more details.
 
@@ -158,7 +158,7 @@ The multipart support is helpful when you want to receive multipart encoded file
 
 See the {code-spring-boot-autoconfigure-src}/web/servlet/MultipartAutoConfiguration.java[`MultipartAutoConfiguration`] source for more details.
 
-NOTE: It is recommended to use the container's built-in support for multipart uploads rather than introducing an additional dependency such as Apache Commons File Upload.
+NOTE: It is recommended to use the container's built-in support for multipart uploads rather than introduce an additional dependency such as Apache Commons File Upload.
 
 
 
@@ -184,7 +184,7 @@ Configuring the `DispatcherServlet` yourself is unusual but if you really need t
 
 
 [[howto.spring-mvc.switch-off-default-configuration]]
-== Switch off the Default MVC Configuration
+== Switch Off the Default MVC Configuration
 
 The easiest way to take complete control over MVC configuration is to provide your own `@Configuration` with the `@EnableWebMvc` annotation.
 Doing so leaves all MVC configuration in your hands.

@@ -39,6 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Tests for {@link SpringBootTest @SpringBootTest} with
  * {@link AutoConfigureMockMvc @AutoConfigureMockMvc} (i.e. full integration test).
+ * <p>
+ * This uses the regular {@link MockMvc} (Hamcrest integration).
  *
  * @author Phillip Webb
  * @author Moritz Halbritter

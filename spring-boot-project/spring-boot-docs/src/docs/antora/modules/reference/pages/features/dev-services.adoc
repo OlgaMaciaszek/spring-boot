@@ -1,5 +1,5 @@
 [[features.dev-services]]
-= Development-time services
+= Development-time Services
 
 Development-time services provide external dependencies needed to run the application while developing it.
 They are only supposed to be used while developing and are disabled when the application is deployed.
@@ -381,7 +381,7 @@ For example, the following `MyContainers` interface declares `mongo` and `neo4j`
 
 include-code::MyContainers[]
 
-If you already have containers defined in this way, or you just prefer this style, you can import these declaration classes rather than defining you containers as `@Bean` methods.
+If you already have containers defined in this way, or you just prefer this style, you can import these declaration classes rather than defining your containers as `@Bean` methods.
 To do so, add the `@ImportTestcontainers` annotation to your test configuration class:
 
 include-code::MyContainersConfiguration[]

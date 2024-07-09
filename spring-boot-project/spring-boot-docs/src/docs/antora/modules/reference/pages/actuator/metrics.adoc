@@ -1,34 +1,34 @@
 [[actuator.metrics]]
 = Metrics
 
-Spring Boot Actuator provides dependency management and auto-configuration for https://micrometer.io[Micrometer], an application metrics facade that supports {url-micrometer-docs}[numerous monitoring systems], including:
+Spring Boot Actuator provides dependency management and auto-configuration for {url-micrometer-site}[Micrometer], an application metrics facade that supports {url-micrometer-docs}[numerous monitoring systems], including:
 
-- xref:actuator/metrics.adoc#actuator.metrics.export.appoptics[AppOptics]
-- xref:actuator/metrics.adoc#actuator.metrics.export.atlas[Atlas]
-- xref:actuator/metrics.adoc#actuator.metrics.export.datadog[Datadog]
-- xref:actuator/metrics.adoc#actuator.metrics.export.dynatrace[Dynatrace]
-- xref:actuator/metrics.adoc#actuator.metrics.export.elastic[Elastic]
-- xref:actuator/metrics.adoc#actuator.metrics.export.ganglia[Ganglia]
-- xref:actuator/metrics.adoc#actuator.metrics.export.graphite[Graphite]
-- xref:actuator/metrics.adoc#actuator.metrics.export.humio[Humio]
-- xref:actuator/metrics.adoc#actuator.metrics.export.influx[Influx]
-- xref:actuator/metrics.adoc#actuator.metrics.export.jmx[JMX]
-- xref:actuator/metrics.adoc#actuator.metrics.export.kairos[KairosDB]
-- xref:actuator/metrics.adoc#actuator.metrics.export.newrelic[New Relic]
-- xref:actuator/metrics.adoc#actuator.metrics.export.otlp[OpenTelemetry]
-- xref:actuator/metrics.adoc#actuator.metrics.export.prometheus[Prometheus]
-- xref:actuator/metrics.adoc#actuator.metrics.export.signalfx[SignalFx]
-- xref:actuator/metrics.adoc#actuator.metrics.export.simple[Simple (in-memory)]
-- xref:actuator/metrics.adoc#actuator.metrics.export.stackdriver[Stackdriver]
-- xref:actuator/metrics.adoc#actuator.metrics.export.statsd[StatsD]
-- xref:actuator/metrics.adoc#actuator.metrics.export.wavefront[Wavefront]
+- xref:actuator/metrics.adoc#actuator.metrics.export.appoptics[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.atlas[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.datadog[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.dynatrace[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.elastic[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.ganglia[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.graphite[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.humio[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.influx[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.jmx[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.kairos[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.newrelic[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.otlp[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.prometheus[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.signalfx[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.simple[] (in-memory)
+- xref:actuator/metrics.adoc#actuator.metrics.export.stackdriver[]
+- xref:actuator/metrics.adoc#actuator.metrics.export.statsd[D]
+- xref:actuator/metrics.adoc#actuator.metrics.export.wavefront[]
 
 TIP: To learn more about Micrometer's capabilities, see its {url-micrometer-docs}[reference documentation], in particular the {url-micrometer-docs-concepts}[concepts section].
 
 
 
 [[actuator.metrics.getting-started]]
-== Getting started
+== Getting Started
 
 Spring Boot auto-configures a composite `MeterRegistry` and adds a registry to the composite for each of the supported implementations that it finds on the classpath.
 Having a dependency on `micrometer-registry-\{system}` in your runtime classpath is enough for Spring Boot to configure the registry.
@@ -206,7 +206,7 @@ This is the default behavior and requires no special setup beyond a dependency o
 
 
 [[actuator.metrics.export.dynatrace.v2-api.manual-config]]
-===== Manual configuration
+===== Manual Configuration
 
 If no auto-configuration is available, the endpoint of the {url-dynatrace-docs-shortlink}/api-metrics-v2-post-datapoints[Metrics v2 API] and an API token are required.
 The {url-dynatrace-docs-shortlink}/api-authentication[API token] must have the "`Ingest metrics`" (`metrics.ingest`) permission set.
@@ -545,11 +545,14 @@ scrape_configs:
 https://prometheus.io/docs/prometheus/latest/feature_flags/#exemplars-storage[Prometheus Exemplars] are also supported.
 To enable this feature, a `SpanContext` bean should be present.
 If you're using the deprecated Prometheus simpleclient support and want to enable that feature, a `SpanContextSupplier` bean should be present.
-If you use https://micrometer.io/docs/tracing[Micrometer Tracing], this will be auto-configured for you, but you can always create your own if you want.
+If you use {url-micrometer-tracing-docs}[Micrometer Tracing], this will be auto-configured for you, but you can always create your own if you want.
 Please check the https://prometheus.io/docs/prometheus/latest/feature_flags/#exemplars-storage[Prometheus Docs], since this feature needs to be explicitly enabled on Prometheus' side, and it is only supported using the https://github.com/OpenObservability/OpenMetrics/blob/v1.0.0/specification/OpenMetrics.md#exemplars[OpenMetrics] format.
 
 For ephemeral or batch jobs that may not exist long enough to be scraped, you can use https://github.com/prometheus/pushgateway[Prometheus Pushgateway] support to expose the metrics to Prometheus.
-The Prometheus Pushgateway only works with the deprecated Prometheus simpleclient for now, until the Prometheus client 1.x adds support for it.
+
+NOTE: The Prometheus Pushgateway only works with the deprecated Prometheus simpleclient for now, until the Prometheus 1.x client adds support for it.
+To switch to the simpleclient, remove `io.micrometer:micrometer-registry-prometheus` from your project and add `io.micrometer:micrometer-registry-prometheus-simpleclient` instead.
+
 To enable Prometheus Pushgateway support, add the following dependency to your project:
 
 [source,xml]
@@ -1233,7 +1236,7 @@ configurable buffer length.
 | Publish a cumulative histogram with buckets defined by your service-level objectives.
 |===
 
-For more details on the concepts behind `percentiles-histogram`, `percentiles`, and `slo`, see the {url-micrometer-docs-concepts}#_histograms_and_percentiles["`Histograms and percentiles`" section] of the Micrometer documentation.
+For more details on the concepts behind `percentiles-histogram`, `percentiles`, and `slo`, see the {url-micrometer-docs-concepts}#_histograms_and_percentiles[Histograms and percentiles] section of the Micrometer documentation.
 
 
 

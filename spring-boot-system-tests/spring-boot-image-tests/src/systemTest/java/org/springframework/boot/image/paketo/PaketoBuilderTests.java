@@ -32,6 +32,7 @@ import org.assertj.core.api.Condition;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
@@ -72,8 +73,8 @@ class PaketoBuilderTests {
 				new File("build/system-test-maven-repository").getAbsoluteFile().toURI().toASCIIString());
 		this.gradleBuild.scriptPropertyFrom(new File("../../gradle.properties"), "nativeBuildToolsVersion");
 		this.gradleBuild.expectDeprecationMessages("BPL_SPRING_CLOUD_BINDINGS_ENABLED.*true.*Deprecated");
-		this.gradleBuild.expectDeprecationMessages("BOM table is deprecated");
 		this.gradleBuild.expectDeprecationMessages("Command \"packages\" is deprecated, use `syft scan` instead");
+		this.gradleBuild.expectDeprecationMessages("BP_ENABLE_RUNTIME_CERT_BINDING.*true.*Deprecated");
 		this.gradleBuild.gradleVersion(GradleVersions.maximumCompatible());
 	}
 
@@ -150,6 +151,7 @@ class PaketoBuilderTests {
 	}
 
 	@Test
+	@Disabled("0.4.292 of the builder launches an unpacked jar rather than the script in bin")
 	void bootDistZipJarApp() throws Exception {
 		writeMainClass();
 		String projectName = this.gradleBuild.getProjectDir().getName();
@@ -272,13 +274,9 @@ class PaketoBuilderTests {
 							"paketo-buildpacks/apache-tomcat", "paketo-buildpacks/dist-zip",
 							"paketo-buildpacks/spring-boot");
 				metadata.processOfType("web")
-					.satisfiesExactly((command) -> assertThat(command).endsWith("sh"),
-							(arg) -> assertThat(arg).endsWith("catalina.sh"),
-							(arg) -> assertThat(arg).isEqualTo("run"));
+					.containsSubsequence("java", "org.apache.catalina.startup.Bootstrap", "start");
 				metadata.processOfType("tomcat")
-					.satisfiesExactly((command) -> assertThat(command).endsWith("sh"),
-							(arg) -> assertThat(arg).endsWith("catalina.sh"),
-							(arg) -> assertThat(arg).isEqualTo("run"));
+					.containsSubsequence("java", "org.apache.catalina.startup.Bootstrap", "start");
 			});
 			assertImageHasJvmSbomLayer(imageReference, config);
 			assertImageHasDependenciesSbomLayer(imageReference, config, "apache-tomcat");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.springframework.boot.build;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.gradle.api.Project;
 import org.gradle.api.attributes.Usage;
-import org.gradle.api.component.AdhocComponentWithVariants;
-import org.gradle.api.component.ConfigurationVariantDetails;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.publish.PublishingExtension;
@@ -101,37 +99,10 @@ class MavenPublishingConventions {
 	}
 
 	private void customizeJavaMavenPublication(MavenPublication publication, Project project) {
-		addMavenOptionalFeature(publication, project);
-		if (publication.getName().equals("pluginMaven")) {
-			return;
-		}
 		publication.versionMapping((strategy) -> strategy.usage(Usage.JAVA_API, (mappingStrategy) -> mappingStrategy
 			.fromResolutionOf(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)));
 		publication.versionMapping(
 				(strategy) -> strategy.usage(Usage.JAVA_RUNTIME, VariantVersionMappingStrategy::fromResolutionResult));
-	}
-
-	/**
-	 * Add a feature that allows maven plugins to declare optional dependencies that
-	 * appear in the POM. This is required to make m2e in Eclipse happy.
-	 * @param publication the project's Maven publication
-	 * @param project the project to add the feature to
-	 */
-	private void addMavenOptionalFeature(MavenPublication publication, Project project) {
-		JavaPluginExtension extension = project.getExtensions().getByType(JavaPluginExtension.class);
-		extension.registerFeature("mavenOptional",
-				(feature) -> feature.usingSourceSet(extension.getSourceSets().getByName("main")));
-		AdhocComponentWithVariants javaComponent = (AdhocComponentWithVariants) project.getComponents()
-			.findByName("java");
-		javaComponent.addVariantsFromConfiguration(
-				project.getConfigurations().findByName("mavenOptionalRuntimeElements"),
-				ConfigurationVariantDetails::mapToOptional);
-		suppressMavenOptionalFeatureWarnings(publication);
-	}
-
-	private void suppressMavenOptionalFeatureWarnings(MavenPublication publication) {
-		publication.suppressPomMetadataWarningsFor("mavenOptionalApiElements");
-		publication.suppressPomMetadataWarningsFor("mavenOptionalRuntimeElements");
 	}
 
 	private void customizeOrganization(MavenPomOrganization organization) {

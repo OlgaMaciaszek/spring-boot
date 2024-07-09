@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.Map.Entry;
 
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 
 import org.springframework.boot.actuate.autoconfigure.tracing.ConditionalOnEnabledTracing;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -66,16 +68,31 @@ class OtlpTracingConfigurations {
 	}
 
 	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnMissingBean({ OtlpGrpcSpanExporter.class, OtlpHttpSpanExporter.class })
+	@ConditionalOnBean(OtlpTracingConnectionDetails.class)
+	@ConditionalOnEnabledTracing("otlp")
 	static class Exporters {
 
 		@Bean
-		@ConditionalOnMissingBean(value = OtlpHttpSpanExporter.class,
-				type = "io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter")
-		@ConditionalOnBean(OtlpTracingConnectionDetails.class)
-		@ConditionalOnEnabledTracing
+		@ConditionalOnProperty(prefix = "management.otlp.tracing", name = "transport", havingValue = "http",
+				matchIfMissing = true)
 		OtlpHttpSpanExporter otlpHttpSpanExporter(OtlpProperties properties,
 				OtlpTracingConnectionDetails connectionDetails) {
 			OtlpHttpSpanExporterBuilder builder = OtlpHttpSpanExporter.builder()
+				.setEndpoint(connectionDetails.getUrl())
+				.setTimeout(properties.getTimeout())
+				.setCompression(properties.getCompression().name().toLowerCase());
+			for (Entry<String, String> header : properties.getHeaders().entrySet()) {
+				builder.addHeader(header.getKey(), header.getValue());
+			}
+			return builder.build();
+		}
+
+		@Bean
+		@ConditionalOnProperty(prefix = "management.otlp.tracing", name = "transport", havingValue = "grpc")
+		OtlpGrpcSpanExporter otlpGrpcSpanExporter(OtlpProperties properties,
+				OtlpTracingConnectionDetails connectionDetails) {
+			OtlpGrpcSpanExporterBuilder builder = OtlpGrpcSpanExporter.builder()
 				.setEndpoint(connectionDetails.getUrl())
 				.setTimeout(properties.getTimeout())
 				.setCompression(properties.getCompression().name().toLowerCase());
