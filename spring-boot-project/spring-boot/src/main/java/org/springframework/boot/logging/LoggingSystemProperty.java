@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ public enum LoggingSystemProperty {
 	/**
 	 * Logging system property for the application name that should be logged.
 	 */
-	APPLICATION_NAME("LOGGED_APPLICATION_NAME"),
+	APPLICATION_NAME("APPLICATION_NAME", "spring.application.name", "logging.include-application-name"),
 
 	/**
 	 * Logging system property for the application group that should be logged.
 	 */
-	LOGGED_APPLICATION_GROUP("LOGGED_APPLICATION_GROUP"),
+	APPLICATION_GROUP("APPLICATION_GROUP", "spring.application.group", "logging.include-application-group"),
 
 	/**
 	 * Logging system property for the process ID.
@@ -86,6 +86,18 @@ public enum LoggingSystemProperty {
 	FILE_PATTERN("FILE_LOG_PATTERN", "logging.pattern.file"),
 
 	/**
+	 * Logging system property for the console structured logging format.
+	 * @since 3.4.0
+	 */
+	CONSOLE_STRUCTURED_FORMAT("CONSOLE_LOG_STRUCTURED_FORMAT", "logging.structured.format.console"),
+
+	/**
+	 * Logging system property for the file structured logging format.
+	 * @since 3.4.0
+	 */
+	FILE_STRUCTURED_FORMAT("FILE_LOG_STRUCTURED_FORMAT", "logging.structured.format.file"),
+
+	/**
 	 * Logging system property for the log level pattern.
 	 */
 	LEVEL_PATTERN("LOG_LEVEL_PATTERN", "logging.pattern.level"),
@@ -104,13 +116,20 @@ public enum LoggingSystemProperty {
 
 	private final String applicationPropertyName;
 
+	private final String includePropertyName;
+
 	LoggingSystemProperty(String environmentVariableName) {
 		this(environmentVariableName, null);
 	}
 
 	LoggingSystemProperty(String environmentVariableName, String applicationPropertyName) {
+		this(environmentVariableName, applicationPropertyName, null);
+	}
+
+	LoggingSystemProperty(String environmentVariableName, String applicationPropertyName, String includePropertyName) {
 		this.environmentVariableName = environmentVariableName;
 		this.applicationPropertyName = applicationPropertyName;
+		this.includePropertyName = includePropertyName;
 	}
 
 	/**
@@ -123,6 +142,10 @@ public enum LoggingSystemProperty {
 
 	String getApplicationPropertyName() {
 		return this.applicationPropertyName;
+	}
+
+	String getIncludePropertyName() {
+		return this.includePropertyName;
 	}
 
 }
