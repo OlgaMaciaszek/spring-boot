@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package interfaceclients.context;
-
-import java.lang.annotation.Annotation;
+package org.springframework.boot.interfaceclients.context.http;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class ImportRSocketInterfaceClientsRegistrar extends ImportInterfaceClientsRegistrar {
-
-	@Override
-	protected Class<? extends Annotation> getAnnotation() {
-		return RSocketClient.class;
-	}
+public interface HttpClientResolver {
 }

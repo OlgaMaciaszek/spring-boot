@@ -14,30 +14,23 @@
  * limitations under the License.
  */
 
-package interfaceclients.context;
+package org.springframework.boot.interfaceclients.context.http;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Import({ ImportHttpInterfaceClientsRegistrar.class, ImportInterfaceClientsRegistrar.class })
-public @interface AutoConfigureInterfaceClients {
+@AutoConfiguration
+// TODO set autoconfiguration order
+@Import(HttpInterfaceClientsImportRegistrar.class)
+public class HttpInterfaceClientsAutoConfiguration {
 
+	@Bean
+	HttpInterfaceClientAdapter httpInterfaceClientAdapter() {
+		return new HttpInterfaceClientAdapter();
+	}
 
-	/**
-	 * List of classes annotated with @HttpClient or @RSocketClient. If empty,
-	 * application classpath will be scanned for annotated interfaces.
-	 * @return array of annotated interfaces
-	 */
-	Class<?>[] value() default {};
 }

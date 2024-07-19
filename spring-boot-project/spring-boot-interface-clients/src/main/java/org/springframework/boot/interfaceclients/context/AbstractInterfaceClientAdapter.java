@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package interfaceclients.context;
+package org.springframework.boot.interfaceclients.context;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +26,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
 /**

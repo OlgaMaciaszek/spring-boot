@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package interfaceclients.context;
+package org.springframework.boot.interfaceclients.context;
 
-import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.Ordered;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-@FunctionalInterface
 public interface InterfaceClientAdapter extends Ordered {
 
 	String DEFAULT_QUALIFIER = "interfaceClients";
 
-	<T> T createClient(BeanFactory beanFactory, String clientName, Class<T> type);
+	<T> T createClient(ListableBeanFactory beanFactory, String clientName, Class<T> type,
+			String httpProxyFactoryBeanName, String httpClientBeanName);
+
+	boolean canCreateClient(String clientName);
 
 }

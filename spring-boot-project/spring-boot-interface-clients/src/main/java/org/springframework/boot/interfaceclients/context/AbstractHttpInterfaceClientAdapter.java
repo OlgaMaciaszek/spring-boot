@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package interfaceclients.context;
+package org.springframework.boot.interfaceclients.context;
 
 import java.util.List;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package interfaceclients.context;
+package org.springframework.boot.interfaceclients.context;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -28,8 +28,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface HttpClient {
+public @interface RSocketClient {
 
 	String value() default "";
-
 }

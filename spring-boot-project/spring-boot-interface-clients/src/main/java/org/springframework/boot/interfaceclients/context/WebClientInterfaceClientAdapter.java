@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package interfaceclients.context;
+package org.springframework.boot.interfaceclients.context;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.Ordered;
@@ -35,7 +35,7 @@ public class WebClientInterfaceClientAdapter extends AbstractHttpInterfaceClient
 	private WebClient.Builder webClientBuilder;
 
 	@Override
-	public <T> T createClient(BeanFactory beanFactory, String clientName, Class<T> type) {
+	public <T> T createClient(BeanFactory beanFactory, String clientName, Class<T> type, String httpProxyFactoryBeanName, String httpClientBeanName) {
 		if (this.proxyFactory == null) {
 			this.proxyFactory = buildProxyFactory(beanFactory, clientName);
 		}
