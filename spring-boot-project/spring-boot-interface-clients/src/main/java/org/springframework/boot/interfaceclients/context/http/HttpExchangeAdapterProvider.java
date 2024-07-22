@@ -16,28 +16,13 @@
 
 package org.springframework.boot.interfaceclients.context.http;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.springframework.web.service.invoker.HttpExchangeAdapter;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface HttpClient {
+@FunctionalInterface
+public interface HttpExchangeAdapterProvider {
 
-	String value() default "";
-
-	// TODO: move from annotation to properties per client
-	String httpProxyFactoryBeanName() default "";
-
-	// TODO: move from annotation to properties per client
-	String httpClientBeanName() default "";
-
-	String baseUrl() default "";
-
+	HttpExchangeAdapter get(String clientName);
 }

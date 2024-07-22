@@ -20,17 +20,24 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.client.NotReactiveWebApplicationCondition;
 import org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestClientAdapter;
+import org.springframework.web.client.support.RestTemplateAdapter;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
@@ -43,34 +50,56 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 public class HttpInterfaceClientsAutoConfiguration {
 
 	@Bean
-	HttpInterfaceClientAdapter httpInterfaceClientAdapter() {
-		return new HttpInterfaceClientAdapter();
+	HttpInterfaceClientAdapter httpInterfaceClientAdapter(HttpExchangeAdapterProvider adapterProvider) {
+		return new HttpInterfaceClientAdapter(adapterProvider);
 	}
 
-	// TODO: handle bean precedence ordering
+	// FIXME create HTTP client per interface client to set different base urls --> so not in the autoconfig!!!
+	// TODO: marker beans in the configuration? or resolution in the environment?
+
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
 	@Conditional(NotReactiveWebApplicationCondition.class)
-	protected static class RestClientAdapterConfiguration {
+	@ConditionalOnProperty(value = "spring.interface.clients.resttemplate.enabled", havingValue = "false",
+			matchIfMissing = true)
+	protected static class RestClientAdapterProviderConfiguration {
 
 		@Bean
 		@ConditionalOnBean(RestClient.Builder.class)
 		@ConditionalOnMissingBean
-		RestClientAdapter restClientAdapter(RestClient.Builder restClientBuilder,
+		HttpExchangeAdapterProvider restClientAdapterProvider(RestClient.Builder restClientBuilder,
 				HttpInterfaceClientsProperties properties) {
-			RestClient restClient = restClientBuilder.baseUrl(properties.getBaseUrl())
-					.build();
-			return RestClientAdapter.create(restClient);
-		}
-
-		@Bean
-		@ConditionalOnMissingBean
-		HttpServiceProxyFactory httpServiceProxyFactory(RestClientAdapter restClientAdapter) {
-			return HttpServiceProxyFactory
-					.builderFor(restClientAdapter)
-					.build();
+			return new RestClientAdapterProvider(restClientBuilder, properties);
 		}
 
 	}
 
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass({ RestTemplate.class, RestTemplateAdapter.class, HttpServiceProxyFactory.class })
+	@Conditional(NotReactiveWebApplicationCondition.class)
+	protected static class RestTemplateAdapterProviderConfiguration {
+
+		@Bean
+		@ConditionalOnBean(RestTemplateBuilder.class)
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.interface.clients.resttemplate.enabled", havingValue = "true")
+		HttpExchangeAdapterProvider restTemplateAdapterProvider(RestTemplateBuilder restTemplateBuilder,
+				HttpInterfaceClientsProperties properties) {
+			return new RestTemplateAdapterProvider(restTemplateBuilder, properties);
+		}
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass({ WebClient.class, WebClientAdapter.class, HttpServiceProxyFactory.class })
+	@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+	protected static class WebClientAdapterProviderConfiguration {
+
+		@Bean
+		@ConditionalOnBean(WebClient.Builder.class)
+		@ConditionalOnMissingBean
+		HttpExchangeAdapterProvider webClientAdapterProvider(WebClient.Builder webClientBuilder,
+				HttpInterfaceClientsProperties properties) {
+			return new WebClientAdapterProvider(webClientBuilder, properties);
+		}
+	}
 }
