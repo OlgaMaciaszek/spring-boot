@@ -32,8 +32,10 @@ public @interface HttpClient {
 
 	String value() default "";
 
+	// TODO: move from annotation to properties per client
 	String httpProxyFactoryBeanName() default "";
 
+	// TODO: move from annotation to properties per client
 	String httpClientBeanName() default "";
 
 }

@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.interfaceclients.context.InterfaceClientAdapter;
+import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
@@ -30,33 +31,38 @@ public class HttpInterfaceClientAdapter implements InterfaceClientAdapter {
 
 	@Override
 	public <T> T createClient(ListableBeanFactory beanFactory, String clientName, Class<T> type,
-			String httpProxyFactoryBeanName, String httpClientBeanName) {
+			String httpProxyFactoryBeanName, String httpExchangeAdapterBeanName) {
 		// Allow using different proxyFactory instances for different client beans
-		HttpServiceProxyFactory proxyFactory = proxyFactory(beanFactory, httpProxyFactoryBeanName);
+		HttpServiceProxyFactory proxyFactory = proxyFactory(beanFactory, httpProxyFactoryBeanName,
+				httpExchangeAdapterBeanName);
 
-		// TODO: autoconfigure webclient/ resttamplate/ restclient resolvers (all implementing
+		// TODO: autoconfigure webclient/ restTemplate/ restclient resolvers (all implementing
 		//  HttpClientResolver), depending on the classpath, allowing for reordering
 
-		throw new UnsupportedOperationException("Please, implement me.");
+		return proxyFactory.createClient(type);
 	}
 
-	private static HttpServiceProxyFactory proxyFactory(ListableBeanFactory beanFactory, String httpProxyFactoryBeanName) {
+	private static HttpServiceProxyFactory proxyFactory(ListableBeanFactory beanFactory,
+			String httpProxyFactoryBeanName, String httpExchangeAdapterBeanName) {
+		// we assume that if the user has specified the bean names, those beans are required
 		if (!httpProxyFactoryBeanName.isEmpty()) {
 			return Optional.of(beanFactory.getBeansOfType(HttpServiceProxyFactory.class)
 					.get(httpProxyFactoryBeanName)).orElseThrow(() ->
 					new IllegalArgumentException("There is no HttpServiceProxyFactory bean with name '"
 							+ httpProxyFactoryBeanName + "'"));
 		}
-		// TODO: rethink relying on naming
+		if (!httpExchangeAdapterBeanName.isEmpty()) {
+			HttpExchangeAdapter adapter = Optional.of(beanFactory.getBeansOfType(HttpExchangeAdapter.class)
+					.get(httpExchangeAdapterBeanName)).orElseThrow(() -> new IllegalArgumentException(
+					"There is no HttpExchangeAdapter bean with name '" + httpExchangeAdapterBeanName
+							+ "'"));
+			return HttpServiceProxyFactory.builderFor(adapter).build();
+		}
 		// TODO: create a default in AutoConfiguration
 		return beanFactory.getBeansOfType(HttpServiceProxyFactory.class)
-				.get("defaultHttpServiceProxyFactory");
-	}
-
-
-	@Override
-	public boolean canCreateClient(String clientName) {
-		throw new UnsupportedOperationException("Please, implement me.");
+				.values().stream().findAny().orElseThrow(() -> new IllegalStateException(
+						"There is no HttpServiceProxyFactory bean available."
+				));
 	}
 
 	@Override

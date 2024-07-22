@@ -16,8 +16,22 @@
 
 package org.springframework.boot.interfaceclients.context.http;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 /**
  * @author Olga Maciaszek-Sharma
  */
-public interface HttpClientResolver {
+// TODO: properties per client
+@ConfigurationProperties("spring.interface.clients")
+public class HttpInterfaceClientsProperties {
+
+	private String baseUrl = null;
+
+	public String getBaseUrl() {
+		return this.baseUrl;
+	}
+
+	public void setBaseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
+	}
 }

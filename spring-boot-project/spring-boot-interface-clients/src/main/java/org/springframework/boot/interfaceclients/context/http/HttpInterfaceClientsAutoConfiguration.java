@@ -17,20 +17,60 @@
 package org.springframework.boot.interfaceclients.context.http;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.web.client.NotReactiveWebApplicationCondition;
+import org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientAdapter;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-@AutoConfiguration
-// TODO set autoconfiguration order
+@AutoConfiguration(after = { RestTemplateAutoConfiguration.class, RestClientAutoConfiguration.class,
+		WebClientAutoConfiguration.class })
 @Import(HttpInterfaceClientsImportRegistrar.class)
+@EnableConfigurationProperties(HttpInterfaceClientsProperties.class)
 public class HttpInterfaceClientsAutoConfiguration {
 
 	@Bean
 	HttpInterfaceClientAdapter httpInterfaceClientAdapter() {
 		return new HttpInterfaceClientAdapter();
+	}
+
+	// TODO: handle bean precedence ordering
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
+	@Conditional(NotReactiveWebApplicationCondition.class)
+	protected static class RestClientAdapterConfiguration {
+
+		@Bean
+		@ConditionalOnBean(RestClient.Builder.class)
+		@ConditionalOnMissingBean
+		RestClientAdapter restClientAdapter(RestClient.Builder restClientBuilder,
+				HttpInterfaceClientsProperties properties) {
+			RestClient restClient = restClientBuilder.baseUrl(properties.getBaseUrl())
+					.build();
+			return RestClientAdapter.create(restClient);
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		HttpServiceProxyFactory httpServiceProxyFactory(RestClientAdapter restClientAdapter) {
+			return HttpServiceProxyFactory
+					.builderFor(restClientAdapter)
+					.build();
+		}
+
 	}
 
 }

@@ -17,7 +17,6 @@
 package org.springframework.boot.interfaceclients.context.http;
 
 import java.lang.annotation.Annotation;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -29,8 +28,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.interfaceclients.context.AbstractInterfaceClientsImportRegistrar;
-import org.springframework.boot.interfaceclients.context.InterfaceClientAdapter;
-import org.springframework.core.OrderComparator;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.AnnotationMetadata;
@@ -41,6 +38,8 @@ import org.springframework.util.StringUtils;
 /**
  * @author Olga Maciaszek-Sharma
  */
+// TODO: move over to spring-boot-autoconfigure
+// TODO: Handle AOT
 public class HttpInterfaceClientsImportRegistrar extends AbstractInterfaceClientsImportRegistrar {
 
 

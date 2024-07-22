@@ -35,6 +35,7 @@ import org.springframework.util.ClassUtils;
 /**
  * @author Olga Maciaszek-Sharma
  */
+// TODO: remove abstract supertype or move to a shared package
 public abstract class AbstractInterfaceClientsImportRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware,
 		ResourceLoaderAware {
 
