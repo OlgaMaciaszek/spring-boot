@@ -69,7 +69,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@ConditionalOnBean(RestClient.Builder.class)
 		@ConditionalOnMissingBean
 		HttpExchangeAdapterProvider restClientAdapterProvider(RestClient.Builder restClientBuilder,
-				HttpInterfaceClientsBaseProperties properties) {
+				HttpInterfaceClientsProperties properties) {
 			return new RestClientAdapterProvider(restClientBuilder, properties);
 		}
 
@@ -85,7 +85,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@ConditionalOnMissingBean
 		@ConditionalOnProperty(value = "spring.interface.clients.resttemplate.enabled", havingValue = "true")
 		HttpExchangeAdapterProvider restTemplateAdapterProvider(RestTemplateBuilder restTemplateBuilder,
-				HttpInterfaceClientsBaseProperties properties) {
+				HttpInterfaceClientsProperties properties) {
 			return new RestTemplateAdapterProvider(restTemplateBuilder, properties);
 		}
 	}
@@ -99,7 +99,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@ConditionalOnBean(WebClient.Builder.class)
 		@ConditionalOnMissingBean
 		HttpExchangeAdapterProvider webClientAdapterProvider(WebClient.Builder webClientBuilder,
-				HttpInterfaceClientsBaseProperties properties) {
+				HttpInterfaceClientsProperties properties) {
 			return new WebClientAdapterProvider(webClientBuilder, properties);
 		}
 	}
