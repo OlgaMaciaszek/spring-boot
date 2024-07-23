@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.interfaceclients.context.http;
+package org.springframework.boot.autoconfigure.interfaceclients.http;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -61,7 +61,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
 	@Conditional(NotReactiveWebApplicationCondition.class)
-	@ConditionalOnProperty(value = "spring.interface.clients.resttemplate.enabled", havingValue = "false",
+	@ConditionalOnProperty(value = "spring.interfaceclients.resttemplate.enabled", havingValue = "false",
 			matchIfMissing = true)
 	protected static class RestClientAdapterProviderConfiguration {
 
@@ -83,7 +83,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(RestTemplateBuilder.class)
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.interface.clients.resttemplate.enabled", havingValue = "true")
+		@ConditionalOnProperty(value = "spring.interfaceclients.resttemplate.enabled", havingValue = "true")
 		HttpExchangeAdapterProvider restTemplateAdapterProvider(RestTemplateBuilder restTemplateBuilder,
 				HttpInterfaceClientsProperties properties) {
 			return new RestTemplateAdapterProvider(restTemplateBuilder, properties);

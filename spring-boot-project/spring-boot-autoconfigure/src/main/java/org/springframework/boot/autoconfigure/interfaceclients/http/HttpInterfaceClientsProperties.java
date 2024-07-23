@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.interfaceclients.context.http;
+package org.springframework.boot.autoconfigure.interfaceclients.http;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author Olga Maciaszek-Sharma
  */
-@ConfigurationProperties("spring.interface.clients")
+@ConfigurationProperties("spring.interfaceclients")
 public class HttpInterfaceClientsProperties extends HttpInterfaceClientsBaseProperties {
 
 	private final Map<String, HttpInterfaceClientsBaseProperties> clients = new HashMap<>();

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.interfaceclients.context.http;
+package org.springframework.boot.autoconfigure.interfaceclients.http;
 
 import java.util.Optional;
 
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.boot.interfaceclients.context.InterfaceClientAdapter;
+import org.springframework.boot.autoconfigure.interfaceclients.InterfaceClientAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 

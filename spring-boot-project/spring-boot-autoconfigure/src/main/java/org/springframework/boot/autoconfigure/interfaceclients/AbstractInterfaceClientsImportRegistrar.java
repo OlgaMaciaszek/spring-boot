@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.interfaceclients.context;
+package org.springframework.boot.autoconfigure.interfaceclients;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;

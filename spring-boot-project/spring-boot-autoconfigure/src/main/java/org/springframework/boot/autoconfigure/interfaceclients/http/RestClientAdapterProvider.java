@@ -14,32 +14,31 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.interfaceclients.context.http;
+package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.client.support.RestTemplateAdapter;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider {
+public class RestClientAdapterProvider implements HttpExchangeAdapterProvider {
 
-	private final RestTemplateBuilder restTemplateBuilder;
+	private final RestClient.Builder builder;
 
 	private final HttpInterfaceClientsProperties properties;
 
-	public RestTemplateAdapterProvider(RestTemplateBuilder restTemplateBuilder, HttpInterfaceClientsProperties properties) {
-		this.restTemplateBuilder = restTemplateBuilder;
+	public RestClientAdapterProvider(RestClient.Builder builder, HttpInterfaceClientsProperties properties) {
+		this.builder = builder;
 		this.properties = properties;
 	}
 
 	@Override
 	public HttpExchangeAdapter get(String clientName) {
-		RestTemplate restTemplate = this.restTemplateBuilder
-				.rootUri(this.properties.getProperties(clientName).getBaseUrl())
+		RestClient restClient = this.builder
+				.baseUrl(this.properties.getProperties(clientName).getBaseUrl())
 				.build();
-		return RestTemplateAdapter.create(restTemplate);
+		return RestClientAdapter.create(restClient);
 	}
 }

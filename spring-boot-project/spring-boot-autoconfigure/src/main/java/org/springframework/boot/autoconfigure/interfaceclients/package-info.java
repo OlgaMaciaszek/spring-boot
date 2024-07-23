@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.interfaceclients.context.http;
-
-import org.springframework.web.service.invoker.HttpExchangeAdapter;
-
 /**
- * @author Olga Maciaszek-Sharma
+ * AutoConfiguration for Spring Interface Clients.
  */
-@FunctionalInterface
-public interface HttpExchangeAdapterProvider {
-
-	HttpExchangeAdapter get(String clientName);
-}
+package org.springframework.boot.autoconfigure.interfaceclients;

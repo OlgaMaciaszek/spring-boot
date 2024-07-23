@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.interfaceclients.context;
+package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.core.Ordered;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-// TODO: remove abstract supertype or move to a shared package
-public interface InterfaceClientAdapter extends Ordered {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface HttpClient {
 
-	String DEFAULT_QUALIFIER = "interfaceClients";
-
-	<T> T createClient(ListableBeanFactory beanFactory, String clientName, Class<T> type);
+	String value() default "";
 
 }

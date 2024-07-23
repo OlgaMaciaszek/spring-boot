@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.interfaceclients.context.http;
+package org.springframework.boot.autoconfigure.interfaceclients.http;
 
 import java.lang.annotation.Annotation;
 import java.util.Set;
@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.interfaceclients.context.AbstractInterfaceClientsImportRegistrar;
+import org.springframework.boot.autoconfigure.interfaceclients.AbstractInterfaceClientsImportRegistrar;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.AnnotationMetadata;
@@ -38,7 +38,6 @@ import org.springframework.util.StringUtils;
 /**
  * @author Olga Maciaszek-Sharma
  */
-// TODO: move over to spring-boot-autoconfigure
 // TODO: Handle AOT
 public class HttpInterfaceClientsImportRegistrar extends AbstractInterfaceClientsImportRegistrar {
 

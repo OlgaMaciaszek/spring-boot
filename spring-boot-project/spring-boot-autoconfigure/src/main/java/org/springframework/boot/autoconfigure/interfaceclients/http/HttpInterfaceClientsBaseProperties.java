@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.interfaceclients.context.http;
+package org.springframework.boot.autoconfigure.interfaceclients.http;
 
 /**
  * @author Olga Maciaszek-Sharma
