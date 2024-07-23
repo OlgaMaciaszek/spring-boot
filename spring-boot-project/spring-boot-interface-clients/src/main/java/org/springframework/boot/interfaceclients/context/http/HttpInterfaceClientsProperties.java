@@ -16,22 +16,34 @@
 
 package org.springframework.boot.interfaceclients.context.http;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
+ * Use per-client properties or default if no client-specific found.
+ * Based on <a href=https://github.com/spring-cloud/spring-cloud-commons/blob/main/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancerClientsProperties.java>LoadBalancerClientsProperties.java</a>
+ *
  * @author Olga Maciaszek-Sharma
  */
-// TODO: properties per client
 @ConfigurationProperties("spring.interface.clients")
-public class HttpInterfaceClientsProperties {
+public class HttpInterfaceClientsProperties extends HttpInterfaceClientsBaseProperties {
 
-	private String baseUrl = null;
+	private final Map<String, HttpInterfaceClientsBaseProperties> clients = new HashMap<>();
 
-	public String getBaseUrl() {
-		return this.baseUrl;
+	public Map<String, HttpInterfaceClientsBaseProperties> getClients() {
+		return this.clients;
 	}
 
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
+	public HttpInterfaceClientsBaseProperties getProperties(String clientName) {
+		if (clientName == null || !this.getClients().containsKey(clientName)) {
+			// no specific client properties, return default
+			return this;
+		}
+		// because specifics are overlayed on top of defaults, everything in `properties`,
+		// unless overridden, is in `clientsProperties`
+		return this.getClients().get(clientName);
 	}
+
 }

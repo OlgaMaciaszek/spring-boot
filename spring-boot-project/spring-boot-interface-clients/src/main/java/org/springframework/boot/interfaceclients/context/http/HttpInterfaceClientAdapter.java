@@ -30,26 +30,28 @@ public class HttpInterfaceClientAdapter implements InterfaceClientAdapter {
 
 	private final HttpExchangeAdapterProvider adapterProvider;
 
-	public HttpInterfaceClientAdapter(HttpExchangeAdapterProvider adapterProvider) {
+	private final HttpInterfaceClientsProperties properties;
+
+	public HttpInterfaceClientAdapter(HttpExchangeAdapterProvider adapterProvider, HttpInterfaceClientsProperties properties) {
 		this.adapterProvider = adapterProvider;
+		this.properties = properties;
 	}
 
 
 	// TODO: get bean names and base url from properties per client
 	@Override
-	public <T> T createClient(ListableBeanFactory beanFactory, String clientName, Class<T> type,
-			String httpProxyFactoryBeanName, String httpExchangeAdapterBeanName) {
+	public <T> T createClient(ListableBeanFactory beanFactory, String clientName, Class<T> type) {
 		// Allow using different proxyFactory instances for different client beans
-		HttpServiceProxyFactory proxyFactory = proxyFactory(beanFactory, clientName,
-				httpProxyFactoryBeanName, httpExchangeAdapterBeanName);
+		HttpServiceProxyFactory proxyFactory = proxyFactory(beanFactory, clientName);
 
 		return proxyFactory.createClient(type);
 	}
 
 	private HttpServiceProxyFactory proxyFactory(ListableBeanFactory beanFactory,
-			String clientName, String httpProxyFactoryBeanName, String httpExchangeAdapterBeanName) {
+			String clientName) {
 		// we assume that if the user has specified the bean name, the bean is required
 		// try getting HttpServiceProxyFactory bean specified by the user
+		String httpProxyFactoryBeanName = this.properties.getProperties(clientName).getHttpProxyFactoryBeanName();
 		if (!httpProxyFactoryBeanName.isEmpty()) {
 			return Optional.of(beanFactory.getBeansOfType(HttpServiceProxyFactory.class)
 					.get(httpProxyFactoryBeanName)).orElseThrow(() ->
@@ -57,13 +59,14 @@ public class HttpInterfaceClientAdapter implements InterfaceClientAdapter {
 							+ httpProxyFactoryBeanName + "'"));
 		}
 		// create an HttpServiceProxyFactory bean with default implementation
-		HttpExchangeAdapter adapter = exchangeAdapter(beanFactory, clientName, httpExchangeAdapterBeanName);
+		HttpExchangeAdapter adapter = exchangeAdapter(beanFactory, clientName);
 		return HttpServiceProxyFactory.builderFor(adapter).build();
 	}
 
-	private HttpExchangeAdapter exchangeAdapter(ListableBeanFactory beanFactory, String clientName, String httpExchangeAdapterBeanName) {
+	private HttpExchangeAdapter exchangeAdapter(ListableBeanFactory beanFactory, String clientName) {
 		// we assume that if the user has specified the bean name, the bean is required
 		// try getting HttpExchangeAdapter bean specified by the user
+		String httpExchangeAdapterBeanName = this.properties.getProperties(clientName).getHttpExchangeAdapterBeanName();
 		if (!httpExchangeAdapterBeanName.isEmpty()) {
 			return Optional.of(beanFactory.getBeansOfType(HttpExchangeAdapter.class)
 					.get(httpExchangeAdapterBeanName)).orElseThrow(() -> new IllegalArgumentException(
@@ -74,6 +77,8 @@ public class HttpInterfaceClientAdapter implements InterfaceClientAdapter {
 		return this.adapterProvider.get(clientName);
 	}
 
+
+	// TODO: check if needed
 	@Override
 	public int getOrder() {
 		throw new UnsupportedOperationException("Please, implement me.");

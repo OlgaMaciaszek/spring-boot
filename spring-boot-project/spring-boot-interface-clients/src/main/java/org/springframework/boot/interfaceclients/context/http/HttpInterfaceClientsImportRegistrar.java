@@ -75,9 +75,7 @@ public class HttpInterfaceClientsImportRegistrar extends AbstractInterfaceClient
 				HttpInterfaceClientAdapter adapter = beanFactory.getBean(HttpInterfaceClientAdapter.class);
 				BeanDefinition definition = BeanDefinitionBuilder
 						.rootBeanDefinition(ResolvableType.forClass(beanClass),
-								() -> adapter.createClient(beanFactory, clientName, beanClass,
-										annotation.getString("httpProxyFactoryBeanName"),
-										annotation.getString("httpClientBeanName")))
+								() -> adapter.createClient(beanFactory, clientName, beanClass))
 						.getBeanDefinition();
 				registry.registerBeanDefinition(clientName, definition);
 

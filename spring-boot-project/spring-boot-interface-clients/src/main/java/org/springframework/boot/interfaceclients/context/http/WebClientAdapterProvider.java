@@ -38,8 +38,7 @@ public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 	@Override
 	public HttpExchangeAdapter get(String clientName) {
 		WebClient webClient = this.builder
-				// TODO: get base url per client
-				.baseUrl(this.properties.getBaseUrl())
+				.baseUrl(this.properties.getProperties(clientName).getBaseUrl())
 				.build();
 		return WebClientAdapter.create(webClient);
 	}

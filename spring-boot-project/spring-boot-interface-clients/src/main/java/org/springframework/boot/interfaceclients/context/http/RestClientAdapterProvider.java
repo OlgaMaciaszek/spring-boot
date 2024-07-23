@@ -37,8 +37,7 @@ public class RestClientAdapterProvider implements HttpExchangeAdapterProvider {
 	@Override
 	public HttpExchangeAdapter get(String clientName) {
 		RestClient restClient = this.builder
-				// TODO: get baseUrl per client
-				.baseUrl(this.properties.getBaseUrl())
+				.baseUrl(this.properties.getProperties(clientName).getBaseUrl())
 				.build();
 		return RestClientAdapter.create(restClient);
 	}

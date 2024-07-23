@@ -50,8 +50,9 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 public class HttpInterfaceClientsAutoConfiguration {
 
 	@Bean
-	HttpInterfaceClientAdapter httpInterfaceClientAdapter(HttpExchangeAdapterProvider adapterProvider) {
-		return new HttpInterfaceClientAdapter(adapterProvider);
+	HttpInterfaceClientAdapter httpInterfaceClientAdapter(HttpExchangeAdapterProvider adapterProvider,
+			HttpInterfaceClientsProperties properties) {
+		return new HttpInterfaceClientAdapter(adapterProvider, properties);
 	}
 
 	// FIXME create HTTP client per interface client to set different base urls --> so not in the autoconfig!!!
@@ -68,7 +69,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@ConditionalOnBean(RestClient.Builder.class)
 		@ConditionalOnMissingBean
 		HttpExchangeAdapterProvider restClientAdapterProvider(RestClient.Builder restClientBuilder,
-				HttpInterfaceClientsProperties properties) {
+				HttpInterfaceClientsBaseProperties properties) {
 			return new RestClientAdapterProvider(restClientBuilder, properties);
 		}
 
@@ -84,7 +85,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@ConditionalOnMissingBean
 		@ConditionalOnProperty(value = "spring.interface.clients.resttemplate.enabled", havingValue = "true")
 		HttpExchangeAdapterProvider restTemplateAdapterProvider(RestTemplateBuilder restTemplateBuilder,
-				HttpInterfaceClientsProperties properties) {
+				HttpInterfaceClientsBaseProperties properties) {
 			return new RestTemplateAdapterProvider(restTemplateBuilder, properties);
 		}
 	}
@@ -98,7 +99,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@ConditionalOnBean(WebClient.Builder.class)
 		@ConditionalOnMissingBean
 		HttpExchangeAdapterProvider webClientAdapterProvider(WebClient.Builder webClientBuilder,
-				HttpInterfaceClientsProperties properties) {
+				HttpInterfaceClientsBaseProperties properties) {
 			return new WebClientAdapterProvider(webClientBuilder, properties);
 		}
 	}

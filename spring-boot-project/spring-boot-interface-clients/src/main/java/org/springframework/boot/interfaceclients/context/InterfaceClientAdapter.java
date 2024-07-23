@@ -27,7 +27,6 @@ public interface InterfaceClientAdapter extends Ordered {
 
 	String DEFAULT_QUALIFIER = "interfaceClients";
 
-	<T> T createClient(ListableBeanFactory beanFactory, String clientName, Class<T> type,
-			String httpProxyFactoryBeanName, String httpClientBeanName);
+	<T> T createClient(ListableBeanFactory beanFactory, String clientName, Class<T> type);
 
 }

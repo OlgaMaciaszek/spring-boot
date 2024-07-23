@@ -38,8 +38,7 @@ public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider 
 	@Override
 	public HttpExchangeAdapter get(String clientName) {
 		RestTemplate restTemplate = this.restTemplateBuilder
-				// TODO: get base url per client
-				.rootUri(this.properties.getBaseUrl())
+				.rootUri(this.properties.getProperties(clientName).getBaseUrl())
 				.build();
 		return RestTemplateAdapter.create(restTemplate);
 	}
