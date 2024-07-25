@@ -16,6 +16,10 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
@@ -24,6 +28,8 @@ import org.springframework.web.service.invoker.HttpExchangeAdapter;
  * @author Olga Maciaszek-Sharma
  */
 public class RestClientAdapterProvider implements HttpExchangeAdapterProvider {
+
+	private static final Log logger = LogFactory.getLog(RestClientAdapterProvider.class);
 
 	private final RestClient.Builder builder;
 
@@ -35,10 +41,26 @@ public class RestClientAdapterProvider implements HttpExchangeAdapterProvider {
 	}
 
 	@Override
-	public HttpExchangeAdapter get(String clientName) {
+	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientName) {
+		RestClient userProvidedRestClient = QualifiedBeanProvider.qualifiedBean(beanFactory, RestClient.class, clientName);
+		if (userProvidedRestClient != null) {
+			return RestClientAdapter.create(userProvidedRestClient);
+		}
+		RestClient.Builder userProvidedRestClientBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory, RestClient.Builder.class, clientName);
+		if (userProvidedRestClientBuilder != null) {
+			// TODO: should we do this or get it from the user?
+			userProvidedRestClientBuilder.baseUrl(this.properties.getProperties(clientName).getBaseUrl());
+			return RestClientAdapter.create(
+					userProvidedRestClientBuilder.build());
+		}
+		// create a RestClientAdapter bean with default implementation
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating RestClientAdapter for '" + clientName + "'");
+		}
 		RestClient restClient = this.builder
 				.baseUrl(this.properties.getProperties(clientName).getBaseUrl())
 				.build();
 		return RestClientAdapter.create(restClient);
 	}
+
 }

@@ -50,13 +50,9 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 public class HttpInterfaceClientsAutoConfiguration {
 
 	@Bean
-	HttpInterfaceClientAdapter httpInterfaceClientAdapter(HttpExchangeAdapterProvider adapterProvider,
-			HttpInterfaceClientsProperties properties) {
-		return new HttpInterfaceClientAdapter(adapterProvider, properties);
+	HttpInterfaceClientAdapter httpInterfaceClientAdapter(HttpExchangeAdapterProvider adapterProvider) {
+		return new HttpInterfaceClientAdapter(adapterProvider);
 	}
-
-	// FIXME create HTTP client per interface client to set different base urls --> so not in the autoconfig!!!
-	// TODO: marker beans in the configuration? or resolution in the environment?
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })

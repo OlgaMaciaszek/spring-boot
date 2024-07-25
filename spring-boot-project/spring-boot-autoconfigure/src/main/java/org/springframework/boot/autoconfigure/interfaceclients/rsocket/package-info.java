@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.autoconfigure.interfaceclients.http;
-
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.web.service.invoker.HttpExchangeAdapter;
-
 /**
- * @author Olga Maciaszek-Sharma
+ * AutoConfiguration for HTTP Spring Interface Clients.
  */
-@FunctionalInterface
-public interface HttpExchangeAdapterProvider {
-
-	// TODO: try a less specific type for the beanFactory
-	HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientName);
-}
+package org.springframework.boot.autoconfigure.interfaceclients.rsocket;

@@ -16,6 +16,10 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
@@ -24,6 +28,8 @@ import org.springframework.web.service.invoker.HttpExchangeAdapter;
  * @author Olga Maciaszek-Sharma
  */
 public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
+
+	private static final Log logger = LogFactory.getLog(WebClientAdapterProvider.class);
 
 	private final WebClient.Builder builder;
 
@@ -34,9 +40,22 @@ public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 		this.properties = properties;
 	}
 
-
 	@Override
-	public HttpExchangeAdapter get(String clientName) {
+	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientName) {
+		WebClient userProvidedWebClient = QualifiedBeanProvider.qualifiedBean(beanFactory, WebClient.class, clientName);
+		if (userProvidedWebClient != null) {
+			return WebClientAdapter.create(userProvidedWebClient);
+		}
+		WebClient.Builder userProvidedWebClientBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory, WebClient.Builder.class, clientName);
+		if (userProvidedWebClientBuilder != null) {
+			// TODO: should we do this or get it from the user?
+			userProvidedWebClientBuilder.baseUrl(this.properties.getProperties(clientName).getBaseUrl());
+			return WebClientAdapter.create(userProvidedWebClientBuilder.build());
+		}
+		// create a WebClientAdapter bean with default implementation
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating WebClientAdapter for '" + clientName + "'");
+		}
 		WebClient webClient = this.builder
 				.baseUrl(this.properties.getProperties(clientName).getBaseUrl())
 				.build();

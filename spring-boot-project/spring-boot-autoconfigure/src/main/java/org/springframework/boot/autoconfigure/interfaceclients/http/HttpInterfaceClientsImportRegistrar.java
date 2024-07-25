@@ -71,7 +71,7 @@ public class HttpInterfaceClientsImportRegistrar extends AbstractInterfaceClient
 				String clientName = !ObjectUtils.isEmpty(annotation.getString(MergedAnnotation.VALUE))
 						? annotation.getString(MergedAnnotation.VALUE) : StringUtils.uncapitalize(beanClassName);
 				ListableBeanFactory beanFactory = (ListableBeanFactory) registry;
-				HttpInterfaceClientAdapter adapter = beanFactory.getBean(HttpInterfaceClientAdapter.class);
+				PropertyBasedHttpInterfaceClientAdapter adapter = beanFactory.getBean(PropertyBasedHttpInterfaceClientAdapter.class);
 				BeanDefinition definition = BeanDefinitionBuilder
 						.rootBeanDefinition(ResolvableType.forClass(beanClass),
 								() -> adapter.createClient(beanFactory, clientName, beanClass))

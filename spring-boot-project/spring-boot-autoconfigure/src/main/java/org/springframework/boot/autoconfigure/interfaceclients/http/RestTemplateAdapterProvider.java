@@ -16,6 +16,10 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestTemplateAdapter;
@@ -25,6 +29,8 @@ import org.springframework.web.service.invoker.HttpExchangeAdapter;
  * @author Olga Maciaszek-Sharma
  */
 public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider {
+
+	private static final Log logger = LogFactory.getLog(RestTemplateAdapterProvider.class);
 
 	private final RestTemplateBuilder restTemplateBuilder;
 
@@ -36,7 +42,22 @@ public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider 
 	}
 
 	@Override
-	public HttpExchangeAdapter get(String clientName) {
+	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientName) {
+		RestTemplate userProvidedRestTemplate = QualifiedBeanProvider.qualifiedBean(beanFactory, RestTemplate.class, clientName);
+		if (userProvidedRestTemplate != null) {
+			return RestTemplateAdapter.create(userProvidedRestTemplate);
+		}
+		RestTemplateBuilder userProvidedRestTemplateBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
+				RestTemplateBuilder.class, clientName);
+		if (userProvidedRestTemplateBuilder != null) {
+			// TODO: should we do this or get it from the user?
+			userProvidedRestTemplateBuilder.rootUri(this.properties.getProperties(clientName).getBaseUrl());
+			return RestTemplateAdapter.create(userProvidedRestTemplateBuilder.build());
+		}
+		// create a RestTemplateAdapter bean with default implementation
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating RestTemplateAdapter for '" + clientName + "'");
+		}
 		RestTemplate restTemplate = this.restTemplateBuilder
 				.rootUri(this.properties.getProperties(clientName).getBaseUrl())
 				.build();

@@ -16,7 +16,8 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import java.util.Optional;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.autoconfigure.interfaceclients.InterfaceClientAdapter;
@@ -28,53 +29,33 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
  */
 public class HttpInterfaceClientAdapter implements InterfaceClientAdapter {
 
+	private static final Log logger = LogFactory.getLog(HttpInterfaceClientAdapter.class);
+
 	private final HttpExchangeAdapterProvider adapterProvider;
 
-	private final HttpInterfaceClientsProperties properties;
-
-	public HttpInterfaceClientAdapter(HttpExchangeAdapterProvider adapterProvider, HttpInterfaceClientsProperties properties) {
+	public HttpInterfaceClientAdapter(HttpExchangeAdapterProvider adapterProvider) {
 		this.adapterProvider = adapterProvider;
-		this.properties = properties;
 	}
 
-
-	// TODO: get bean names and base url from properties per client
 	@Override
 	public <T> T createClient(ListableBeanFactory beanFactory, String clientName, Class<T> type) {
-		// Allow using different proxyFactory instances for different client beans
 		HttpServiceProxyFactory proxyFactory = proxyFactory(beanFactory, clientName);
 
 		return proxyFactory.createClient(type);
 	}
 
-	private HttpServiceProxyFactory proxyFactory(ListableBeanFactory beanFactory,
-			String clientName) {
-		// we assume that if the user has specified the bean name, the bean is required
-		// try getting HttpServiceProxyFactory bean specified by the user
-		String httpProxyFactoryBeanName = this.properties.getProperties(clientName).getHttpProxyFactoryBeanName();
-		if (!httpProxyFactoryBeanName.isEmpty()) {
-			return Optional.of(beanFactory.getBeansOfType(HttpServiceProxyFactory.class)
-					.get(httpProxyFactoryBeanName)).orElseThrow(() ->
-					new IllegalArgumentException("There is no HttpServiceProxyFactory bean with name '"
-							+ httpProxyFactoryBeanName + "'"));
+	private HttpServiceProxyFactory proxyFactory(ListableBeanFactory beanFactory, String clientName) {
+		HttpServiceProxyFactory userProvidedProxyFactory = QualifiedBeanProvider.qualifiedBean(beanFactory,
+				HttpServiceProxyFactory.class, clientName);
+		if (userProvidedProxyFactory != null) {
+			return userProvidedProxyFactory;
 		}
 		// create an HttpServiceProxyFactory bean with default implementation
-		HttpExchangeAdapter adapter = exchangeAdapter(beanFactory, clientName);
-		return HttpServiceProxyFactory.builderFor(adapter).build();
-	}
-
-	private HttpExchangeAdapter exchangeAdapter(ListableBeanFactory beanFactory, String clientName) {
-		// we assume that if the user has specified the bean name, the bean is required
-		// try getting HttpExchangeAdapter bean specified by the user
-		String httpExchangeAdapterBeanName = this.properties.getProperties(clientName).getHttpExchangeAdapterBeanName();
-		if (!httpExchangeAdapterBeanName.isEmpty()) {
-			return Optional.of(beanFactory.getBeansOfType(HttpExchangeAdapter.class)
-					.get(httpExchangeAdapterBeanName)).orElseThrow(() -> new IllegalArgumentException(
-					"There is no HttpExchangeAdapter bean with name '" + httpExchangeAdapterBeanName
-							+ "'"));
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating HttpServiceProxyFactory for '" + clientName + "'");
 		}
-		// create an HttpExchangeAdapter bean with default implementation
-		return this.adapterProvider.get(clientName);
+		HttpExchangeAdapter adapter = this.adapterProvider.get(beanFactory, clientName);
+		return HttpServiceProxyFactory.builderFor(adapter).build();
 	}
 
 
