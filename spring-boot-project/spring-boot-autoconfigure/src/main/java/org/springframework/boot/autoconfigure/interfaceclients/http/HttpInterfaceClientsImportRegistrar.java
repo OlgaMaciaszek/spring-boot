@@ -41,21 +41,20 @@ import org.springframework.util.StringUtils;
 // TODO: Handle AOT
 public class HttpInterfaceClientsImportRegistrar extends AbstractInterfaceClientsImportRegistrar {
 
-
 	private static final Log logger = LogFactory.getLog(HttpInterfaceClientsImportRegistrar.class);
 
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
-		Assert.isInstanceOf(ListableBeanFactory.class, registry, "Registry must be an instance of "
-				+ ListableBeanFactory.class.getSimpleName());
+		Assert.isInstanceOf(ListableBeanFactory.class, registry,
+				"Registry must be an instance of " + ListableBeanFactory.class.getSimpleName());
 		Set<BeanDefinition> candidateComponents = discoverCandidateComponents(metadata);
 		for (BeanDefinition candidateComponent : candidateComponents) {
 			if (candidateComponent instanceof AnnotatedBeanDefinition beanDefinition) {
 				AnnotationMetadata annotationMetadata = beanDefinition.getMetadata();
-				Assert.isTrue(annotationMetadata.isInterface(), getAnnotation().getSimpleName()
-						+ "can only be placed on an interface.");
+				Assert.isTrue(annotationMetadata.isInterface(),
+						getAnnotation().getSimpleName() + "can only be placed on an interface.");
 				MergedAnnotation<? extends Annotation> annotation = annotationMetadata.getAnnotations()
-						.get(getAnnotation());
+					.get(getAnnotation());
 				String beanClassName = annotationMetadata.getClassName();
 				Class<?> beanClass;
 				try {
@@ -63,27 +62,23 @@ public class HttpInterfaceClientsImportRegistrar extends AbstractInterfaceClient
 				}
 				catch (ClassNotFoundException e) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Class not found for interface client "
-								+ beanClassName + ": " + e.getMessage());
+						logger.debug("Class not found for interface client " + beanClassName + ": " + e.getMessage());
 					}
 					throw new RuntimeException(e);
 				}
 				String clientName = !ObjectUtils.isEmpty(annotation.getString(MergedAnnotation.VALUE))
 						? annotation.getString(MergedAnnotation.VALUE) : StringUtils.uncapitalize(beanClassName);
 				ListableBeanFactory beanFactory = (ListableBeanFactory) registry;
-				PropertyBasedHttpInterfaceClientAdapter adapter = beanFactory.getBean(PropertyBasedHttpInterfaceClientAdapter.class);
+				HttpInterfaceClientAdapter adapter = beanFactory.getBean(HttpInterfaceClientAdapter.class);
 				BeanDefinition definition = BeanDefinitionBuilder
-						.rootBeanDefinition(ResolvableType.forClass(beanClass),
-								() -> adapter.createClient(beanFactory, clientName, beanClass))
-						.getBeanDefinition();
+					.rootBeanDefinition(ResolvableType.forClass(beanClass),
+							() -> adapter.createClient(beanFactory, clientName, beanClass))
+					.getBeanDefinition();
 				registry.registerBeanDefinition(clientName, definition);
 
 			}
 		}
 	}
-
-
-
 
 	@Override
 	protected Class<? extends Annotation> getAnnotation() {
@@ -91,5 +86,3 @@ public class HttpInterfaceClientsImportRegistrar extends AbstractInterfaceClient
 	}
 
 }
-
-

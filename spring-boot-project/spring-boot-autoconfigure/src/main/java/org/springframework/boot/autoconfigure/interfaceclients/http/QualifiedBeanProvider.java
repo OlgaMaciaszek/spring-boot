@@ -42,13 +42,16 @@ final class QualifiedBeanProvider {
 		}
 		// Get default-qualified bean
 		try {
-			return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, type, InterfaceClientAdapter.DEFAULT_QUALIFIER);
+			return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, type,
+					InterfaceClientAdapter.DEFAULT_QUALIFIER);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No qualified of type " + type + "found for " + InterfaceClientAdapter.DEFAULT_QUALIFIER, ex);
+				logger.debug("No qualified of type " + type + "found for " + InterfaceClientAdapter.DEFAULT_QUALIFIER,
+						ex);
 			}
 		}
 		return null;
 	}
+
 }

@@ -36,14 +36,16 @@ public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider 
 
 	private final HttpInterfaceClientsProperties properties;
 
-	public RestTemplateAdapterProvider(RestTemplateBuilder restTemplateBuilder, HttpInterfaceClientsProperties properties) {
+	public RestTemplateAdapterProvider(RestTemplateBuilder restTemplateBuilder,
+			HttpInterfaceClientsProperties properties) {
 		this.restTemplateBuilder = restTemplateBuilder;
 		this.properties = properties;
 	}
 
 	@Override
 	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientName) {
-		RestTemplate userProvidedRestTemplate = QualifiedBeanProvider.qualifiedBean(beanFactory, RestTemplate.class, clientName);
+		RestTemplate userProvidedRestTemplate = QualifiedBeanProvider.qualifiedBean(beanFactory, RestTemplate.class,
+				clientName);
 		if (userProvidedRestTemplate != null) {
 			return RestTemplateAdapter.create(userProvidedRestTemplate);
 		}
@@ -59,8 +61,9 @@ public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider 
 			logger.debug("Creating RestTemplateAdapter for '" + clientName + "'");
 		}
 		RestTemplate restTemplate = this.restTemplateBuilder
-				.rootUri(this.properties.getProperties(clientName).getBaseUrl())
-				.build();
+			.rootUri(this.properties.getProperties(clientName).getBaseUrl())
+			.build();
 		return RestTemplateAdapter.create(restTemplate);
 	}
+
 }

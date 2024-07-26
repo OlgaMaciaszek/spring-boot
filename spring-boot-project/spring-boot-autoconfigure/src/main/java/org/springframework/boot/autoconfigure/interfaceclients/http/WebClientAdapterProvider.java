@@ -46,7 +46,8 @@ public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 		if (userProvidedWebClient != null) {
 			return WebClientAdapter.create(userProvidedWebClient);
 		}
-		WebClient.Builder userProvidedWebClientBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory, WebClient.Builder.class, clientName);
+		WebClient.Builder userProvidedWebClientBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
+				WebClient.Builder.class, clientName);
 		if (userProvidedWebClientBuilder != null) {
 			// TODO: should we do this or get it from the user?
 			userProvidedWebClientBuilder.baseUrl(this.properties.getProperties(clientName).getBaseUrl());
@@ -56,9 +57,8 @@ public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating WebClientAdapter for '" + clientName + "'");
 		}
-		WebClient webClient = this.builder
-				.baseUrl(this.properties.getProperties(clientName).getBaseUrl())
-				.build();
+		WebClient webClient = this.builder.baseUrl(this.properties.getProperties(clientName).getBaseUrl()).build();
 		return WebClientAdapter.create(webClient);
 	}
+
 }

@@ -27,4 +27,5 @@ public interface HttpExchangeAdapterProvider {
 
 	// TODO: try a less specific type for the beanFactory
 	HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientName);
+
 }

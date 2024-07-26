@@ -42,24 +42,23 @@ public class RestClientAdapterProvider implements HttpExchangeAdapterProvider {
 
 	@Override
 	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientName) {
-		RestClient userProvidedRestClient = QualifiedBeanProvider.qualifiedBean(beanFactory, RestClient.class, clientName);
+		RestClient userProvidedRestClient = QualifiedBeanProvider.qualifiedBean(beanFactory, RestClient.class,
+				clientName);
 		if (userProvidedRestClient != null) {
 			return RestClientAdapter.create(userProvidedRestClient);
 		}
-		RestClient.Builder userProvidedRestClientBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory, RestClient.Builder.class, clientName);
+		RestClient.Builder userProvidedRestClientBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
+				RestClient.Builder.class, clientName);
 		if (userProvidedRestClientBuilder != null) {
 			// TODO: should we do this or get it from the user?
 			userProvidedRestClientBuilder.baseUrl(this.properties.getProperties(clientName).getBaseUrl());
-			return RestClientAdapter.create(
-					userProvidedRestClientBuilder.build());
+			return RestClientAdapter.create(userProvidedRestClientBuilder.build());
 		}
 		// create a RestClientAdapter bean with default implementation
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating RestClientAdapter for '" + clientName + "'");
 		}
-		RestClient restClient = this.builder
-				.baseUrl(this.properties.getProperties(clientName).getBaseUrl())
-				.build();
+		RestClient restClient = this.builder.baseUrl(this.properties.getProperties(clientName).getBaseUrl()).build();
 		return RestClientAdapter.create(restClient);
 	}
 

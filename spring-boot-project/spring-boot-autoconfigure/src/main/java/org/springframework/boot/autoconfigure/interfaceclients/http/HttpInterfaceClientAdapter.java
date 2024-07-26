@@ -58,10 +58,10 @@ public class HttpInterfaceClientAdapter implements InterfaceClientAdapter {
 		return HttpServiceProxyFactory.builderFor(adapter).build();
 	}
 
-
 	// TODO: check if needed
 	@Override
 	public int getOrder() {
 		throw new UnsupportedOperationException("Please, implement me.");
 	}
+
 }

@@ -84,6 +84,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 				HttpInterfaceClientsProperties properties) {
 			return new RestTemplateAdapterProvider(restTemplateBuilder, properties);
 		}
+
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -98,5 +99,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 				HttpInterfaceClientsProperties properties) {
 			return new WebClientAdapterProvider(webClientBuilder, properties);
 		}
+
 	}
+
 }

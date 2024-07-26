@@ -1620,6 +1620,12 @@
       "defaultValue": "embedded"
     },
     {
+      "name": "spring.interfaceclients.resttemplate.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to use RestTemplate as the underlying HTTP client for interface clients.",
+      "defaultValue": true
+    },
+    {
       "name": "spring.jackson.constructor-detector",
       "defaultValue": "default"
     },
@@ -2883,12 +2889,6 @@
       "name": "spring.webservices.wsdl-locations",
       "type": "java.util.List<java.lang.String>",
       "description": "Comma-separated list of locations of WSDLs and accompanying XSDs to be exposed as beans."
-    },
-    {
-      "name": "spring.interfaceclients.resttemplate.enabled",
-      "type": "java.lang.Boolean",
-      "description": "Whether to use RestTemplate as the underlying HTTP client for interface clients.",
-      "defaultValue": true
     }
   ],
   "hints": [
