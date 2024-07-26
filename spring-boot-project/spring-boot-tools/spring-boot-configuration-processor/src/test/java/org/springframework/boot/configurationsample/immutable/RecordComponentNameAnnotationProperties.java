@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.logging.structured;
+package org.springframework.boot.configurationsample.immutable;
+
+import org.springframework.boot.configurationsample.ConfigurationProperties;
+import org.springframework.boot.configurationsample.Name;
 
 /**
- * Metadata about the application.
+ * Immutable record properties making use of {@code @Name}.
  *
- * @param pid the process ID of the application
- * @param name the application name
- * @param version the version of the application
- * @param environment the name of the environment the application is running in
- * @param nodeName the name of the node the application is running on
- * @author Moritz Halbritter
- * @since 3.4.0
+ * @param imports some imports
+ * @author Andy Wilkinson
  */
-public record ApplicationMetadata(Long pid, String name, String version, String environment, String nodeName) {
+@ConfigurationProperties("named")
+public record RecordComponentNameAnnotationProperties(@Name("import") String imports) {
 
 }

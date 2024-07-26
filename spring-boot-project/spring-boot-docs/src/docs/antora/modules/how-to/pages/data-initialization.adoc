@@ -97,7 +97,11 @@ Spring Boot supports two higher-level migration tools: https://flywaydb.org/[Fly
 [[howto.data-initialization.migration-tool.flyway]]
 === Execute Flyway Database Migrations on Startup
 
-To automatically run Flyway database migrations on startup, add the `org.flywaydb:flyway-core` to your classpath.
+To automatically run Flyway database migrations on startup, add the appropriate Flyway module to your classpath.
+In-memory and file-based databases are supported by `org.flywaydb:flyway-core`.
+Otherwise, a database-specific module is required.
+For example, use `org.flywaydb:flyway-database-postgresql` with PostgreSQL and `org.flywaydb:flyway-mysql` with MySQL.
+See https://documentation.red-gate.com/flyway/flyway-cli-and-api/supported-databases[the Flyway Documentation] for further details.
 
 Typically, migrations are scripts in the form `V<VERSION>__<NAME>.sql` (with `<VERSION>` an underscore-separated version, such as '`1`' or '`2_1`').
 By default, they are in a directory called `classpath:db/migration`, but you can modify that location by setting `spring.flyway.locations`.
@@ -122,18 +126,18 @@ spring:
 ----
 
 Rather than using `db/migration`, the preceding configuration sets the directory to use according to the type of the database (such as `db/migration/mysql` for MySQL).
-The list of supported databases is available in xref:api:java/org/springframework/boot/jdbc/DatabaseDriver.html[`DatabaseDriver`].
+The list of supported databases is available in javadoc:org.springframework.boot.jdbc.DatabaseDriver[].
 
 Migrations can also be written in Java.
 Flyway will be auto-configured with any beans that implement `JavaMigration`.
 
-xref:api:java/org/springframework/boot/autoconfigure/flyway/FlywayProperties.html[`FlywayProperties`] provides most of Flyway's settings and a small set of additional properties that can be used to disable the migrations or switch off the location checking.
+javadoc:org.springframework.boot.autoconfigure.flyway.FlywayProperties[] provides most of Flyway's settings and a small set of additional properties that can be used to disable the migrations or switch off the location checking.
 If you need more control over the configuration, consider registering a `FlywayConfigurationCustomizer` bean.
 
 Spring Boot calls `Flyway.migrate()` to perform the database migration.
-If you would like more control, provide a `@Bean` that implements xref:api:java/org/springframework/boot/autoconfigure/flyway/FlywayMigrationStrategy.html[`FlywayMigrationStrategy`].
+If you would like more control, provide a `@Bean` that implements javadoc:org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy[].
 
-Flyway supports SQL and Java https://flywaydb.org/documentation/concepts/callbacks[callbacks].
+Flyway supports SQL and Java https://documentation.red-gate.com/fd/callback-concept-184127466.html[callbacks].
 To use SQL-based callbacks, place the callback scripts in the `classpath:db/migration` directory.
 To use Java-based callbacks, create one or more beans that implement `Callback`.
 Any such beans are automatically registered with `Flyway`.
@@ -185,7 +189,7 @@ Alternatively, you can use Liquibase's native `DataSource` by setting `spring.li
 Setting either `spring.liquibase.url` or `spring.liquibase.user` is sufficient to cause Liquibase to use its own `DataSource`.
 If any of the three properties has not been set, the value of its equivalent `spring.datasource` property will be used.
 
-See xref:api:java/org/springframework/boot/autoconfigure/liquibase/LiquibaseProperties.html[`LiquibaseProperties`] for details about available settings such as contexts, the default schema, and others.
+See javadoc:org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties[] for details about available settings such as contexts, the default schema, and others.
 
 You can also use a `Customizer<Liquibase>` bean if you want to customize the `Liquibase` instance before it is being used.
 

@@ -75,7 +75,7 @@ Doing so enables trace logging for a selection of core loggers (embedded contain
 === Color-coded Output
 
 If your terminal supports ANSI, color output is used to aid readability.
-You can set `spring.output.ansi.enabled` to a xref:api:java/org/springframework/boot/ansi/AnsiOutput.Enabled.html[supported value] to override the auto-detection.
+You can set `spring.output.ansi.enabled` to a javadoc:org.springframework.boot.ansi.AnsiOutput$Enabled[supported value] to override the auto-detection.
 
 Color coding is configured by using the `%clr` conversion word.
 In its simplest form, the converter colors the output according to the log level, as shown in the following example:
@@ -440,7 +440,7 @@ Handling authenticated request
 == Structured Logging
 
 Structured logging is a technique where the log output is written in a well-defined, often machine-readable format.
-Spring Boot supports structured logging and has support for the following formats out of the box:
+Spring Boot supports structured logging and has support for the following JSON formats out of the box:
 
 * xref:#features.logging.structured.ecs[Elastic Common Schema (ECS)]
 * xref:#features.logging.structured.logstash[Logstash]
@@ -473,6 +473,22 @@ A log line looks like this:
 
 This format also adds every key value pair contained in the MDC to the JSON object.
 You can also use the https://www.slf4j.org/manual.html#fluent[SLF4J fluent logging API] to add key value pairs to the logged JSON object with the https://www.slf4j.org/apidocs/org/slf4j/spi/LoggingEventBuilder.html#addKeyValue(java.lang.String,java.lang.Object)[addKeyValue] method.
+
+The `service` values can be customized using `logging.structured.ecs.service` properties:
+
+[configprops,yaml]
+----
+logging:
+  structured:
+    ecs:
+      service:
+        name: MyService
+        version: 1.0
+        environment: Production
+        node-name: Primary
+----
+
+NOTE: configprop:logging.structured.ecs.service.name[] will default to configprop:spring.application.name[] if not specified.
 
 
 
@@ -520,7 +536,7 @@ As you can see in the example, you can return any format, it doesn't have to be 
 To enable your custom format, set the property configprop:logging.structured.format.console[] or configprop:logging.structured.format.file[] to the fully qualified class name of your implementation.
 
 Your implementation can use some constructor parameters, which are injected automatically.
-Please see the JavaDoc of xref:api:java/org/springframework/boot/logging/structured/StructuredLogFormatter.html[`StructuredLogFormatter`] for more details.
+Please see the JavaDoc of javadoc:org.springframework.boot.logging.structured.StructuredLogFormatter[] for more details.
 
 
 
@@ -607,7 +623,7 @@ You can use these extensions in any `log4j2-spring.xml` configuration file.
 NOTE: Because the standard `log4j2.xml` configuration file is loaded too early, you cannot use extensions in it.
 You need to either use `log4j2-spring.xml` or define a configprop:logging.config[] property.
 
-NOTE: The extensions supersede the https://logging.apache.org/log4j/2.x/log4j-spring-boot/index.html[Spring Boot support] provided by Log4J.
+NOTE: The extensions supersede the https://logging.apache.org/log4j/2.x/log4j-spring-boot.html[Spring Boot support] provided by Log4J.
 You should make sure not to include the `org.apache.logging.log4j:log4j-spring-boot` module in your build.
 
 

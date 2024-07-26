@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2022 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,22 @@ import org.springframework.boot.configurationsample.ConfigurationProperties;
 import org.springframework.boot.configurationsample.Name;
 
 /**
- * Immutable properties making use of {@code @Name}.
+ * Java bean properties making use of {@code @Name}.
  *
- * @author Phillip Webb
+ * @author Andy Wilkinson
  */
 @ConfigurationProperties("named")
-public class ImmutableNameAnnotationProperties {
+public class JavaBeanNameAnnotationProperties {
 
-	private final String imports;
-
-	public ImmutableNameAnnotationProperties(@Name("import") String imports) {
-		this.imports = imports;
-	}
+	@Name("import")
+	private String imports;
 
 	public String getImports() {
 		return this.imports;
+	}
+
+	public void setImports(String imports) {
+		this.imports = imports;
 	}
 
 }

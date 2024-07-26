@@ -27,7 +27,6 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.visibility.DefaultGraphqlFieldVisibility;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +44,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.graphql.ExecutionGraphQlService;
+import org.springframework.graphql.data.method.HandlerMethodArgumentResolver;
 import org.springframework.graphql.data.method.annotation.support.AnnotatedControllerConfigurer;
 import org.springframework.graphql.data.pagination.EncodingCursorStrategy;
 import org.springframework.graphql.execution.BatchLoaderRegistry;
@@ -171,20 +171,13 @@ class GraphQlAutoConfigurationTests {
 
 	@Test
 	void fieldIntrospectionShouldBeEnabledByDefault() {
-		this.contextRunner.run((context) -> {
-			GraphQlSource graphQlSource = context.getBean(GraphQlSource.class);
-			GraphQLSchema schema = graphQlSource.schema();
-			assertThat(schema.getCodeRegistry().getFieldVisibility()).isInstanceOf(DefaultGraphqlFieldVisibility.class);
-		});
+		this.contextRunner.run((context) -> assertThat(Introspection.isEnabledJvmWide()).isTrue());
 	}
 
 	@Test
 	void shouldDisableFieldIntrospection() {
-		this.contextRunner.withPropertyValues("spring.graphql.schema.introspection.enabled:false").run((context) -> {
-			GraphQlSource graphQlSource = context.getBean(GraphQlSource.class);
-			GraphQLSchema schema = graphQlSource.schema();
-			assertThat(Introspection.isEnabledJvmWide()).isFalse();
-		});
+		this.contextRunner.withPropertyValues("spring.graphql.schema.introspection.enabled:false")
+			.run((context) -> assertThat(Introspection.isEnabledJvmWide()).isFalse());
 	}
 
 	@Test
@@ -239,6 +232,15 @@ class GraphQlAutoConfigurationTests {
 				.getBean(AnnotatedControllerConfigurer.class);
 			assertThat(annotatedControllerConfigurer).extracting("executor").isNull();
 		});
+	}
+
+	@Test
+	void whenAHandlerMethodArgumentResolverIsDefinedThenAnnotatedControllerConfigurerShouldUseIt() {
+		this.contextRunner.withUserConfiguration(CustomHandlerMethodArgumentResolverConfiguration.class)
+			.run((context) -> assertThat(context.getBean(AnnotatedControllerConfigurer.class))
+				.extracting("customArgumentResolvers")
+				.asInstanceOf(InstanceOfAssertFactories.LIST)
+				.hasSize(1));
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -332,6 +334,15 @@ class GraphQlAutoConfigurationTests {
 		@Bean
 		Executor customExecutor() {
 			return mock(Executor.class);
+		}
+
+	}
+
+	static class CustomHandlerMethodArgumentResolverConfiguration {
+
+		@Bean
+		HandlerMethodArgumentResolver customHandlerMethodArgumentResolver() {
+			return mock(HandlerMethodArgumentResolver.class);
 		}
 
 	}

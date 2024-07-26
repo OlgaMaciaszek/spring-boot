@@ -24,7 +24,7 @@ Sources are considered in the following order:
 . Properties from `SPRING_APPLICATION_JSON` (inline JSON embedded in an environment variable or system property).
 . Command line arguments.
 . `properties` attribute on your tests.
-  Available on xref:api:java/org/springframework/boot/test/context/SpringBootTest.html[`@SpringBootTest`] and the xref:testing/spring-boot-applications.adoc#testing.spring-boot-applications.autoconfigured-tests[test annotations for testing a particular slice of your application].
+  Available on javadoc:org.springframework.boot.test.context.SpringBootTest[format=annotation] and the xref:testing/spring-boot-applications.adoc#testing.spring-boot-applications.autoconfigured-tests[test annotations for testing a particular slice of your application].
 . {url-spring-framework-javadoc}/org/springframework/test/context/DynamicPropertySource.html[`@DynamicPropertySource`] annotations in your tests.
 . {url-spring-framework-javadoc}/org/springframework/test/context/TestPropertySource.html[`@TestPropertySource`] annotations on your tests.
 . xref:using/devtools.adoc#using.devtools.globalsettings[Devtools global settings properties] in the `$HOME/.config/spring-boot` directory when devtools is active.
@@ -713,6 +713,8 @@ The preceding POJO defines the following properties:
 * `my.service.security.password`.
 * `my.service.security.roles`, with a collection of `String` that defaults to `USER`.
 
+TIP: To use a reserved keyword in the name of a property, such as `my.service.import`, use the `@Name` annotation on the property's field.
+
 NOTE: The properties that map to `@ConfigurationProperties` classes available in Spring Boot, which are configured through properties files, YAML files, environment variables, and other mechanisms, are public API but the accessors (getters/setters) of the class itself are not meant to be used directly.
 
 [NOTE]
@@ -769,6 +771,8 @@ This will happen automatically if you use Spring Boot's Gradle plugin or if you 
 NOTE: The use of `java.util.Optional` with `@ConfigurationProperties` is not recommended as it is primarily intended for use as a return type.
 As such, it is not well-suited to configuration property injection.
 For consistency with properties of other types, if you do declare an `Optional` property and it has no value, `null` rather than an empty `Optional` will be bound.
+
+TIP: To use a reserved keyword in the name of a property, such as `my.service.import`, use the `@Name` annotation on the constructor parameter.
 
 
 

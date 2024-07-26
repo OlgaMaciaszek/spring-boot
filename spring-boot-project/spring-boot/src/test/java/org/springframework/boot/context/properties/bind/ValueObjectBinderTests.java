@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -307,6 +308,13 @@ class ValueObjectBinderTests {
 	}
 
 	@Test
+	void bindWhenEnumMapParametersWithEmptyDefaultValueShouldReturnEmptyInstance() {
+		NestedConstructorBeanWithEmptyDefaultValueForEnumMapTypes bound = this.binder.bindOrCreate("foo",
+				Bindable.of(NestedConstructorBeanWithEmptyDefaultValueForEnumMapTypes.class));
+		assertThat(bound.getMapValue()).isEmpty();
+	}
+
+	@Test
 	void bindWhenArrayParameterWithEmptyDefaultValueShouldReturnEmptyInstance() {
 		NestedConstructorBeanWithEmptyDefaultValueForArrayTypes bound = this.binder.bindOrCreate("foo",
 				Bindable.of(NestedConstructorBeanWithEmptyDefaultValueForArrayTypes.class));
@@ -361,13 +369,23 @@ class ValueObjectBinderTests {
 	}
 
 	@Test
-	void bindToAnnotationNamedParameter() {
+	void bindToAnnotationNamedConstructorParameter() {
 		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
 		source.put("test.import", "test");
 		this.sources.add(source);
-		Bindable<NamedParameter> target = Bindable.of(NamedParameter.class);
-		NamedParameter bound = this.binder.bindOrCreate("test", target);
+		Bindable<NamedConstructorParameter> target = Bindable.of(NamedConstructorParameter.class);
+		NamedConstructorParameter bound = this.binder.bindOrCreate("test", target);
 		assertThat(bound.getImportName()).isEqualTo("test");
+	}
+
+	@Test
+	void bindToAnnotationNamedRecordComponent() {
+		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
+		source.put("test.import", "test");
+		this.sources.add(source);
+		Bindable<NamedRecordComponent> target = Bindable.of(NamedRecordComponent.class);
+		NamedRecordComponent bound = this.binder.bindOrCreate("test", target);
+		assertThat(bound.importName()).isEqualTo("test");
 	}
 
 	@Test
@@ -781,6 +799,20 @@ class ValueObjectBinderTests {
 
 	}
 
+	static class NestedConstructorBeanWithEmptyDefaultValueForEnumMapTypes {
+
+		private final EnumMap<ExampleEnum, String> mapValue;
+
+		NestedConstructorBeanWithEmptyDefaultValueForEnumMapTypes(@DefaultValue EnumMap<ExampleEnum, String> mapValue) {
+			this.mapValue = mapValue;
+		}
+
+		EnumMap<ExampleEnum, String> getMapValue() {
+			return this.mapValue;
+		}
+
+	}
+
 	static class NestedConstructorBeanWithEmptyDefaultValueForArrayTypes {
 
 		private final String[] arrayValue;
@@ -864,11 +896,11 @@ class ValueObjectBinderTests {
 
 	}
 
-	static class NamedParameter {
+	static class NamedConstructorParameter {
 
 		private final String importName;
 
-		NamedParameter(@Name("import") String importName) {
+		NamedConstructorParameter(@Name("import") String importName) {
 			this.importName = importName;
 		}
 
@@ -876,6 +908,9 @@ class ValueObjectBinderTests {
 			return this.importName;
 		}
 
+	}
+
+	record NamedRecordComponent(@Name("import") String importName) {
 	}
 
 	static class NonExtractableParameterName {
