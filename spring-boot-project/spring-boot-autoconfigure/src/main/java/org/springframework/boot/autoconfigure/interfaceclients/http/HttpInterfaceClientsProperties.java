@@ -30,6 +30,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("spring.interfaceclients")
 public class HttpInterfaceClientsProperties extends HttpInterfaceClientsBaseProperties {
 
+	/**
+	 * Client-specific interface client properties.
+	 */
 	private final Map<String, HttpInterfaceClientsBaseProperties> clients = new HashMap<>();
 
 	public Map<String, HttpInterfaceClientsBaseProperties> getClients() {
@@ -41,7 +44,7 @@ public class HttpInterfaceClientsProperties extends HttpInterfaceClientsBaseProp
 			// no specific client properties, return default
 			return this;
 		}
-		// because specifics are overlayed on top of defaults, everything in `properties`,
+		// because specifics are overlaid on top of defaults, everything in `properties`,
 		// unless overridden, is in `clientsProperties`
 		return this.getClients().get(clientName);
 	}

@@ -21,11 +21,10 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
  */
 public class HttpInterfaceClientsBaseProperties {
 
+	/**
+	 * Base url to set in the underlying HTTP client. By default, set to null.
+	 */
 	private String baseUrl = null;
-
-	private String httpProxyFactoryBeanName = "";
-
-	private String httpExchangeAdapterBeanName = "";
 
 	public String getBaseUrl() {
 		return this.baseUrl;
@@ -33,22 +32,6 @@ public class HttpInterfaceClientsBaseProperties {
 
 	public void setBaseUrl(String baseUrl) {
 		this.baseUrl = baseUrl;
-	}
-
-	public String getHttpProxyFactoryBeanName() {
-		return this.httpProxyFactoryBeanName;
-	}
-
-	public void setHttpProxyFactoryBeanName(String httpProxyFactoryBeanName) {
-		this.httpProxyFactoryBeanName = httpProxyFactoryBeanName;
-	}
-
-	public String getHttpExchangeAdapterBeanName() {
-		return this.httpExchangeAdapterBeanName;
-	}
-
-	public void setHttpExchangeAdapterBeanName(String httpExchangeAdapterBeanName) {
-		this.httpExchangeAdapterBeanName = httpExchangeAdapterBeanName;
 	}
 
 }
