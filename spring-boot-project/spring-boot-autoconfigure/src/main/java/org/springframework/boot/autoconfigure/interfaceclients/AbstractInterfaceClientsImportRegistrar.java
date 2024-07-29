@@ -18,19 +18,20 @@ package org.springframework.boot.autoconfigure.interfaceclients;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.util.ClassUtils;
 
 /**
  * @author Olga Maciaszek-Sharma
@@ -43,12 +44,12 @@ public abstract class AbstractInterfaceClientsImportRegistrar
 
 	private ResourceLoader resourceLoader;
 
-	protected Set<BeanDefinition> discoverCandidateComponents(AnnotationMetadata metadata) {
+	protected Set<BeanDefinition> discoverCandidateComponents(ListableBeanFactory beanFactory) {
 		Set<BeanDefinition> candidateComponents = new HashSet<>();
 		ClassPathScanningCandidateComponentProvider scanner = getScanner();
 		scanner.setResourceLoader(this.resourceLoader);
 		scanner.addIncludeFilter(new AnnotationTypeFilter(getAnnotation()));
-		Set<String> basePackages = Set.of(ClassUtils.getPackageName(metadata.getClassName()));
+		List<String> basePackages = AutoConfigurationPackages.get(beanFactory);
 		for (String basePackage : basePackages) {
 			candidateComponents.addAll(scanner.findCandidateComponents(basePackage));
 		}

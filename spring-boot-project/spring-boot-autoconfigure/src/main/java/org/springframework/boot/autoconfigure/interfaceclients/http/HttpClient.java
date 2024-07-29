@@ -30,6 +30,8 @@ import java.lang.annotation.Target;
 @Documented
 public @interface HttpClient {
 
-	String value() default "";
+	String value();
+
+	String beanName() default "";
 
 }
