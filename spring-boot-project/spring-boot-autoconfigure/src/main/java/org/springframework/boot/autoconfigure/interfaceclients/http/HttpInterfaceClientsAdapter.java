@@ -20,41 +20,41 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.boot.autoconfigure.interfaceclients.InterfaceClientAdapter;
+import org.springframework.boot.autoconfigure.interfaceclients.InterfaceClientsAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class HttpInterfaceClientAdapter implements InterfaceClientAdapter {
+public class HttpInterfaceClientsAdapter implements InterfaceClientsAdapter {
 
-	private static final Log logger = LogFactory.getLog(HttpInterfaceClientAdapter.class);
+	private static final Log logger = LogFactory.getLog(HttpInterfaceClientsAdapter.class);
 
 	private final HttpExchangeAdapterProvider adapterProvider;
 
-	public HttpInterfaceClientAdapter(HttpExchangeAdapterProvider adapterProvider) {
+	public HttpInterfaceClientsAdapter(HttpExchangeAdapterProvider adapterProvider) {
 		this.adapterProvider = adapterProvider;
 	}
 
 	@Override
-	public <T> T createClient(ListableBeanFactory beanFactory, String clientName, Class<T> type) {
-		HttpServiceProxyFactory proxyFactory = proxyFactory(beanFactory, clientName);
+	public <T> T createClient(ListableBeanFactory beanFactory, String clientId, Class<T> type) {
+		HttpServiceProxyFactory proxyFactory = proxyFactory(beanFactory, clientId);
 
 		return proxyFactory.createClient(type);
 	}
 
-	private HttpServiceProxyFactory proxyFactory(ListableBeanFactory beanFactory, String clientName) {
+	private HttpServiceProxyFactory proxyFactory(ListableBeanFactory beanFactory, String clientId) {
 		HttpServiceProxyFactory userProvidedProxyFactory = QualifiedBeanProvider.qualifiedBean(beanFactory,
-				HttpServiceProxyFactory.class, clientName);
+				HttpServiceProxyFactory.class, clientId);
 		if (userProvidedProxyFactory != null) {
 			return userProvidedProxyFactory;
 		}
 		// create an HttpServiceProxyFactory bean with default implementation
 		if (logger.isDebugEnabled()) {
-			logger.debug("Creating HttpServiceProxyFactory for '" + clientName + "'");
+			logger.debug("Creating HttpServiceProxyFactory for '" + clientId + "'");
 		}
-		HttpExchangeAdapter adapter = this.adapterProvider.get(beanFactory, clientName);
+		HttpExchangeAdapter adapter = this.adapterProvider.get(beanFactory, clientId);
 		return HttpServiceProxyFactory.builderFor(adapter).build();
 	}
 

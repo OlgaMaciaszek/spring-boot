@@ -42,6 +42,8 @@ import org.springframework.util.ObjectUtils;
 // TODO: Handle AOT
 public class HttpInterfaceClientsImportRegistrar extends AbstractInterfaceClientsImportRegistrar {
 
+	// TODO: work on IntelliJ plugin /other plugins/ to show that the client beans are
+	//  autoconfigured
 	private static final Log logger = LogFactory.getLog(HttpInterfaceClientsImportRegistrar.class);
 
 	private static final String INTERFACE_CLIENT_SUFFIX = "InterfaceClient";
@@ -76,13 +78,13 @@ public class HttpInterfaceClientsImportRegistrar extends AbstractInterfaceClient
 				// qualifier to look for related beans
 				// TODO: while the actual beanName corresponds to the simple class name
 				// suffixed with InterfaceClient
-				String clientQualifier = annotation.getString(MergedAnnotation.VALUE);
+				String clientId = annotation.getString(MergedAnnotation.VALUE);
 				String beanName = !ObjectUtils.isEmpty(annotation.getString(BEAN_NAME_ATTRIBUTE_NAME))
-						? annotation.getString(BEAN_NAME_ATTRIBUTE_NAME) : buildBeanName(clientQualifier);
-				HttpInterfaceClientAdapter adapter = beanFactory.getBean(HttpInterfaceClientAdapter.class);
+						? annotation.getString(BEAN_NAME_ATTRIBUTE_NAME) : buildBeanName(clientId);
+				HttpInterfaceClientsAdapter adapter = beanFactory.getBean(HttpInterfaceClientsAdapter.class);
 				BeanDefinition definition = BeanDefinitionBuilder
 					.rootBeanDefinition(ResolvableType.forClass(beanClass),
-							() -> adapter.createClient(beanFactory, clientQualifier, beanClass))
+							() -> adapter.createClient(beanFactory, clientId, beanClass))
 					.getBeanDefinition();
 				registry.registerBeanDefinition(beanName, definition);
 
@@ -90,9 +92,9 @@ public class HttpInterfaceClientsImportRegistrar extends AbstractInterfaceClient
 		}
 	}
 
-	private String buildBeanName(String clientQualifier) {
+	private String buildBeanName(String clientId) {
 		// TODO: research Normalizer form types
-		String normalised = Normalizer.normalize(clientQualifier, Normalizer.Form.NFD);
+		String normalised = Normalizer.normalize(clientId, Normalizer.Form.NFD);
 		String camelCased = CaseUtils.toCamelCase(normalised, false, '-', '_');
 		return camelCased + INTERFACE_CLIENT_SUFFIX;
 	}

@@ -22,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
-import org.springframework.boot.autoconfigure.interfaceclients.InterfaceClientAdapter;
+import org.springframework.boot.autoconfigure.interfaceclients.InterfaceClientsAdapter;
 
 /**
  * @author Olga Maciaszek-Sharma
@@ -31,24 +31,23 @@ final class QualifiedBeanProvider {
 
 	private static final Log logger = LogFactory.getLog(QualifiedBeanProvider.class);
 
-	static <T> T qualifiedBean(ListableBeanFactory beanFactory, Class<T> type, String clientName) {
+	static <T> T qualifiedBean(ListableBeanFactory beanFactory, Class<T> type, String clientId) {
 		try {
-			return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, type, clientName);
+			return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, type, clientId);
 		}
-		catch (NoSuchBeanDefinitionException ex) {
+		catch (NoSuchBeanDefinitionException ignored) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No qualified bean of type " + type + " found for " + clientName, ex);
+				logger.debug("No qualified bean of type " + type + " found for " + clientId);
 			}
 		}
 		// Get default-qualified bean
 		try {
 			return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, type,
-					InterfaceClientAdapter.DEFAULT_QUALIFIER);
+					InterfaceClientsAdapter.DEFAULT_QUALIFIER);
 		}
-		catch (NoSuchBeanDefinitionException ex) {
+		catch (NoSuchBeanDefinitionException ignored) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No qualified of type " + type + "found for " + InterfaceClientAdapter.DEFAULT_QUALIFIER,
-						ex);
+				logger.debug("No qualified of type " + type + "found for " + InterfaceClientsAdapter.DEFAULT_QUALIFIER);
 			}
 		}
 		return null;

@@ -39,14 +39,14 @@ public class HttpInterfaceClientsProperties extends HttpInterfaceClientsBaseProp
 		return this.clients;
 	}
 
-	public HttpInterfaceClientsBaseProperties getProperties(String clientName) {
-		if (clientName == null || !this.getClients().containsKey(clientName)) {
+	public HttpInterfaceClientsBaseProperties getProperties(String clientId) {
+		if (clientId == null || !this.getClients().containsKey(clientId)) {
 			// no specific client properties, return default
 			return this;
 		}
 		// because specifics are overlaid on top of defaults, everything in `properties`,
 		// unless overridden, is in `clientsProperties`
-		return this.getClients().get(clientName);
+		return this.getClients().get(clientId);
 	}
 
 }

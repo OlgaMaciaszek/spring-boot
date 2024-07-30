@@ -43,25 +43,25 @@ public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider 
 	}
 
 	@Override
-	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientName) {
+	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientId) {
 		RestTemplate userProvidedRestTemplate = QualifiedBeanProvider.qualifiedBean(beanFactory, RestTemplate.class,
-				clientName);
+				clientId);
 		if (userProvidedRestTemplate != null) {
 			return RestTemplateAdapter.create(userProvidedRestTemplate);
 		}
 		RestTemplateBuilder userProvidedRestTemplateBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
-				RestTemplateBuilder.class, clientName);
+				RestTemplateBuilder.class, clientId);
 		if (userProvidedRestTemplateBuilder != null) {
 			// TODO: should we do this or get it from the user?
-			userProvidedRestTemplateBuilder.rootUri(this.properties.getProperties(clientName).getBaseUrl());
+			userProvidedRestTemplateBuilder.rootUri(this.properties.getProperties(clientId).getBaseUrl());
 			return RestTemplateAdapter.create(userProvidedRestTemplateBuilder.build());
 		}
 		// create a RestTemplateAdapter bean with default implementation
 		if (logger.isDebugEnabled()) {
-			logger.debug("Creating RestTemplateAdapter for '" + clientName + "'");
+			logger.debug("Creating RestTemplateAdapter for '" + clientId + "'");
 		}
 		RestTemplate restTemplate = this.restTemplateBuilder
-			.rootUri(this.properties.getProperties(clientName).getBaseUrl())
+			.rootUri(this.properties.getProperties(clientId).getBaseUrl())
 			.build();
 		return RestTemplateAdapter.create(restTemplate);
 	}

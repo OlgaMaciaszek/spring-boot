@@ -41,23 +41,23 @@ public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 	}
 
 	@Override
-	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientName) {
-		WebClient userProvidedWebClient = QualifiedBeanProvider.qualifiedBean(beanFactory, WebClient.class, clientName);
+	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientId) {
+		WebClient userProvidedWebClient = QualifiedBeanProvider.qualifiedBean(beanFactory, WebClient.class, clientId);
 		if (userProvidedWebClient != null) {
 			return WebClientAdapter.create(userProvidedWebClient);
 		}
 		WebClient.Builder userProvidedWebClientBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
-				WebClient.Builder.class, clientName);
+				WebClient.Builder.class, clientId);
 		if (userProvidedWebClientBuilder != null) {
 			// TODO: should we do this or get it from the user?
-			userProvidedWebClientBuilder.baseUrl(this.properties.getProperties(clientName).getBaseUrl());
+			userProvidedWebClientBuilder.baseUrl(this.properties.getProperties(clientId).getBaseUrl());
 			return WebClientAdapter.create(userProvidedWebClientBuilder.build());
 		}
 		// create a WebClientAdapter bean with default implementation
 		if (logger.isDebugEnabled()) {
-			logger.debug("Creating WebClientAdapter for '" + clientName + "'");
+			logger.debug("Creating WebClientAdapter for '" + clientId + "'");
 		}
-		WebClient webClient = this.builder.baseUrl(this.properties.getProperties(clientName).getBaseUrl()).build();
+		WebClient webClient = this.builder.baseUrl(this.properties.getProperties(clientId).getBaseUrl()).build();
 		return WebClientAdapter.create(webClient);
 	}
 

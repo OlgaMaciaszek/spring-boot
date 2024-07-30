@@ -23,10 +23,10 @@ import org.springframework.core.Ordered;
  * @author Olga Maciaszek-Sharma
  */
 // TODO: remove abstract supertype or move to a shared package
-public interface InterfaceClientAdapter extends Ordered {
+public interface InterfaceClientsAdapter extends Ordered {
 
 	String DEFAULT_QUALIFIER = "interfaceClients";
 
-	<T> T createClient(ListableBeanFactory beanFactory, String clientName, Class<T> type);
+	<T> T createClient(ListableBeanFactory beanFactory, String clientId, Class<T> type);
 
 }
