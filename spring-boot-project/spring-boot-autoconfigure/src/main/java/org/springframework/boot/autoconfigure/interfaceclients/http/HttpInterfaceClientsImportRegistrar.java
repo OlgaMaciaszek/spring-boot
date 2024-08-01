@@ -43,7 +43,7 @@ import org.springframework.util.ObjectUtils;
 public class HttpInterfaceClientsImportRegistrar extends AbstractInterfaceClientsImportRegistrar {
 
 	// TODO: work on IntelliJ plugin /other plugins/ to show that the client beans are
-	//  autoconfigured
+	// autoconfigured
 	private static final Log logger = LogFactory.getLog(HttpInterfaceClientsImportRegistrar.class);
 
 	private static final String INTERFACE_CLIENT_SUFFIX = "InterfaceClient";

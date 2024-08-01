@@ -180,6 +180,14 @@ public abstract class BuildImageMojo extends AbstractPackagerMojo {
 	String applicationDirectory;
 
 	/**
+	 * Alias for {@link Image#imagePlatform} to support configuration through command-line
+	 * property.
+	 * @since 3.4.0
+	 */
+	@Parameter(property = "spring-boot.build-image.imagePlatform", readonly = true)
+	String imagePlatform;
+
+	/**
 	 * Docker configuration options.
 	 * @since 2.4.0
 	 */
@@ -253,9 +261,10 @@ public abstract class BuildImageMojo extends AbstractPackagerMojo {
 	private void buildImage() throws MojoExecutionException {
 		Libraries libraries = getLibraries(Collections.emptySet());
 		try {
-			DockerConfiguration dockerConfiguration = (this.docker != null) ? this.docker.asDockerConfiguration()
-					: new Docker().asDockerConfiguration();
 			BuildRequest request = getBuildRequest(libraries);
+			DockerConfiguration dockerConfiguration = (this.docker != null)
+					? this.docker.asDockerConfiguration(request.isPublish())
+					: new Docker().asDockerConfiguration(request.isPublish());
 			Builder builder = new Builder(new MojoBuildLog(this::getLog), dockerConfiguration);
 			builder.build(request);
 		}
@@ -298,6 +307,9 @@ public abstract class BuildImageMojo extends AbstractPackagerMojo {
 		if (image.applicationDirectory == null && this.applicationDirectory != null) {
 			image.setApplicationDirectory(this.applicationDirectory);
 		}
+		if (image.imagePlatform == null && this.imagePlatform != null) {
+			image.setImagePlatform(this.imagePlatform);
+		}
 		return customize(image.getBuildRequest(this.project.getArtifact(), content));
 	}
 
@@ -307,8 +319,8 @@ public abstract class BuildImageMojo extends AbstractPackagerMojo {
 	}
 
 	private File getArchiveFile() {
-		// We can use 'project.getArtifact().getFile()' because that was done in a
-		// forked lifecycle and is now null
+		// We can't use 'project.getArtifact().getFile()' because package can be done in a
+		// forked lifecycle and will be null
 		File archiveFile = getTargetFile(this.finalName, this.classifier, this.sourceDirectory);
 		if (!archiveFile.exists()) {
 			archiveFile = getSourceArtifact(this.classifier).getFile();
@@ -324,9 +336,17 @@ public abstract class BuildImageMojo extends AbstractPackagerMojo {
 	 * @return the file to use to back up the original source
 	 */
 	private File getBackupFile() {
-		Artifact source = getSourceArtifact(null);
-		if (this.classifier != null && !this.classifier.equals(source.getClassifier())) {
-			return source.getFile();
+		// We can't use 'project.getAttachedArtifacts()' because package can be done in a
+		// forked lifecycle and will be null
+		if (this.classifier != null) {
+			File backupFile = getTargetFile(this.finalName, null, this.sourceDirectory);
+			if (backupFile.exists()) {
+				return backupFile;
+			}
+			Artifact source = getSourceArtifact(null);
+			if (!this.classifier.equals(source.getClassifier())) {
+				return source.getFile();
+			}
 		}
 		return null;
 	}

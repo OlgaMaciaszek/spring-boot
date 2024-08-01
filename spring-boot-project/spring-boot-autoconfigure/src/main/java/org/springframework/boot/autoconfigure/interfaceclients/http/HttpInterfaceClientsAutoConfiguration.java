@@ -44,7 +44,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
  * @author Olga Maciaszek-Sharma
  */
 @AutoConfiguration(after = { RestTemplateAutoConfiguration.class, RestClientAutoConfiguration.class,
-		WebClientAutoConfiguration.class})
+		WebClientAutoConfiguration.class })
 @Import(HttpInterfaceClientsImportRegistrar.class)
 @EnableConfigurationProperties(HttpInterfaceClientsProperties.class)
 public class HttpInterfaceClientsAutoConfiguration {

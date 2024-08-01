@@ -38,18 +38,6 @@
       }
     },
     {
-      "name": "server.error.include-binding-errors",
-      "defaultValue": "never"
-    },
-    {
-      "name": "server.error.include-message",
-      "defaultValue": "never"
-    },
-    {
-      "name": "server.error.include-stacktrace",
-      "defaultValue": "never"
-    },
-    {
       "name": "server.http2.enabled",
       "description": "Whether to enable HTTP/2 support, if the current environment supports it.",
       "defaultValue": false
@@ -67,10 +55,6 @@
         "replacement": "server.jetty.accesslog.format",
         "level": "error"
       }
-    },
-    {
-      "name": "server.jetty.accesslog.format",
-      "defaultValue": "ncsa"
     },
     {
       "name": "server.jetty.accesslog.locale",
@@ -274,10 +258,6 @@
     {
       "name": "server.servlet.session.tracking-modes",
       "description": "Session tracking modes."
-    },
-    {
-      "name": "server.shutdown",
-      "defaultValue": "immediate"
     },
     {
       "name": "server.ssl.bundle",
@@ -494,10 +474,6 @@
         "replacement": "spring.batch.jdbc.initialize-schema",
         "level": "error"
       }
-    },
-    {
-      "name": "spring.batch.jdbc.initialize-schema",
-      "defaultValue": "embedded"
     },
     {
       "name": "spring.batch.job.enabled",
@@ -1052,10 +1028,6 @@
       "defaultValue": "mongodb://localhost/test"
     },
     {
-      "name": "spring.data.mongodb.uuid-representation",
-      "defaultValue": "java-legacy"
-    },
-    {
       "name": "spring.data.neo4j.auto-index",
       "description": "Auto index mode.",
       "defaultValue": "none",
@@ -1152,10 +1124,6 @@
         "replacement": "spring.data.redis.ssl.enabled",
         "level": "error"
       }
-    },
-    {
-      "name": "spring.data.rest.detection-strategy",
-      "defaultValue": "default"
     },
     {
       "name" : "spring.datasource.continue-on-error",
@@ -1616,10 +1584,6 @@
       "defaultValue": "classpath:git.properties"
     },
     {
-      "name": "spring.integration.jdbc.initialize-schema",
-      "defaultValue": "embedded"
-    },
-    {
       "name": "spring.interfaceclients.resttemplate.enabled",
       "type": "java.lang.Boolean",
       "description": "Whether to use RestTemplate as the underlying HTTP client for interface clients.",
@@ -1640,22 +1604,6 @@
       "deprecation": {
         "level": "error"
       }
-    },
-    {
-      "name": "spring.jersey.type",
-      "defaultValue": "servlet"
-    },
-    {
-      "name": "spring.jms.listener.session.acknowledge-mode",
-      "defaultValue": "auto"
-    },
-    {
-      "name": "spring.jms.template.session.acknowledge-mode",
-      "defaultValue": "auto"
-    },
-    {
-      "name": "spring.jmx.registration-policy",
-      "defaultValue": "fail-on-existing"
     },
     {
       "name": "spring.jpa.hibernate.use-new-id-generator-mappings",
@@ -1838,10 +1786,6 @@
       }
     },
     {
-      "name": "spring.kafka.consumer.isolation-level",
-      "defaultValue": "read-uncommitted"
-    },
-    {
       "name": "spring.kafka.consumer.ssl.keystore-location",
       "type": "org.springframework.core.io.Resource",
       "description": "Location of the key store file.",
@@ -1878,10 +1822,6 @@
       }
     },
     {
-      "name": "spring.kafka.jaas.control-flag",
-      "defaultValue": "required"
-    },
-    {
       "name": "spring.kafka.listener.only-log-record-metadata",
       "type": "java.lang.Boolean",
       "defaultValue": true,
@@ -1890,10 +1830,6 @@
         "reason": "Use KafkaUtils#setConsumerRecordFormatter instead.",
         "level": "error"
       }
-    },
-    {
-      "name": "spring.kafka.listener.type",
-      "defaultValue": "single"
     },
     {
       "name": "spring.kafka.producer.ssl.keystore-location",
@@ -2100,10 +2036,6 @@
       }
     },
     {
-      "name": "spring.mvc.pathmatch.matching-strategy",
-      "defaultValue": "path-pattern-parser"
-    },
-    {
       "name": "spring.mvc.throw-exception-if-no-handler-found",
       "deprecation": {
       	"reason": "DispatcherServlet property is deprecated for removal and should no longer need to be configured.",
@@ -2111,16 +2043,8 @@
       }
     },
     {
-      "name": "spring.neo4j.security.trust-strategy",
-      "defaultValue": "trust-system-ca-signed-certificates"
-    },
-    {
       "name": "spring.neo4j.uri",
       "defaultValue": "bolt://localhost:7687"
-    },
-    {
-      "name": "spring.pulsar.client.failover.policy",
-      "defaultValue": "order"
     },
     {
       "name": "spring.pulsar.function.enabled",
@@ -2142,28 +2066,8 @@
       ]
     },
     {
-      "name": "spring.quartz.jdbc.initialize-schema",
-      "defaultValue": "embedded"
-    },
-    {
-      "name": "spring.quartz.job-store-type",
-      "defaultValue": "memory"
-    },
-    {
       "name": "spring.quartz.scheduler-name",
       "defaultValue": "quartzScheduler"
-    },
-    {
-      "name": "spring.r2dbc.pool.validation-depth",
-      "defaultValue": "local"
-    },
-    {
-      "name": "spring.rabbitmq.address-shuffle-mode",
-      "defaultValue": "none"
-    },
-    {
-      "name": "spring.rabbitmq.cache.connection.mode",
-      "defaultValue": "channel"
     },
     {
       "name": "spring.rabbitmq.dynamic",
@@ -2179,10 +2083,6 @@
       }
     },
     {
-      "name": "spring.rabbitmq.listener.type",
-      "defaultValue": "simple"
-    },
-    {
       "name": "spring.rabbitmq.publisher-confirms",
       "type": "java.lang.Boolean",
       "deprecation": {
@@ -2196,10 +2096,6 @@
         "replacement": "spring.rabbitmq.template.default-receive-queue",
         "level": "error"
       }
-    },
-    {
-      "name": "spring.reactor.context-propagation",
-      "defaultValue": "limited"
     },
     {
       "name": "spring.reactor.stacktrace-mode.enabled",
@@ -2747,10 +2643,6 @@
       "description": "Type of the trust store."
     },
     {
-      "name": "spring.rsocket.server.transport",
-      "defaultValue": "tcp"
-    },
-    {
       "name": "spring.security.filter.dispatcher-types",
       "defaultValue": [
         "async",
@@ -2773,44 +2665,8 @@
       }
     },
     {
-      "name": "spring.session.hazelcast.flush-mode",
-      "defaultValue": "on-save"
-    },
-    {
-      "name": "spring.session.hazelcast.save-mode",
-      "defaultValue": "on-set-attribute"
-    },
-    {
-      "name": "spring.session.jdbc.flush-mode",
-      "defaultValue": "on-save"
-    },
-    {
-      "name": "spring.session.jdbc.initialize-schema",
-      "defaultValue": "embedded"
-    },
-    {
-      "name": "spring.session.jdbc.save-mode",
-      "defaultValue": "on-set-attribute"
-    },
-    {
       "name": "spring.session.redis.cleanup-cron",
       "defaultValue": "0 * * * * *"
-    },
-    {
-      "name": "spring.session.redis.configure-action",
-      "defaultValue": "notify-keyspace-events"
-    },
-    {
-      "name": "spring.session.redis.flush-mode",
-      "defaultValue": "on-save"
-    },
-    {
-      "name": "spring.session.redis.repository-type",
-      "defaultValue": "default"
-    },
-    {
-      "name": "spring.session.redis.save-mode",
-      "defaultValue": "on-set-attribute"
     },
     {
       "name": "spring.session.servlet.filter-dispatcher-types",
@@ -2829,10 +2685,6 @@
         "replacement": "spring.sql.init.mode",
         "level": "warning"
       }
-    },
-    {
-      "name": "spring.sql.init.mode",
-      "defaultValue": "embedded"
     },
     {
       "name": "spring.threads.virtual.enabled",
@@ -2866,10 +2718,6 @@
     {
       "name": "spring.thymeleaf.suffix",
       "defaultValue": ".html"
-    },
-    {
-      "name": "spring.web.locale-resolver",
-      "defaultValue": "accept-header"
     },
     {
       "name": "spring.webflux.hiddenmethod.filter.enabled",
