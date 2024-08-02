@@ -49,18 +49,22 @@ public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 			return WebClientAdapter.create(userProvidedWebClient);
 		}
 		HttpInterfaceClientsProperties properties = this.propertiesProvider.getObject();
+		String baseUrl = properties.getProperties(clientId).getBaseUrl();
 		WebClient.Builder userProvidedWebClientBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
 				WebClient.Builder.class, clientId);
 		if (userProvidedWebClientBuilder != null) {
-			// TODO: should we do this or get it from the user?
-			userProvidedWebClientBuilder.baseUrl(properties.getProperties(clientId).getBaseUrl());
+			// If the user wants to set the baseUrl directly on the builder,
+			// it should not be set in properties.
+			if (baseUrl != null) {
+				userProvidedWebClientBuilder.baseUrl(baseUrl);
+			}
 			return WebClientAdapter.create(userProvidedWebClientBuilder.build());
 		}
 		// create a WebClientAdapter bean with default implementation
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating WebClientAdapter for '" + clientId + "'");
 		}
-		WebClient webClient = this.builder.baseUrl(properties.getProperties(clientId).getBaseUrl()).build();
+		WebClient webClient = this.builder.baseUrl(baseUrl).build();
 		return WebClientAdapter.create(webClient);
 	}
 

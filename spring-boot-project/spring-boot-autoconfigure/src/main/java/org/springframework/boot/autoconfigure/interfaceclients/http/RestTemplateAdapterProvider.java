@@ -51,19 +51,22 @@ public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider 
 			return RestTemplateAdapter.create(userProvidedRestTemplate);
 		}
 		HttpInterfaceClientsProperties properties = this.propertiesProvider.getObject();
+		String baseUrl = properties.getProperties(clientId).getBaseUrl();
 		RestTemplateBuilder userProvidedRestTemplateBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
 				RestTemplateBuilder.class, clientId);
 		if (userProvidedRestTemplateBuilder != null) {
-			// TODO: should we do this or get it from the user?
-			userProvidedRestTemplateBuilder.rootUri(properties.getProperties(clientId).getBaseUrl());
+			// If the user wants to set the baseUrl directly on the builder,
+			// it should not be set in properties.
+			if (baseUrl != null) {
+				userProvidedRestTemplateBuilder.rootUri(baseUrl);
+			}
 			return RestTemplateAdapter.create(userProvidedRestTemplateBuilder.build());
 		}
 		// create a RestTemplateAdapter bean with default implementation
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating RestTemplateAdapter for '" + clientId + "'");
 		}
-		RestTemplate restTemplate = this.restTemplateBuilder.rootUri(properties.getProperties(clientId).getBaseUrl())
-			.build();
+		RestTemplate restTemplate = this.restTemplateBuilder.rootUri(baseUrl).build();
 		return RestTemplateAdapter.create(restTemplate);
 	}
 

@@ -50,18 +50,22 @@ public class RestClientAdapterProvider implements HttpExchangeAdapterProvider {
 			return RestClientAdapter.create(userProvidedRestClient);
 		}
 		HttpInterfaceClientsProperties properties = this.propertiesProvider.getObject();
+		String baseUrl = properties.getProperties(clientId).getBaseUrl();
 		RestClient.Builder userProvidedRestClientBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
 				RestClient.Builder.class, clientId);
 		if (userProvidedRestClientBuilder != null) {
-			// TODO: should we do this or get it from the user?
-			userProvidedRestClientBuilder.baseUrl(properties.getProperties(clientId).getBaseUrl());
+			// If the user wants to set the baseUrl directly on the builder,
+			// it should not be set in properties.
+			if (baseUrl != null) {
+				userProvidedRestClientBuilder.baseUrl(baseUrl);
+			}
 			return RestClientAdapter.create(userProvidedRestClientBuilder.build());
 		}
 		// create a RestClientAdapter bean with default implementation
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating RestClientAdapter for '" + clientId + "'");
 		}
-		RestClient restClient = this.builder.baseUrl(properties.getProperties(clientId).getBaseUrl()).build();
+		RestClient restClient = this.builder.baseUrl(baseUrl).build();
 		return RestClientAdapter.create(restClient);
 	}
 
