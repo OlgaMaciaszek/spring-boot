@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
@@ -33,11 +34,12 @@ public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 
 	private final WebClient.Builder builder;
 
-	private final HttpInterfaceClientsProperties properties;
+	private final ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider;
 
-	public WebClientAdapterProvider(WebClient.Builder builder, HttpInterfaceClientsProperties properties) {
+	public WebClientAdapterProvider(WebClient.Builder builder,
+			ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
 		this.builder = builder;
-		this.properties = properties;
+		this.propertiesProvider = propertiesProvider;
 	}
 
 	@Override
@@ -46,18 +48,19 @@ public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 		if (userProvidedWebClient != null) {
 			return WebClientAdapter.create(userProvidedWebClient);
 		}
+		HttpInterfaceClientsProperties properties = this.propertiesProvider.getObject();
 		WebClient.Builder userProvidedWebClientBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
 				WebClient.Builder.class, clientId);
 		if (userProvidedWebClientBuilder != null) {
 			// TODO: should we do this or get it from the user?
-			userProvidedWebClientBuilder.baseUrl(this.properties.getProperties(clientId).getBaseUrl());
+			userProvidedWebClientBuilder.baseUrl(properties.getProperties(clientId).getBaseUrl());
 			return WebClientAdapter.create(userProvidedWebClientBuilder.build());
 		}
 		// create a WebClientAdapter bean with default implementation
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating WebClientAdapter for '" + clientId + "'");
 		}
-		WebClient webClient = this.builder.baseUrl(this.properties.getProperties(clientId).getBaseUrl()).build();
+		WebClient webClient = this.builder.baseUrl(properties.getProperties(clientId).getBaseUrl()).build();
 		return WebClientAdapter.create(webClient);
 	}
 

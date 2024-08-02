@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestTemplateAdapter;
@@ -34,12 +35,12 @@ public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider 
 
 	private final RestTemplateBuilder restTemplateBuilder;
 
-	private final HttpInterfaceClientsProperties properties;
+	private final ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider;
 
 	public RestTemplateAdapterProvider(RestTemplateBuilder restTemplateBuilder,
-			HttpInterfaceClientsProperties properties) {
+			ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
 		this.restTemplateBuilder = restTemplateBuilder;
-		this.properties = properties;
+		this.propertiesProvider = propertiesProvider;
 	}
 
 	@Override
@@ -49,19 +50,19 @@ public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider 
 		if (userProvidedRestTemplate != null) {
 			return RestTemplateAdapter.create(userProvidedRestTemplate);
 		}
+		HttpInterfaceClientsProperties properties = this.propertiesProvider.getObject();
 		RestTemplateBuilder userProvidedRestTemplateBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
 				RestTemplateBuilder.class, clientId);
 		if (userProvidedRestTemplateBuilder != null) {
 			// TODO: should we do this or get it from the user?
-			userProvidedRestTemplateBuilder.rootUri(this.properties.getProperties(clientId).getBaseUrl());
+			userProvidedRestTemplateBuilder.rootUri(properties.getProperties(clientId).getBaseUrl());
 			return RestTemplateAdapter.create(userProvidedRestTemplateBuilder.build());
 		}
 		// create a RestTemplateAdapter bean with default implementation
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating RestTemplateAdapter for '" + clientId + "'");
 		}
-		RestTemplate restTemplate = this.restTemplateBuilder
-			.rootUri(this.properties.getProperties(clientId).getBaseUrl())
+		RestTemplate restTemplate = this.restTemplateBuilder.rootUri(properties.getProperties(clientId).getBaseUrl())
 			.build();
 		return RestTemplateAdapter.create(restTemplate);
 	}

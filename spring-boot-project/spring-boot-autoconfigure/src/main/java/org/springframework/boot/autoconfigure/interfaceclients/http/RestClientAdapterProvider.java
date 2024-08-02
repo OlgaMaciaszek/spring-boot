@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
@@ -33,11 +34,12 @@ public class RestClientAdapterProvider implements HttpExchangeAdapterProvider {
 
 	private final RestClient.Builder builder;
 
-	private final HttpInterfaceClientsProperties properties;
+	private final ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider;
 
-	public RestClientAdapterProvider(RestClient.Builder builder, HttpInterfaceClientsProperties properties) {
+	public RestClientAdapterProvider(RestClient.Builder builder,
+			ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
 		this.builder = builder;
-		this.properties = properties;
+		this.propertiesProvider = propertiesProvider;
 	}
 
 	@Override
@@ -47,18 +49,19 @@ public class RestClientAdapterProvider implements HttpExchangeAdapterProvider {
 		if (userProvidedRestClient != null) {
 			return RestClientAdapter.create(userProvidedRestClient);
 		}
+		HttpInterfaceClientsProperties properties = this.propertiesProvider.getObject();
 		RestClient.Builder userProvidedRestClientBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
 				RestClient.Builder.class, clientId);
 		if (userProvidedRestClientBuilder != null) {
 			// TODO: should we do this or get it from the user?
-			userProvidedRestClientBuilder.baseUrl(this.properties.getProperties(clientId).getBaseUrl());
+			userProvidedRestClientBuilder.baseUrl(properties.getProperties(clientId).getBaseUrl());
 			return RestClientAdapter.create(userProvidedRestClientBuilder.build());
 		}
 		// create a RestClientAdapter bean with default implementation
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating RestClientAdapter for '" + clientId + "'");
 		}
-		RestClient restClient = this.builder.baseUrl(this.properties.getProperties(clientId).getBaseUrl()).build();
+		RestClient restClient = this.builder.baseUrl(properties.getProperties(clientId).getBaseUrl()).build();
 		return RestClientAdapter.create(restClient);
 	}
 
