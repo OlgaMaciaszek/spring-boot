@@ -46,61 +46,59 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
  */
 @AutoConfiguration(after = { RestTemplateAutoConfiguration.class, RestClientAutoConfiguration.class,
 		WebClientAutoConfiguration.class })
-@Import(HttpInterfaceClientsImportRegistrar.class)
 @EnableConfigurationProperties(HttpInterfaceClientsProperties.class)
 public class HttpInterfaceClientsAutoConfiguration {
 
-	@Bean
-	HttpInterfaceClientsAdapter httpInterfaceClientAdapter(HttpExchangeAdapterProvider adapterProvider) {
-		return new HttpInterfaceClientsAdapter(adapterProvider);
-	}
+	// @Bean
+	// HttpInterfaceClientsAdapter httpInterfaceClientAdapter(HttpExchangeAdapterProvider
+	// adapterProvider) {
+	// return new HttpInterfaceClientsAdapter(adapterProvider);
+	// }
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
 	@Conditional(NotReactiveWebApplicationCondition.class)
 	@ConditionalOnProperty(value = "spring.interfaceclients.resttemplate.enabled", havingValue = "false",
 			matchIfMissing = true)
+	@Import(RestClientInterfaceClientsImportRegistrar.class)
 	protected static class RestClientAdapterProviderConfiguration {
 
-		@Bean
-		@ConditionalOnBean(RestClient.Builder.class)
-		@ConditionalOnMissingBean
-		HttpExchangeAdapterProvider restClientAdapterProvider(RestClient.Builder restClientBuilder,
-				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-			return new RestClientAdapterProvider(restClientBuilder, propertiesProvider);
-		}
-
 	}
-
-	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass({ RestTemplate.class, RestTemplateAdapter.class, HttpServiceProxyFactory.class })
-	@Conditional(NotReactiveWebApplicationCondition.class)
-	protected static class RestTemplateAdapterProviderConfiguration {
-
-		@Bean
-		@ConditionalOnBean(RestTemplateBuilder.class)
-		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.interfaceclients.resttemplate.enabled", havingValue = "true")
-		HttpExchangeAdapterProvider restTemplateAdapterProvider(RestTemplateBuilder restTemplateBuilder,
-				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-			return new RestTemplateAdapterProvider(restTemplateBuilder, propertiesProvider);
-		}
-
-	}
-
-	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass({ WebClient.class, WebClientAdapter.class, HttpServiceProxyFactory.class })
-	@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
-	protected static class WebClientAdapterProviderConfiguration {
-
-		@Bean
-		@ConditionalOnBean(WebClient.Builder.class)
-		@ConditionalOnMissingBean
-		HttpExchangeAdapterProvider webClientAdapterProvider(WebClient.Builder webClientBuilder,
-				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-			return new WebClientAdapterProvider(webClientBuilder, propertiesProvider);
-		}
-
-	}
+	//
+	// @Configuration(proxyBeanMethods = false)
+	// @ConditionalOnClass({ RestTemplate.class, RestTemplateAdapter.class,
+	// HttpServiceProxyFactory.class })
+	// @Conditional(NotReactiveWebApplicationCondition.class)
+	// protected static class RestTemplateAdapterProviderConfiguration {
+	//
+	// @Bean
+	// @ConditionalOnBean(RestTemplateBuilder.class)
+	// @ConditionalOnMissingBean
+	// @ConditionalOnProperty(value = "spring.interfaceclients.resttemplate.enabled",
+	// havingValue = "true")
+	// HttpExchangeAdapterProvider restTemplateAdapterProvider(RestTemplateBuilder
+	// restTemplateBuilder,
+	// ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
+	// return new RestTemplateAdapterProvider(restTemplateBuilder, propertiesProvider);
+	// }
+	//
+	// }
+	//
+	// @Configuration(proxyBeanMethods = false)
+	// @ConditionalOnClass({ WebClient.class, WebClientAdapter.class,
+	// HttpServiceProxyFactory.class })
+	// @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+	// protected static class WebClientAdapterProviderConfiguration {
+	//
+	// @Bean
+	// @ConditionalOnBean(WebClient.Builder.class)
+	// @ConditionalOnMissingBean
+	// HttpExchangeAdapterProvider webClientAdapterProvider(WebClient.Builder
+	// webClientBuilder,
+	// ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
+	// return new WebClientAdapterProvider(webClientBuilder, propertiesProvider);
+	// }
+	//
+	// }
 
 }
