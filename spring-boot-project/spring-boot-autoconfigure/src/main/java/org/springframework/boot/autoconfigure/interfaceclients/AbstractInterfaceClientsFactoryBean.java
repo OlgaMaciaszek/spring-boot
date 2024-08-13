@@ -64,4 +64,28 @@ public abstract class AbstractInterfaceClientsFactoryBean
 
 	}
 
+	public Class<?> getType() {
+		return this.type;
+	}
+
+	public void setType(Class<?> type) {
+		this.type = type;
+	}
+
+	public String getBeanName() {
+		return this.beanName;
+	}
+
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
+
+	public String getClientId() {
+		return this.clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+
 }
