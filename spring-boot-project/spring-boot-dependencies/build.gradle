@@ -941,7 +941,7 @@ bom {
 			]
 		}
 	}
-	library("Jetty", "12.0.11") {
+	library("Jetty", "12.0.12") {
 		group("org.eclipse.jetty.ee10") {
 			imports = [
 				"jetty-ee10-bom"
@@ -1043,7 +1043,7 @@ bom {
 			releaseNotes("https://junit.org/junit5/docs/{version}/release-notes")
 		}
 	}
-	library("Kafka", "3.7.1") {
+	library("Kafka", "3.8.0") {
 		group("org.apache.kafka") {
 			modules = [
 				"connect",
@@ -1329,7 +1329,7 @@ bom {
 			]
 		}
 	}
-	library("Micrometer", "1.14.0-SNAPSHOT") {
+	library("Micrometer", "1.14.0-M2") {
 		considerSnapshots()
 		group("io.micrometer") {
 			modules = [
@@ -1349,7 +1349,7 @@ bom {
 			releaseNotes("https://github.com/micrometer-metrics/micrometer/releases/tag/v{version}")
 		}
 	}
-	library("Micrometer Tracing", "1.4.0-SNAPSHOT") {
+	library("Micrometer Tracing", "1.4.0-M2") {
 		considerSnapshots()
 		group("io.micrometer") {
 			imports = [
