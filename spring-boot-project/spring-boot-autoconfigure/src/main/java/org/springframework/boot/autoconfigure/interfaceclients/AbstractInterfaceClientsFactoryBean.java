@@ -23,8 +23,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
 
-import static com.mysema.commons.lang.Assert.assertThat;
-
 /**
  * @author Olga Maciaszek-Sharma
  */

@@ -32,24 +32,31 @@ public class RestClientInterfaceClientsFactoryBean extends AbstractHttpInterface
 
 	@Override
 	protected HttpExchangeAdapter exchangeAdapter() {
+		HttpInterfaceClientsProperties properties = this.applicationContext
+			.getBean(HttpInterfaceClientsProperties.class);
+		// If the user wants to set the baseUrl directly on the builder,
+		// it should not be set in properties.
+		String baseUrl = properties.getProperties(this.clientId).getBaseUrl();
+
 		RestClient userProvidedRestClient = QualifiedBeanProvider.qualifiedBean(this.applicationContext,
 				RestClient.class, this.clientId);
 		if (userProvidedRestClient != null) {
+			if (baseUrl != null) {
+				userProvidedRestClient = userProvidedRestClient.mutate().baseUrl(baseUrl).build();
+			}
 			return RestClientAdapter.create(userProvidedRestClient);
 		}
-		HttpInterfaceClientsProperties properties = this.applicationContext
-			.getBean(HttpInterfaceClientsProperties.class);
-		String baseUrl = properties.getProperties(this.clientId).getBaseUrl();
+
 		RestClient.Builder userProvidedRestClientBuilder = QualifiedBeanProvider.qualifiedBean(this.applicationContext,
 				RestClient.Builder.class, this.clientId);
 		if (userProvidedRestClientBuilder != null) {
-			// If the user wants to set the baseUrl directly on the builder,
-			// it should not be set in properties.
+
 			if (baseUrl != null) {
 				userProvidedRestClientBuilder.baseUrl(baseUrl);
 			}
 			return RestClientAdapter.create(userProvidedRestClientBuilder.build());
 		}
+
 		// create a RestClientAdapter bean with default implementation
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating RestClientAdapter for '" + this.clientId + "'");
