@@ -38,8 +38,8 @@ public class RestClientInterfaceClientsFactoryBean extends AbstractHttpInterface
 		// it should not be set in properties.
 		String baseUrl = properties.getProperties(this.clientId).getBaseUrl();
 
-		RestClient userProvidedRestClient = QualifiedBeanProvider.qualifiedBean(this.applicationContext,
-				RestClient.class, this.clientId);
+		RestClient userProvidedRestClient = QualifiedBeanProvider
+			.qualifiedBean(this.applicationContext.getBeanFactory(), RestClient.class, this.clientId);
 		if (userProvidedRestClient != null) {
 			if (baseUrl != null) {
 				userProvidedRestClient = userProvidedRestClient.mutate().baseUrl(baseUrl).build();
@@ -47,8 +47,8 @@ public class RestClientInterfaceClientsFactoryBean extends AbstractHttpInterface
 			return RestClientAdapter.create(userProvidedRestClient);
 		}
 
-		RestClient.Builder userProvidedRestClientBuilder = QualifiedBeanProvider.qualifiedBean(this.applicationContext,
-				RestClient.Builder.class, this.clientId);
+		RestClient.Builder userProvidedRestClientBuilder = QualifiedBeanProvider
+			.qualifiedBean(this.applicationContext.getBeanFactory(), RestClient.Builder.class, this.clientId);
 		if (userProvidedRestClientBuilder != null) {
 
 			if (baseUrl != null) {

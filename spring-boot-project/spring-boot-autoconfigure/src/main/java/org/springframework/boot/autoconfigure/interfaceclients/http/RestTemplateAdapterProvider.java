@@ -19,8 +19,8 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestTemplateAdapter;
@@ -44,7 +44,7 @@ public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider 
 	}
 
 	@Override
-	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientId) {
+	public HttpExchangeAdapter get(ConfigurableListableBeanFactory beanFactory, String clientId) {
 		RestTemplate userProvidedRestTemplate = QualifiedBeanProvider.qualifiedBean(beanFactory, RestTemplate.class,
 				clientId);
 		if (userProvidedRestTemplate != null) {

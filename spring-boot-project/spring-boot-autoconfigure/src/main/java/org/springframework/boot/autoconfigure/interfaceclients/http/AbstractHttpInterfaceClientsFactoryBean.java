@@ -37,8 +37,8 @@ public abstract class AbstractHttpInterfaceClientsFactoryBean extends AbstractIn
 	}
 
 	private HttpServiceProxyFactory proxyFactory() {
-		HttpServiceProxyFactory userProvidedProxyFactory = QualifiedBeanProvider.qualifiedBean(this.applicationContext,
-				HttpServiceProxyFactory.class, this.clientId);
+		HttpServiceProxyFactory userProvidedProxyFactory = QualifiedBeanProvider
+			.qualifiedBean(this.applicationContext.getBeanFactory(), HttpServiceProxyFactory.class, this.clientId);
 		if (userProvidedProxyFactory != null) {
 			return userProvidedProxyFactory;
 		}

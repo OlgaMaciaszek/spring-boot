@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
@@ -43,7 +44,7 @@ public class RestClientAdapterProvider implements HttpExchangeAdapterProvider {
 	}
 
 	@Override
-	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientId) {
+	public HttpExchangeAdapter get(ConfigurableListableBeanFactory beanFactory, String clientId) {
 		RestClient userProvidedRestClient = QualifiedBeanProvider.qualifiedBean(beanFactory, RestClient.class,
 				clientId);
 		if (userProvidedRestClient != null) {

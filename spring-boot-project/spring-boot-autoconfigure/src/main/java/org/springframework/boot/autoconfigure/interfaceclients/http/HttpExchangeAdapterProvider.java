@@ -16,7 +16,7 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 
 /**
@@ -26,6 +26,6 @@ import org.springframework.web.service.invoker.HttpExchangeAdapter;
 public interface HttpExchangeAdapterProvider {
 
 	// TODO: try a less specific type for the beanFactory
-	HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientId);
+	HttpExchangeAdapter get(ConfigurableListableBeanFactory beanFactory, String clientId);
 
 }

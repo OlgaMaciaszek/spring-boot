@@ -58,7 +58,6 @@ public abstract class AbstractInterfaceClientsImportRegistrar
 
 	// TODO: work on IntelliJ plugin /other plugins/ to show that the client beans are
 	// autoconfigured
-	private static final Log logger = LogFactory.getLog(AbstractInterfaceClientsImportRegistrar.class);
 
 	private static final String INTERFACE_CLIENT_SUFFIX = "InterfaceClient";
 

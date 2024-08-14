@@ -17,6 +17,7 @@
 package org.springframework.boot.autoconfigure.interfaceclients;
 
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.Ordered;
 
 /**
@@ -27,6 +28,6 @@ public interface InterfaceClientsAdapter extends Ordered {
 
 	String DEFAULT_QUALIFIER = "interfaceClients";
 
-	<T> T createClient(ListableBeanFactory beanFactory, String clientId, Class<T> type);
+	<T> T createClient(ConfigurableListableBeanFactory beanFactory, String clientId, Class<T> type);
 
 }

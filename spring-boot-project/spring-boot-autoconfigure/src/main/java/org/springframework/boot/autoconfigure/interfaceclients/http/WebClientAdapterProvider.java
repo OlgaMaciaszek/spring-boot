@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
@@ -43,7 +44,7 @@ public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 	}
 
 	@Override
-	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientId) {
+	public HttpExchangeAdapter get(ConfigurableListableBeanFactory beanFactory, String clientId) {
 		WebClient userProvidedWebClient = QualifiedBeanProvider.qualifiedBean(beanFactory, WebClient.class, clientId);
 		if (userProvidedWebClient != null) {
 			return WebClientAdapter.create(userProvidedWebClient);

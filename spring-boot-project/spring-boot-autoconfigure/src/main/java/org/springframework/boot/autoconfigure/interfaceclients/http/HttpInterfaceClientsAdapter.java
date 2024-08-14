@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.interfaceclients.InterfaceClientsAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
@@ -38,13 +39,13 @@ public class HttpInterfaceClientsAdapter implements InterfaceClientsAdapter {
 	}
 
 	@Override
-	public <T> T createClient(ListableBeanFactory beanFactory, String clientId, Class<T> type) {
+	public <T> T createClient(ConfigurableListableBeanFactory beanFactory, String clientId, Class<T> type) {
 		HttpServiceProxyFactory proxyFactory = proxyFactory(beanFactory, clientId);
 
 		return proxyFactory.createClient(type);
 	}
 
-	private HttpServiceProxyFactory proxyFactory(ListableBeanFactory beanFactory, String clientId) {
+	private HttpServiceProxyFactory proxyFactory(ConfigurableListableBeanFactory beanFactory, String clientId) {
 		HttpServiceProxyFactory userProvidedProxyFactory = QualifiedBeanProvider.qualifiedBean(beanFactory,
 				HttpServiceProxyFactory.class, clientId);
 		if (userProvidedProxyFactory != null) {

@@ -21,6 +21,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.Assert;
 
 /**
@@ -35,7 +36,7 @@ public abstract class AbstractInterfaceClientsFactoryBean
 
 	protected String clientId;
 
-	protected ApplicationContext applicationContext;
+	protected ConfigurableApplicationContext applicationContext;
 
 	public AbstractInterfaceClientsFactoryBean() {
 	}
@@ -58,7 +59,9 @@ public abstract class AbstractInterfaceClientsFactoryBean
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
+		Assert.isInstanceOf(ConfigurableApplicationContext.class, applicationContext,
+				"ApplicationContext must be an instance of " + ConfigurableApplicationContext.class.getSimpleName());
+		this.applicationContext = (ConfigurableApplicationContext) applicationContext;
 
 	}
 
