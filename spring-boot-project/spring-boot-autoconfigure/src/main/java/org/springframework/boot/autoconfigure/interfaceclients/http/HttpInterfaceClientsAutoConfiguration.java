@@ -28,7 +28,9 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestClientAdapter;
+import org.springframework.web.client.support.RestTemplateAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
@@ -49,26 +51,16 @@ public class HttpInterfaceClientsAutoConfiguration {
 	protected static class RestClientAdapterProviderConfiguration {
 
 	}
-	//
-	// @Configuration(proxyBeanMethods = false)
-	// @ConditionalOnClass({ RestTemplate.class, RestTemplateAdapter.class,
-	// HttpServiceProxyFactory.class })
-	// @Conditional(NotReactiveWebApplicationCondition.class)
-	// protected static class RestTemplateAdapterProviderConfiguration {
-	//
-	// @Bean
-	// @ConditionalOnBean(RestTemplateBuilder.class)
-	// @ConditionalOnMissingBean
-	// @ConditionalOnProperty(value = "spring.interfaceclients.resttemplate.enabled",
-	// havingValue = "true")
-	// HttpExchangeAdapterProvider restTemplateAdapterProvider(RestTemplateBuilder
-	// restTemplateBuilder,
-	// ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-	// return new RestTemplateAdapterProvider(restTemplateBuilder, propertiesProvider);
-	// }
-	//
-	// }
-	//
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass({ RestTemplate.class, RestTemplateAdapter.class, HttpServiceProxyFactory.class })
+	@Conditional(NotReactiveWebApplicationCondition.class)
+	@ConditionalOnProperty(value = "spring.interfaceclients.resttemplate.enabled", havingValue = "true")
+	@Import(RestTemplateInterfaceClientsImportRegistrar.class)
+	protected static class RestTemplateAdapterProviderConfiguration {
+
+	}
+
 	// @Configuration(proxyBeanMethods = false)
 	// @ConditionalOnClass({ WebClient.class, WebClientAdapter.class,
 	// HttpServiceProxyFactory.class })

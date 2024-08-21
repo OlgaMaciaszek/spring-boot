@@ -19,54 +19,50 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestTemplateAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider {
+public class RestTemplateInterfaceClientsFactoryBean extends AbstractHttpInterfaceClientsFactoryBean {
 
-	private static final Log logger = LogFactory.getLog(RestTemplateAdapterProvider.class);
-
-	private final RestTemplateBuilder restTemplateBuilder;
-
-	private final ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider;
-
-	public RestTemplateAdapterProvider(RestTemplateBuilder restTemplateBuilder,
-			ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-		this.restTemplateBuilder = restTemplateBuilder;
-		this.propertiesProvider = propertiesProvider;
-	}
+	private static final Log logger = LogFactory.getLog(RestTemplateInterfaceClientsFactoryBean.class);
 
 	@Override
-	public HttpExchangeAdapter get(ConfigurableListableBeanFactory beanFactory, String clientId) {
-		RestTemplate userProvidedRestTemplate = QualifiedBeanProvider.qualifiedBean(beanFactory, RestTemplate.class,
-				clientId);
+	protected HttpExchangeAdapter exchangeAdapter() {
+		String baseUrl = getBaseUrl();
+
+		RestTemplate userProvidedRestTemplate = QualifiedBeanProvider
+			.qualifiedBean(this.applicationContext.getBeanFactory(), RestTemplate.class, this.clientId);
 		if (userProvidedRestTemplate != null) {
-			return RestTemplateAdapter.create(userProvidedRestTemplate);
-		}
-		HttpInterfaceClientsProperties properties = this.propertiesProvider.getObject();
-		String baseUrl = properties.getProperties(clientId).getBaseUrl();
-		RestTemplateBuilder userProvidedRestTemplateBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
-				RestTemplateBuilder.class, clientId);
-		if (userProvidedRestTemplateBuilder != null) {
 			// If the user wants to set the baseUrl directly on the builder,
 			// it should not be set in properties.
+			if (baseUrl != null) {
+				userProvidedRestTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(baseUrl));
+			}
+			return RestTemplateAdapter.create(userProvidedRestTemplate);
+		}
+
+		RestTemplateBuilder userProvidedRestTemplateBuilder = QualifiedBeanProvider
+			.qualifiedBean(this.applicationContext.getBeanFactory(), RestTemplateBuilder.class, this.clientId);
+		if (userProvidedRestTemplateBuilder != null) {
+
 			if (baseUrl != null) {
 				userProvidedRestTemplateBuilder.rootUri(baseUrl);
 			}
 			return RestTemplateAdapter.create(userProvidedRestTemplateBuilder.build());
 		}
+
 		// create a RestTemplateAdapter bean with default implementation
 		if (logger.isDebugEnabled()) {
-			logger.debug("Creating RestTemplateAdapter for '" + clientId + "'");
+			logger.debug("Creating RestTemplateAdapter for '" + this.clientId + "'");
 		}
-		RestTemplate restTemplate = this.restTemplateBuilder.rootUri(baseUrl).build();
+		RestTemplateBuilder builder = this.applicationContext.getBean(RestTemplateBuilder.class);
+		RestTemplate restTemplate = builder.rootUri(baseUrl).build();
 		return RestTemplateAdapter.create(restTemplate);
 	}
 

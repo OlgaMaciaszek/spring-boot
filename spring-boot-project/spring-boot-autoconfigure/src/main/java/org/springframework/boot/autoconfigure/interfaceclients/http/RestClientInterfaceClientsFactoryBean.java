@@ -32,15 +32,13 @@ public class RestClientInterfaceClientsFactoryBean extends AbstractHttpInterface
 
 	@Override
 	protected HttpExchangeAdapter exchangeAdapter() {
-		HttpInterfaceClientsProperties properties = this.applicationContext
-			.getBean(HttpInterfaceClientsProperties.class);
-		// If the user wants to set the baseUrl directly on the builder,
-		// it should not be set in properties.
-		String baseUrl = properties.getProperties(this.clientId).getBaseUrl();
+		String baseUrl = getBaseUrl();
 
 		RestClient userProvidedRestClient = QualifiedBeanProvider
 			.qualifiedBean(this.applicationContext.getBeanFactory(), RestClient.class, this.clientId);
 		if (userProvidedRestClient != null) {
+			// If the user wants to set the baseUrl directly on the builder,
+			// it should not be set in properties.
 			if (baseUrl != null) {
 				userProvidedRestClient = userProvidedRestClient.mutate().baseUrl(baseUrl).build();
 			}
