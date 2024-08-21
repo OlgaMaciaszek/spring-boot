@@ -16,16 +16,23 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.web.service.invoker.HttpExchangeAdapter;
+import java.lang.annotation.Annotation;
+
+import org.springframework.boot.autoconfigure.interfaceclients.AbstractInterfaceClientsImportRegistrar;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-@FunctionalInterface
-public interface HttpExchangeAdapterProvider {
+public class WebClientInterfaceClientsImportRegistrar extends AbstractInterfaceClientsImportRegistrar {
 
-	// TODO: try a less specific type for the beanFactory
-	HttpExchangeAdapter get(ConfigurableListableBeanFactory beanFactory, String clientId);
+	@Override
+	protected Class<? extends Annotation> getAnnotation() {
+		return HttpClient.class;
+	}
+
+	@Override
+	protected Class<?> getFactoryBeanClass() {
+		return WebClientInterfaceClientsFactoryBean.class;
+	}
 
 }

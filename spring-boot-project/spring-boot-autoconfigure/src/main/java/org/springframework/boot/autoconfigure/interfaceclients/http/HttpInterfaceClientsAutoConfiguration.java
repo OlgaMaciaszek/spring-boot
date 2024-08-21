@@ -19,6 +19,7 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.client.NotReactiveWebApplicationCondition;
 import org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
@@ -31,6 +32,8 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.client.support.RestTemplateAdapter;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
@@ -61,21 +64,12 @@ public class HttpInterfaceClientsAutoConfiguration {
 
 	}
 
-	// @Configuration(proxyBeanMethods = false)
-	// @ConditionalOnClass({ WebClient.class, WebClientAdapter.class,
-	// HttpServiceProxyFactory.class })
-	// @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
-	// protected static class WebClientAdapterProviderConfiguration {
-	//
-	// @Bean
-	// @ConditionalOnBean(WebClient.Builder.class)
-	// @ConditionalOnMissingBean
-	// HttpExchangeAdapterProvider webClientAdapterProvider(WebClient.Builder
-	// webClientBuilder,
-	// ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-	// return new WebClientAdapterProvider(webClientBuilder, propertiesProvider);
-	// }
-	//
-	// }
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass({ WebClient.class, WebClientAdapter.class, HttpServiceProxyFactory.class })
+	@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+	@Import(WebClientInterfaceClientsImportRegistrar.class)
+	protected static class WebClientAdapterProviderConfiguration {
+
+	}
 
 }
