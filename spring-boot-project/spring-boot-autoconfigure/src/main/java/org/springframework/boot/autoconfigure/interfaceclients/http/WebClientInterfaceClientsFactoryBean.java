@@ -19,6 +19,7 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.boot.autoconfigure.interfaceclients.QualifiedBeanProvider;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;

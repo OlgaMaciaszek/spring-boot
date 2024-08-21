@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.autoconfigure.interfaceclients.http;
+package org.springframework.boot.autoconfigure.interfaceclients.rsocket;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,24 +22,21 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Use per-client properties or default if no client-specific found. Based on <a
- * href=https://github.com/spring-cloud/spring-cloud-commons/blob/main/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancerClientsProperties.java>LoadBalancerClientsProperties.java</a>
- *
  * @author Olga Maciaszek-Sharma
  */
-@ConfigurationProperties("spring.interfaceclients.http")
-public class HttpInterfaceClientsProperties extends HttpInterfaceClientsBaseProperties {
+@ConfigurationProperties("spring.interfaceclients.rsocket")
+public class RSocketInterfaceClientsProperties extends RSocketInterfaceClientsBaseProperties {
 
 	/**
 	 * Client-specific interface client properties.
 	 */
-	private final Map<String, HttpInterfaceClientsBaseProperties> clients = new HashMap<>();
+	private final Map<String, RSocketInterfaceClientsBaseProperties> clients = new HashMap<>();
 
-	public Map<String, HttpInterfaceClientsBaseProperties> getClients() {
+	public Map<String, RSocketInterfaceClientsBaseProperties> getClients() {
 		return this.clients;
 	}
 
-	public HttpInterfaceClientsBaseProperties getProperties(String clientId) {
+	public RSocketInterfaceClientsBaseProperties getProperties(String clientId) {
 		if (clientId == null || !this.getClients().containsKey(clientId)) {
 			// no specific client properties, return default
 			return this;
@@ -48,5 +45,4 @@ public class HttpInterfaceClientsProperties extends HttpInterfaceClientsBaseProp
 		// unless overridden, is in `clientsProperties`
 		return this.getClients().get(clientId);
 	}
-
 }

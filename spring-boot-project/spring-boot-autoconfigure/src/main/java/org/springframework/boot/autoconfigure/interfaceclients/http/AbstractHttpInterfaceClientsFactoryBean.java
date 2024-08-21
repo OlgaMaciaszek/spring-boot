@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.autoconfigure.interfaceclients.AbstractInterfaceClientsFactoryBean;
+import org.springframework.boot.autoconfigure.interfaceclients.QualifiedBeanProvider;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
@@ -43,6 +44,8 @@ public abstract class AbstractHttpInterfaceClientsFactoryBean extends AbstractIn
 		return properties.getProperties(this.clientId).getBaseUrl();
 	}
 
+	protected abstract HttpExchangeAdapter exchangeAdapter();
+
 	private HttpServiceProxyFactory proxyFactory() {
 		HttpServiceProxyFactory userProvidedProxyFactory = QualifiedBeanProvider
 			.qualifiedBean(this.applicationContext.getBeanFactory(), HttpServiceProxyFactory.class, this.clientId);
@@ -56,7 +59,5 @@ public abstract class AbstractHttpInterfaceClientsFactoryBean extends AbstractIn
 		HttpExchangeAdapter adapter = exchangeAdapter();
 		return HttpServiceProxyFactory.builderFor(adapter).build();
 	}
-
-	protected abstract HttpExchangeAdapter exchangeAdapter();
 
 }

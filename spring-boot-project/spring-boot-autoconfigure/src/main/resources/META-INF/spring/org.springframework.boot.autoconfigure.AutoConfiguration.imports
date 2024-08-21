@@ -151,3 +151,4 @@ org.springframework.boot.autoconfigure.websocket.servlet.WebSocketMessagingAutoC
 org.springframework.boot.autoconfigure.webservices.WebServicesAutoConfiguration
 org.springframework.boot.autoconfigure.webservices.client.WebServiceTemplateAutoConfiguration
 org.springframework.boot.autoconfigure.interfaceclients.http.HttpInterfaceClientsAutoConfiguration
+org.springframework.boot.autoconfigure.interfaceclients.rsocket.RSocketInterfaceClientsAutoConfiguration

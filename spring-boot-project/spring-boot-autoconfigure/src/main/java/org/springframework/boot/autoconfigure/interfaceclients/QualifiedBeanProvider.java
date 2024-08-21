@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.autoconfigure.interfaceclients.http;
+package org.springframework.boot.autoconfigure.interfaceclients;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,11 +31,11 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  * @author Josh Long
  * @author Olga Maciaszek-Sharma
  */
-final class QualifiedBeanProvider {
+public final class QualifiedBeanProvider {
 
 	private static final Log logger = LogFactory.getLog(QualifiedBeanProvider.class);
 
-	static <T> T qualifiedBean(ConfigurableListableBeanFactory beanFactory, Class<T> type, String clientId) {
+	public static <T> T qualifiedBean(ConfigurableListableBeanFactory beanFactory, Class<T> type, String clientId) {
 		Map<String, T> matchingClientBeans = getQualifiedBeansOfType(beanFactory, type, clientId);
 		if (matchingClientBeans.size() > 1) {
 			throw new NoUniqueBeanDefinitionException(type, matchingClientBeans.keySet());

@@ -19,6 +19,7 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.boot.autoconfigure.interfaceclients.QualifiedBeanProvider;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;

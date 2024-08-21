@@ -1618,7 +1618,7 @@
       "defaultValue": true
     },
     {
-      "name": "spring.interfaceclients.resttemplate.enabled",
+      "name": "spring.interfaceclients.http.resttemplate.enabled",
       "type": "java.lang.Boolean",
       "description": "Whether to use RestTemplate as the underlying HTTP client for interface clients.",
       "defaultValue": true

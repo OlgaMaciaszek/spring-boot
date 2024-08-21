@@ -48,7 +48,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
 	@Conditional(NotReactiveWebApplicationCondition.class)
-	@ConditionalOnProperty(value = "spring.interfaceclients.resttemplate.enabled", havingValue = "false",
+	@ConditionalOnProperty(value = "spring.interfaceclients.http.resttemplate.enabled", havingValue = "false",
 			matchIfMissing = true)
 	@Import(RestClientInterfaceClientsImportRegistrar.class)
 	protected static class RestClientAdapterProviderConfiguration {
@@ -58,7 +58,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestTemplate.class, RestTemplateAdapter.class, HttpServiceProxyFactory.class })
 	@Conditional(NotReactiveWebApplicationCondition.class)
-	@ConditionalOnProperty(value = "spring.interfaceclients.resttemplate.enabled", havingValue = "true")
+	@ConditionalOnProperty(value = "spring.interfaceclients.http.resttemplate.enabled", havingValue = "true")
 	@Import(RestTemplateInterfaceClientsImportRegistrar.class)
 	protected static class RestTemplateAdapterProviderConfiguration {
 

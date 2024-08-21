@@ -14,7 +14,24 @@
  * limitations under the License.
  */
 
-/**
- * AutoConfiguration for RSocket Spring Interface Clients.
- */
 package org.springframework.boot.autoconfigure.interfaceclients.rsocket;
+
+import java.lang.annotation.Annotation;
+
+import org.springframework.boot.autoconfigure.interfaceclients.AbstractInterfaceClientsImportRegistrar;
+
+/**
+ * @author Olga Maciaszek-Sharma
+ */
+public class RSocketInterfaceClientsImportRegistrar extends AbstractInterfaceClientsImportRegistrar {
+
+	@Override
+	protected Class<? extends Annotation> getAnnotation() {
+		return RSocketClient.class;
+	}
+
+	@Override
+	protected Class<?> getFactoryBeanClass() {
+		return RSocketInterfaceClientsFactoryBean.class;
+	}
+}
