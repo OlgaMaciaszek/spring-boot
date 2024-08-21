@@ -24,13 +24,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.core.annotation.AnnotationAttributes;
-import org.springframework.core.annotation.MergedAnnotation;
-import org.springframework.core.type.MethodMetadata;
 
 /**
  * @author Olga Maciaszek-Sharma
@@ -67,20 +62,9 @@ final class QualifiedBeanProvider {
 		Map<String, T> beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(beanFactory, type);
 		Map<String, T> matchingClientBeans = new HashMap<>();
 		for (String beanName : beansOfType.keySet()) {
-			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-			if (beanDefinition instanceof AnnotatedBeanDefinition definition) {
-				// TODO: try refactoring this
-				// TODO: beans defined in a different way
-				// AnnotationAttributes annotationAttributes = AnnotationAttributes
-				// .fromMap(definition.getMetadata().getAnnotationAttributes(Qualifier.class.getName()));
-				MethodMetadata methodMetadata = definition.getFactoryMethodMetadata();
-				AnnotationAttributes annotationAttributes = methodMetadata != null ? AnnotationAttributes
-					.fromMap(methodMetadata.getAnnotationAttributes(Qualifier.class.getName())) : null;
-				if (annotationAttributes != null
-						&& clientId.equals(annotationAttributes.getString(MergedAnnotation.VALUE))) {
-					matchingClientBeans.put(beanName, beansOfType.get(beanName));
-				}
-
+			Qualifier qualifier = (beanFactory.findAnnotationOnBean(beanName, Qualifier.class));
+			if (qualifier != null && clientId.equals(qualifier.value())) {
+				matchingClientBeans.put(beanName, beanFactory.getBean(beanName, type));
 			}
 		}
 		return matchingClientBeans;

@@ -16,10 +16,19 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
+import java.lang.annotation.Annotation;
+
+import org.springframework.boot.autoconfigure.interfaceclients.AbstractInterfaceClientsImportRegistrar;
+
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class RestClientInterfaceClientsImportRegistrar extends HttpInterfaceClientsImportRegistrar {
+public class RestClientInterfaceClientsImportRegistrar extends AbstractInterfaceClientsImportRegistrar {
+
+	@Override
+	protected Class<? extends Annotation> getAnnotation() {
+		return HttpClient.class;
+	}
 
 	@Override
 	protected Class<?> getFactoryBeanClass() {

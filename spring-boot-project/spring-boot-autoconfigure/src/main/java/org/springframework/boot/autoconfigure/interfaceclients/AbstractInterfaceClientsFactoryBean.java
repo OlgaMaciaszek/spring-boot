@@ -18,7 +18,6 @@ package org.springframework.boot.autoconfigure.interfaceclients;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -27,8 +26,7 @@ import org.springframework.util.Assert;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public abstract class AbstractInterfaceClientsFactoryBean
-		implements FactoryBean<Object>, ApplicationContextAware, InitializingBean {
+public abstract class AbstractInterfaceClientsFactoryBean implements FactoryBean<Object>, ApplicationContextAware {
 
 	protected Class<?> type;
 
@@ -37,20 +35,6 @@ public abstract class AbstractInterfaceClientsFactoryBean
 	protected String clientId;
 
 	protected ConfigurableApplicationContext applicationContext;
-
-	public AbstractInterfaceClientsFactoryBean() {
-	}
-
-	// TODO
-	@Override
-	public Object getObject() throws Exception {
-		throw new UnsupportedOperationException("Please, implement me.");
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.type, "Type must not be null");
-	}
 
 	@Override
 	public Class<?> getObjectType() {

@@ -22,8 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.text.CaseUtils;
 
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -49,6 +47,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * @author Josh Long
  * @author Olga Maciaszek-Sharma
  */
 // TODO: Handle AOT
@@ -91,21 +90,9 @@ public abstract class AbstractInterfaceClientsImportRegistrar
 				getAnnotation().getSimpleName() + "can only be placed on an interface.");
 		MergedAnnotation<? extends Annotation> annotation = annotatedBeanMetadata.getAnnotations().get(getAnnotation());
 		String beanClassName = annotatedBeanMetadata.getClassName();
-		// Class<?> beanClass;
-		// try {
-		// beanClass = Class.forName(beanClassName);
-		// }
-		// catch (ClassNotFoundException e) {
-		// if (logger.isDebugEnabled()) {
-		// logger.debug("Class not found for interface client " + beanClassName + ": " +
-		// e.getMessage());
-		// }
-		// throw new RuntimeException(e);
-		// }
-		// TODO: consider naming conventions: value of the annotation is the
-		// qualifier to look for related beans
-		// TODO: while the actual beanName corresponds to the simple class name
-		// suffixed with InterfaceClient
+		// The value of the annotation is the qualifier to look for related beans
+		// while the default beanName corresponds to the simple class name suffixed with
+		// `InterfaceClient`
 		String clientId = annotation.getString(MergedAnnotation.VALUE);
 		String beanName = !ObjectUtils.isEmpty(annotation.getString(BEAN_NAME_ATTRIBUTE_NAME))
 				? annotation.getString(BEAN_NAME_ATTRIBUTE_NAME) : buildBeanName(clientId);

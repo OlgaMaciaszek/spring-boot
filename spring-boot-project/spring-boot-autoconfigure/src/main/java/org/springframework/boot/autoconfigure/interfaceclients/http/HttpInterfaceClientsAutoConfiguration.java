@@ -37,13 +37,8 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 @AutoConfiguration(after = { RestTemplateAutoConfiguration.class, RestClientAutoConfiguration.class,
 		WebClientAutoConfiguration.class })
 @EnableConfigurationProperties(HttpInterfaceClientsProperties.class)
+@ConditionalOnProperty(value = "spring.interfaceclients.enabled", havingValue = "true")
 public class HttpInterfaceClientsAutoConfiguration {
-
-	// @Bean
-	// HttpInterfaceClientsAdapter httpInterfaceClientAdapter(HttpExchangeAdapterProvider
-	// adapterProvider) {
-	// return new HttpInterfaceClientsAdapter(adapterProvider);
-	// }
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
