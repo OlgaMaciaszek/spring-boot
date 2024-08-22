@@ -33,9 +33,22 @@ public class RSocketInterfaceClientsFactoryBean extends AbstractInterfaceClients
 
 	@Override
 	public Object getObject() throws Exception {
-		RSocketRequester requester = rsocketRequester();
-		RSocketServiceProxyFactory factory = RSocketServiceProxyFactory.builder(requester).build();
+		RSocketServiceProxyFactory factory = proxyFactory();
 		return factory.createClient(this.type);
+	}
+
+	private RSocketServiceProxyFactory proxyFactory() {
+		RSocketServiceProxyFactory userProvidedProxyFactory = QualifiedBeanProvider
+			.qualifiedBean(this.applicationContext.getBeanFactory(), RSocketServiceProxyFactory.class, this.clientId);
+		if (userProvidedProxyFactory != null) {
+			return userProvidedProxyFactory;
+		}
+		// create an RSocketServiceProxyFactory bean with default implementation
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating RSocketServiceProxyFactory for '" + this.clientId + "'");
+		}
+		RSocketRequester requester = rsocketRequester();
+		return RSocketServiceProxyFactory.builder(requester).build();
 	}
 
 	private RSocketRequester rsocketRequester() {
