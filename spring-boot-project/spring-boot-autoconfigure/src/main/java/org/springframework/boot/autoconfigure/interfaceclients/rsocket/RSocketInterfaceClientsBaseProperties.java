@@ -35,9 +35,9 @@ public class RSocketInterfaceClientsBaseProperties {
 	 */
 	private Integer port;
 
-
 	/**
-	 * URI used to create a Websocket connection for RSocketRequester. By default, set to null.
+	 * URI used to create a Websocket connection for RSocketRequester. By default, set to
+	 * null.
 	 */
 	private URI uri;
 
@@ -64,4 +64,5 @@ public class RSocketInterfaceClientsBaseProperties {
 	public void setUri(URI uri) {
 		this.uri = uri;
 	}
+
 }

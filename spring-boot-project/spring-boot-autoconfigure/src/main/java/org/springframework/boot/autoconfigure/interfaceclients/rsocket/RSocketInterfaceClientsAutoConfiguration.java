@@ -32,10 +32,11 @@ import org.springframework.messaging.rsocket.service.RSocketServiceProxyFactory;
  * @author Olga Maciaszek-Sharma
  */
 @AutoConfiguration(after = RSocketRequesterAutoConfiguration.class)
-@ConditionalOnClass({ RSocketRequester.class, io.rsocket.RSocket.class, HttpServer.class,
-		TcpServerTransport.class, RSocketServiceProxyFactory.class })
+@ConditionalOnClass({ RSocketRequester.class, io.rsocket.RSocket.class, HttpServer.class, TcpServerTransport.class,
+		RSocketServiceProxyFactory.class })
 @EnableConfigurationProperties(RSocketInterfaceClientsProperties.class)
 @ConditionalOnProperty(value = "spring.interfaceclients.enabled", havingValue = "true")
 @Import(RSocketInterfaceClientsImportRegistrar.class)
 public class RSocketInterfaceClientsAutoConfiguration {
+
 }

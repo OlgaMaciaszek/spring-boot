@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.autoconfigure.interfaceclients.AbstractInterfaceClientsFactoryBean;
 import org.springframework.boot.autoconfigure.interfaceclients.QualifiedBeanProvider;
 import org.springframework.messaging.rsocket.RSocketRequester;
-import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.rsocket.service.RSocketServiceProxyFactory;
 
 /**
@@ -35,18 +34,19 @@ public class RSocketInterfaceClientsFactoryBean extends AbstractInterfaceClients
 	@Override
 	public Object getObject() throws Exception {
 		RSocketRequester requester = rsocketRequester();
-		return RSocketServiceProxyFactory.builder(requester).build();
+		RSocketServiceProxyFactory factory = RSocketServiceProxyFactory.builder(requester).build();
+		return factory.createClient(this.type);
 	}
 
 	private RSocketRequester rsocketRequester() {
 		RSocketRequester userProvidedRequester = QualifiedBeanProvider
-				.qualifiedBean(this.applicationContext.getBeanFactory(), RSocketRequester.class, this.clientId);
+			.qualifiedBean(this.applicationContext.getBeanFactory(), RSocketRequester.class, this.clientId);
 		if (userProvidedRequester != null) {
 			return userProvidedRequester;
 		}
 
 		RSocketRequester.Builder userProvidedRSocketRequesterBuilder = QualifiedBeanProvider
-				.qualifiedBean(this.applicationContext.getBeanFactory(), RSocketRequester.Builder.class, this.clientId);
+			.qualifiedBean(this.applicationContext.getBeanFactory(), RSocketRequester.Builder.class, this.clientId);
 		if (userProvidedRSocketRequesterBuilder != null) {
 			return toRequester(userProvidedRSocketRequesterBuilder);
 		}
@@ -63,7 +63,7 @@ public class RSocketInterfaceClientsFactoryBean extends AbstractInterfaceClients
 		// If the user wants to set the baseUrl directly on the builder,
 		// it should not be set in properties.
 		RSocketInterfaceClientsProperties properties = this.applicationContext
-				.getBean(RSocketInterfaceClientsProperties.class);
+			.getBean(RSocketInterfaceClientsProperties.class);
 		if (properties.getHost() != null && properties.getPort() != null) {
 			return requesterBuilder.tcp(properties.getHost(), properties.getPort());
 		}

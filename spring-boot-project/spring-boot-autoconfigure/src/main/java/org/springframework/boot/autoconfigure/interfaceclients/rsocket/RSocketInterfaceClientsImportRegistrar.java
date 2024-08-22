@@ -34,4 +34,5 @@ public class RSocketInterfaceClientsImportRegistrar extends AbstractInterfaceCli
 	protected Class<?> getFactoryBeanClass() {
 		return RSocketInterfaceClientsFactoryBean.class;
 	}
+
 }
