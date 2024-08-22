@@ -51,12 +51,8 @@ import org.springframework.util.ObjectUtils;
  * @author Olga Maciaszek-Sharma
  */
 // TODO: Handle AOT
-// TODO: remove abstract supertype or move to a shared package
 public abstract class AbstractInterfaceClientsImportRegistrar
 		implements ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware {
-
-	// TODO: work on IntelliJ plugin /other plugins/ to show that the client beans are
-	// autoconfigured
 
 	private static final String INTERFACE_CLIENT_SUFFIX = "InterfaceClient";
 
@@ -148,7 +144,6 @@ public abstract class AbstractInterfaceClientsImportRegistrar
 	protected abstract Class<?> getFactoryBeanClass();
 
 	private String buildBeanName(String clientId) {
-		// TODO: research Normalizer form types
 		String normalised = Normalizer.normalize(clientId, Normalizer.Form.NFD);
 		String camelCased = CaseUtils.toCamelCase(normalised, false, '-', '_');
 		return camelCased + INTERFACE_CLIENT_SUFFIX;
