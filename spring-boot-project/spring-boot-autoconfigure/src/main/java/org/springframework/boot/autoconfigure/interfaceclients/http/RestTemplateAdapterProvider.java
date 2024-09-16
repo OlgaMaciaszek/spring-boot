@@ -33,11 +33,11 @@ public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider 
 
 	private static final Log logger = LogFactory.getLog(RestTemplateAdapterProvider.class);
 
-	private final RestTemplateBuilder restTemplateBuilder;
+	private final ObjectProvider<RestTemplateBuilder> restTemplateBuilder;
 
 	private final ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider;
 
-	public RestTemplateAdapterProvider(RestTemplateBuilder restTemplateBuilder,
+	public RestTemplateAdapterProvider(ObjectProvider<RestTemplateBuilder> restTemplateBuilder,
 			ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
 		this.restTemplateBuilder = restTemplateBuilder;
 		this.propertiesProvider = propertiesProvider;
@@ -66,7 +66,8 @@ public class RestTemplateAdapterProvider implements HttpExchangeAdapterProvider 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating RestTemplateAdapter for '" + clientId + "'");
 		}
-		RestTemplate restTemplate = this.restTemplateBuilder.rootUri(baseUrl).build();
+		// FIXME
+		RestTemplate restTemplate = this.restTemplateBuilder.getObject().rootUri(baseUrl).build();
 		return RestTemplateAdapter.create(restTemplate);
 	}
 

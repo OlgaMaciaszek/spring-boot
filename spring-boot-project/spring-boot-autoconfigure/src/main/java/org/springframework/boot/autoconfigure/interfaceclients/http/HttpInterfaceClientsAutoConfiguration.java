@@ -65,9 +65,10 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(RestClient.Builder.class)
 		@ConditionalOnMissingBean
-		HttpExchangeAdapterProvider restClientAdapterProvider(RestClient.Builder restClientBuilder,
+		HttpExchangeAdapterProvider restClientAdapterProvider(
+				ObjectProvider<RestClient.Builder> restClientBuilderProvider,
 				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-			return new RestClientAdapterProvider(restClientBuilder, propertiesProvider);
+			return new RestClientAdapterProvider(restClientBuilderProvider, propertiesProvider);
 		}
 
 	}
@@ -80,10 +81,12 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(RestTemplateBuilder.class)
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.interfaceclients.resttemplate.enabled", havingValue = "true")
-		HttpExchangeAdapterProvider restTemplateAdapterProvider(RestTemplateBuilder restTemplateBuilder,
+		// FIXME
+		@ConditionalOnProperty(value = "spring.interfaceclients.http.resttemplate.enabled", havingValue = "true")
+		HttpExchangeAdapterProvider restTemplateAdapterProvider(
+				ObjectProvider<RestTemplateBuilder> restTemplateBuilderProvider,
 				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-			return new RestTemplateAdapterProvider(restTemplateBuilder, propertiesProvider);
+			return new RestTemplateAdapterProvider(restTemplateBuilderProvider, propertiesProvider);
 		}
 
 	}
@@ -96,9 +99,9 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(WebClient.Builder.class)
 		@ConditionalOnMissingBean
-		HttpExchangeAdapterProvider webClientAdapterProvider(WebClient.Builder webClientBuilder,
+		HttpExchangeAdapterProvider webClientAdapterProvider(ObjectProvider<WebClient.Builder> webClientBuilderProvider,
 				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-			return new WebClientAdapterProvider(webClientBuilder, propertiesProvider);
+			return new WebClientAdapterProvider(webClientBuilderProvider, propertiesProvider);
 		}
 
 	}

@@ -32,13 +32,13 @@ public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 
 	private static final Log logger = LogFactory.getLog(WebClientAdapterProvider.class);
 
-	private final WebClient.Builder builder;
+	private final ObjectProvider<WebClient.Builder> builderProvider;
 
 	private final ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider;
 
-	public WebClientAdapterProvider(WebClient.Builder builder,
+	public WebClientAdapterProvider(ObjectProvider<WebClient.Builder> builderProvider,
 			ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-		this.builder = builder;
+		this.builderProvider = builderProvider;
 		this.propertiesProvider = propertiesProvider;
 	}
 
@@ -64,7 +64,8 @@ public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating WebClientAdapter for '" + clientId + "'");
 		}
-		WebClient webClient = this.builder.baseUrl(baseUrl).build();
+		// FIXME
+		WebClient webClient = this.builderProvider.getObject().baseUrl(baseUrl).build();
 		return WebClientAdapter.create(webClient);
 	}
 

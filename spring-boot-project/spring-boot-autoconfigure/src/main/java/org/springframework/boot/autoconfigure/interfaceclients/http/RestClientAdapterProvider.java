@@ -32,13 +32,13 @@ public class RestClientAdapterProvider implements HttpExchangeAdapterProvider {
 
 	private static final Log logger = LogFactory.getLog(RestClientAdapterProvider.class);
 
-	private final RestClient.Builder builder;
+	private final ObjectProvider<RestClient.Builder> builderProvider;
 
 	private final ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider;
 
-	public RestClientAdapterProvider(RestClient.Builder builder,
+	public RestClientAdapterProvider(ObjectProvider<RestClient.Builder> builderProvider,
 			ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-		this.builder = builder;
+		this.builderProvider = builderProvider;
 		this.propertiesProvider = propertiesProvider;
 	}
 
@@ -65,7 +65,8 @@ public class RestClientAdapterProvider implements HttpExchangeAdapterProvider {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating RestClientAdapter for '" + clientId + "'");
 		}
-		RestClient restClient = this.builder.baseUrl(baseUrl).build();
+		// FIXME
+		RestClient restClient = this.builderProvider.getObject().baseUrl(baseUrl).build();
 		return RestClientAdapter.create(restClient);
 	}
 
