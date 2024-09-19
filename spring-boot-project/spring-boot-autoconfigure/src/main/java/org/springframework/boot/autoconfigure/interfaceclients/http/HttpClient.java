@@ -22,9 +22,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.web.service.annotation.HttpExchange;
+
 /**
+ * Annotation to be placed on interfaces containing {@link HttpExchange}-annotated methods
+ * in order for a client based on that interface to be autoconfigured.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.4.0
  */
+// TODO: Consider moving over to Framework.
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

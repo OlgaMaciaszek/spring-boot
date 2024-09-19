@@ -20,12 +20,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.boot.autoconfigure.interfaceclients.AbstractInterfaceClientsImportRegistrar;
 import org.springframework.boot.autoconfigure.interfaceclients.InterfaceClientsAdapter;
+import org.springframework.boot.autoconfigure.interfaceclients.QualifiedBeanProvider;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
+ * HTTP-specific {@link InterfaceClientsAdapter} implementation.
+ * <p>
+ * Will attempt to use an {@link HttpServiceProxyFactory} provided by the user to create
+ * an HTTP Interface Client. Beans qualified with a specific client id or
+ * {@link AbstractInterfaceClientsImportRegistrar#DEFAULT_INTERFACE_CLIENTS_ID}) will be
+ * used. If no user-provided bean is found, one with a default implementation is created.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.4.0
  */
 public class HttpInterfaceClientsAdapter implements InterfaceClientsAdapter {
 
@@ -56,12 +66,6 @@ public class HttpInterfaceClientsAdapter implements InterfaceClientsAdapter {
 		}
 		HttpExchangeAdapter adapter = this.adapterProvider.get(beanFactory, clientId);
 		return HttpServiceProxyFactory.builderFor(adapter).build();
-	}
-
-	// TODO: check if needed
-	@Override
-	public int getOrder() {
-		throw new UnsupportedOperationException("Please, implement me.");
 	}
 
 }

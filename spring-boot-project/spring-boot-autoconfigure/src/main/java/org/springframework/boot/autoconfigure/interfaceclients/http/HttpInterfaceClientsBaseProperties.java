@@ -17,7 +17,10 @@
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
 /**
+ * Properties for HTTP Interface Clients.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.4.0
  */
 public class HttpInterfaceClientsBaseProperties {
 

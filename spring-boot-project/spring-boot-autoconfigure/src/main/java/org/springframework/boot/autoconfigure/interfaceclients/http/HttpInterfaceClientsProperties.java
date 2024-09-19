@@ -22,12 +22,16 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Use per-client properties or default if no client-specific found. Based on <a
+ * Configuration properties for HTTP Interface Clients.
+ * <p>
+ * Allows using per-client properties or default if no client-specific found. Based on <a
  * href=https://github.com/spring-cloud/spring-cloud-commons/blob/main/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancerClientsProperties.java>LoadBalancerClientsProperties.java</a>
  *
+ * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
+ * @since 3.4.0
  */
-@ConfigurationProperties("spring.interfaceclients")
+@ConfigurationProperties("spring.interfaceclients.http")
 public class HttpInterfaceClientsProperties extends HttpInterfaceClientsBaseProperties {
 
 	/**

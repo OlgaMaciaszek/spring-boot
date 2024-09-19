@@ -18,6 +18,7 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -42,12 +43,19 @@ import org.springframework.web.reactive.function.client.support.WebClientAdapter
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
+ * {@link EnableAutoConfiguration Auto-configuration} for HTTP Interface Clients.
+ * <p>
+ * This will result in the creation of Interface Client beans from
+ * {@link HttpClient}-annotated interfaces.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.4.0
  */
 @AutoConfiguration(after = { RestTemplateAutoConfiguration.class, RestClientAutoConfiguration.class,
 		WebClientAutoConfiguration.class })
 @Import(HttpInterfaceClientsImportRegistrar.class)
 @EnableConfigurationProperties(HttpInterfaceClientsProperties.class)
+@ConditionalOnProperty(value = "spring.interfaceclients.enabled", havingValue = "true")
 public class HttpInterfaceClientsAutoConfiguration {
 
 	@Bean

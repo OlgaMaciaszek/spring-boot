@@ -20,10 +20,10 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.Ordered;
 
 /**
+ * @author Josh Long
  * @author Olga Maciaszek-Sharma
  */
-// TODO: remove abstract supertype or move to a shared package
-public interface InterfaceClientsAdapter extends Ordered {
+public interface InterfaceClientsAdapter {
 
 	String DEFAULT_QUALIFIER = "interfaceClients";
 

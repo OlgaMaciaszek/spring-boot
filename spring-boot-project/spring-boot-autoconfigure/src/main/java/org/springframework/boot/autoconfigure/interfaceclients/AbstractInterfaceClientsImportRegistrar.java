@@ -17,32 +17,94 @@
 package org.springframework.boot.autoconfigure.interfaceclients;
 
 import java.lang.annotation.Annotation;
+import java.text.Normalizer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.text.CaseUtils;
+import org.jetbrains.annotations.NotNull;
+
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
+import org.springframework.boot.autoconfigure.interfaceclients.http.HttpInterfaceClientsAdapter;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
+ * Registers bean definitions for {@code HttpClient} and {@code RSocketClient}-annotated
+ * Interface Clients in order to automatically instantiate client beans based on those
+ * interfaces.
+ *
+ * @author Josh Long
  * @author Olga Maciaszek-Sharma
+ * @since 3.4.0
  */
-// TODO: remove abstract supertype or move to a shared package
+// TODO: Handle AOT
 public abstract class AbstractInterfaceClientsImportRegistrar
 		implements ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware {
+
+	/**
+	 * Default qualifier for user-provided beans used for creating Interface Clients.
+	 */
+	public static final String DEFAULT_INTERFACE_CLIENTS_ID = "interface-clients";
+
+	private static final String INTERFACE_CLIENT_SUFFIX = "InterfaceClient";
+
+	private static final String BEAN_NAME_ATTRIBUTE_NAME = "beanName";
+
+	private static final Log logger = LogFactory.getLog(AbstractInterfaceClientsImportRegistrar.class);
 
 	private Environment environment;
 
 	private ResourceLoader resourceLoader;
+
+
+	@Override
+	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry,
+			BeanNameGenerator importBeanNameGenerator) {
+		Assert.isInstanceOf(ListableBeanFactory.class, registry,
+				"Registry must be an instance of " + ListableBeanFactory.class.getSimpleName());
+		ListableBeanFactory beanFactory = (ListableBeanFactory) registry;
+		Set<BeanDefinition> candidateComponents = discoverCandidateComponents(beanFactory);
+		for (BeanDefinition candidateComponent : candidateComponents) {
+			if (candidateComponent instanceof AnnotatedBeanDefinition beanDefinition) {
+				registerInterfaceClient(registry, beanFactory, beanDefinition);
+			}
+		}
+	}
+
+	@Override
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
+	@Override
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
+
+	protected abstract Class<? extends Annotation> getAnnotation();
 
 	protected Set<BeanDefinition> discoverCandidateComponents(ListableBeanFactory beanFactory) {
 		Set<BeanDefinition> candidateComponents = new HashSet<>();
@@ -71,16 +133,48 @@ public abstract class AbstractInterfaceClientsImportRegistrar
 		};
 	}
 
-	@Override
-	public void setEnvironment(Environment environment) {
-		this.environment = environment;
+	private void registerInterfaceClient(BeanDefinitionRegistry registry, ListableBeanFactory beanFactory,
+			AnnotatedBeanDefinition beanDefinition) {
+		AnnotationMetadata annotatedBeanMetadata = beanDefinition.getMetadata();
+		Assert.isTrue(annotatedBeanMetadata.isInterface(),
+				getAnnotation().getSimpleName() + "can only be placed on an interface.");
+		MergedAnnotation<? extends Annotation> annotation = annotatedBeanMetadata.getAnnotations().get(getAnnotation());
+		String beanClassName = annotatedBeanMetadata.getClassName();
+		// The value of the annotation is the qualifier to look for related beans
+		// while the default beanName corresponds to the simple class name suffixed with
+		// `InterfaceClient`
+		String clientId = annotation.getString(MergedAnnotation.VALUE);
+		String beanName = !ObjectUtils.isEmpty(annotation.getString(BEAN_NAME_ATTRIBUTE_NAME))
+				? annotation.getString(BEAN_NAME_ATTRIBUTE_NAME) : buildBeanName(clientId);
+		HttpInterfaceClientsAdapter adapter = beanFactory.getBean(HttpInterfaceClientsAdapter.class);
+		Class<?> beanClass = toClass(beanClassName);
+		BeanDefinition definition = BeanDefinitionBuilder
+				.rootBeanDefinition(ResolvableType.forClass(beanClass),
+						() -> adapter.createClient(beanFactory, clientId, beanClass))
+				.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
+				.getBeanDefinition();
+		BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, beanName, new String[] { clientId });
+		BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
 	}
 
-	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
+	private String buildBeanName(String clientId) {
+		String normalised = Normalizer.normalize(clientId, Normalizer.Form.NFD);
+		String camelCased = CaseUtils.toCamelCase(normalised, false, '-', '_');
+		return camelCased + INTERFACE_CLIENT_SUFFIX;
 	}
 
-	protected abstract Class<? extends Annotation> getAnnotation();
+	private static @NotNull Class<?> toClass(String beanClassName) {
+		Class<?> beanClass;
+		try {
+			beanClass = Class.forName(beanClassName);
+		}
+		catch (ClassNotFoundException e) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Class not found for interface client " + beanClassName + ": " + e.getMessage());
+			}
+			throw new RuntimeException(e);
+		}
+		return beanClass;
+	}
 
 }
