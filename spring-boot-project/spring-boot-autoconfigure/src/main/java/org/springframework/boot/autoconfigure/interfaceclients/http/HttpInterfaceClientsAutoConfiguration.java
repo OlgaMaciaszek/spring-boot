@@ -66,9 +66,9 @@ public class HttpInterfaceClientsAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
 	@Conditional(NotReactiveWebApplicationCondition.class)
-	@ConditionalOnProperty(value = "spring.interfaceclients.resttemplate.enabled", havingValue = "false",
+	@ConditionalOnProperty(value = "spring.interfaceclients.http.resttemplate.enabled", havingValue = "false",
 			matchIfMissing = true)
-	protected static class RestClientAdapterProviderConfiguration {
+	protected static class RestClientInterfaceClientsConfiguration {
 
 		@Bean
 		@ConditionalOnBean(RestClient.Builder.class)
@@ -84,13 +84,12 @@ public class HttpInterfaceClientsAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestTemplate.class, RestTemplateAdapter.class, HttpServiceProxyFactory.class })
 	@Conditional(NotReactiveWebApplicationCondition.class)
-	protected static class RestTemplateAdapterProviderConfiguration {
+	@ConditionalOnProperty(value = "spring.interfaceclients.http.resttemplate.enabled", havingValue = "true")
+	protected static class RestTemplateInterfaceClientsConfiguration {
 
 		@Bean
 		@ConditionalOnBean(RestTemplateBuilder.class)
 		@ConditionalOnMissingBean
-		// FIXME
-		@ConditionalOnProperty(value = "spring.interfaceclients.http.resttemplate.enabled", havingValue = "true")
 		HttpExchangeAdapterProvider restTemplateAdapterProvider(
 				ObjectProvider<RestTemplateBuilder> restTemplateBuilderProvider,
 				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
@@ -102,7 +101,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ WebClient.class, WebClientAdapter.class, HttpServiceProxyFactory.class })
 	@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
-	protected static class WebClientAdapterProviderConfiguration {
+	protected static class WebClientInterfaceClientsConfiguration {
 
 		@Bean
 		@ConditionalOnBean(WebClient.Builder.class)

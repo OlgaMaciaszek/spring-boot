@@ -21,13 +21,24 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.interfaceclients.AbstractInterfaceClientsImportRegistrar;
 import org.springframework.boot.autoconfigure.interfaceclients.QualifiedBeanProvider;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 
 /**
+ * {@link WebClient}-backed {@link HttpExchangeAdapterProvider}
+ * implementation.
+ * <p>
+ * Will attempt to use a {@link WebClient} or {@link WebClient.Builder} bean provided by
+ * the user to create a {@link WebClientAdapter}. Beans qualified with a specific client
+ * id or {@link AbstractInterfaceClientsImportRegistrar#DEFAULT_INTERFACE_CLIENTS_ID})
+ * will be used. If no user-provided bean is found, one with a default implementation is
+ * created.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.4.0
  */
 public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 
@@ -45,27 +56,34 @@ public class WebClientAdapterProvider implements HttpExchangeAdapterProvider {
 
 	@Override
 	public HttpExchangeAdapter get(ListableBeanFactory beanFactory, String clientId) {
-		WebClient userProvidedWebClient = QualifiedBeanProvider.qualifiedBean(beanFactory, WebClient.class, clientId);
-		if (userProvidedWebClient != null) {
-			return WebClientAdapter.create(userProvidedWebClient);
-		}
 		HttpInterfaceClientsProperties properties = this.propertiesProvider.getObject();
 		String baseUrl = properties.getProperties(clientId).getBaseUrl();
+
+		WebClient userProvidedWebClient = QualifiedBeanProvider.qualifiedBean(beanFactory, WebClient.class, clientId);
+		if (userProvidedWebClient != null) {
+			// If the user wants to set the baseUrl directly on the builder,
+			// it should not be set in the properties.
+			if (baseUrl != null) {
+				userProvidedWebClient = userProvidedWebClient.mutate().baseUrl(baseUrl).build();
+			}
+			return WebClientAdapter.create(userProvidedWebClient);
+		}
+
 		WebClient.Builder userProvidedWebClientBuilder = QualifiedBeanProvider.qualifiedBean(beanFactory,
 				WebClient.Builder.class, clientId);
 		if (userProvidedWebClientBuilder != null) {
 			// If the user wants to set the baseUrl directly on the builder,
-			// it should not be set in properties.
+			// it should not be set in the properties.
 			if (baseUrl != null) {
 				userProvidedWebClientBuilder.baseUrl(baseUrl);
 			}
 			return WebClientAdapter.create(userProvidedWebClientBuilder.build());
 		}
+
 		// create a WebClientAdapter bean with default implementation
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating WebClientAdapter for '" + clientId + "'");
 		}
-		// FIXME
 		WebClient webClient = this.builderProvider.getObject().baseUrl(baseUrl).build();
 		return WebClientAdapter.create(webClient);
 	}
