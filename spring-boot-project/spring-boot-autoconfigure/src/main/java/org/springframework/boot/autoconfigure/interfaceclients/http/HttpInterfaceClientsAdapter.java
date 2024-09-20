@@ -34,6 +34,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
  * {@link AbstractInterfaceClientsImportRegistrar#DEFAULT_INTERFACE_CLIENTS_ID}) will be
  * used. If no user-provided bean is found, one with a default implementation is created.
  *
+ * @author Josh Long
  * @author Olga Maciaszek-Sharma
  * @since 3.4.0
  */
