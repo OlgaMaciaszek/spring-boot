@@ -19,11 +19,11 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 import java.lang.annotation.Annotation;
 
 import org.springframework.boot.autoconfigure.interfaceclients.AbstractInterfaceClientsImportRegistrar;
-import org.springframework.web.client.RestClient;
 
 /**
- * HTTP-specific {@link AbstractInterfaceClientsImportRegistrar}
- * implementation.
+ * HTTP-specific {@link AbstractInterfaceClientsImportRegistrar} implementation. Registers
+ * bean definitions for {@code HttpClient} -annotated Interface Clients in order to
+ * automatically instantiate client beans based on those interfaces.
  *
  * @author Olga Maciaszek-Sharma
  * @since 3.4.0

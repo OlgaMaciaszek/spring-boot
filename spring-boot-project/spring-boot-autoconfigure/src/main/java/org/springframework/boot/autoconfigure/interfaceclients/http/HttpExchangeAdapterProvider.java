@@ -20,7 +20,12 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 
 /**
+ * Provides an {@link HttpExchangeAdapter} instance for the {@code clientId} specified in
+ * the argument.
+ *
+ * @author Josh Long
  * @author Olga Maciaszek-Sharma
+ * @since 3.4.0
  */
 @FunctionalInterface
 public interface HttpExchangeAdapterProvider {

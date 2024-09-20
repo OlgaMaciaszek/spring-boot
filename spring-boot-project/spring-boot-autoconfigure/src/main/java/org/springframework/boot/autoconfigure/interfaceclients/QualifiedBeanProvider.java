@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 /**
  * Utility class containing methods that allow searching for beans with a specific
  * qualifier, falling back to the
- * {@link AbstractInterfaceClientsImportRegistrar#DEFAULT_INTERFACE_CLIENTS_ID} qualifier.
+ * {@link InterfaceClientsAdapter#INTERFACE_CLIENTS_DEFAULT_QUALIFIER} qualifier.
  *
  * @author Josh Long
  * @author Olga Maciaszek-Sharma
@@ -54,7 +54,7 @@ public final class QualifiedBeanProvider {
 				logger.debug("No qualified bean of type " + type + " found for " + clientId);
 			}
 			Map<String, T> matchingDefaultBeans = getQualifiedBeansOfType(beanFactory, type,
-					org.springframework.boot.autoconfigure.interfaceclients.AbstractInterfaceClientsImportRegistrar.DEFAULT_INTERFACE_CLIENTS_ID);
+					org.springframework.boot.autoconfigure.interfaceclients.InterfaceClientsAdapter.INTERFACE_CLIENTS_DEFAULT_QUALIFIER);
 			if (matchingDefaultBeans.size() > 1) {
 				throw new NoUniqueBeanDefinitionException(type, matchingDefaultBeans.keySet());
 			}
@@ -68,7 +68,8 @@ public final class QualifiedBeanProvider {
 		return matchingClientBeans.values().iterator().next();
 	}
 
-	private static <T> Map<String, T> getQualifiedBeansOfType(ListableBeanFactory beanFactory, Class<T> type, String clientId) {
+	private static <T> Map<String, T> getQualifiedBeansOfType(ListableBeanFactory beanFactory, Class<T> type,
+			String clientId) {
 		Map<String, T> beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(beanFactory, type);
 		Map<String, T> matchingClientBeans = new HashMap<>();
 		for (String beanName : beansOfType.keySet()) {

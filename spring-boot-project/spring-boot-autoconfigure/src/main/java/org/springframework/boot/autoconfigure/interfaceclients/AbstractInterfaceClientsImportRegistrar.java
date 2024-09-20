@@ -25,7 +25,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.text.CaseUtils;
-import org.jetbrains.annotations.NotNull;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -37,7 +36,6 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
-import org.springframework.boot.autoconfigure.interfaceclients.http.HttpInterfaceClientsAdapter;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -52,9 +50,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Registers bean definitions for {@code HttpClient} and {@code RSocketClient}-annotated
- * Interface Clients in order to automatically instantiate client beans based on those
- * interfaces.
+ * Registers bean definitions for annotated Interface Clients in order to automatically
+ * instantiate client beans based on those interfaces.
  *
  * @author Josh Long
  * @author Olga Maciaszek-Sharma
@@ -63,11 +60,6 @@ import org.springframework.util.ObjectUtils;
 // TODO: Handle AOT
 public abstract class AbstractInterfaceClientsImportRegistrar
 		implements ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware {
-
-	/**
-	 * Default qualifier for user-provided beans used for creating Interface Clients.
-	 */
-	public static final String DEFAULT_INTERFACE_CLIENTS_ID = "interface-clients";
 
 	private static final String INTERFACE_CLIENT_SUFFIX = "InterfaceClient";
 
@@ -78,7 +70,6 @@ public abstract class AbstractInterfaceClientsImportRegistrar
 	private Environment environment;
 
 	private ResourceLoader resourceLoader;
-
 
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry,
@@ -146,13 +137,13 @@ public abstract class AbstractInterfaceClientsImportRegistrar
 		String clientId = annotation.getString(MergedAnnotation.VALUE);
 		String beanName = !ObjectUtils.isEmpty(annotation.getString(BEAN_NAME_ATTRIBUTE_NAME))
 				? annotation.getString(BEAN_NAME_ATTRIBUTE_NAME) : buildBeanName(clientId);
-		HttpInterfaceClientsAdapter adapter = beanFactory.getBean(HttpInterfaceClientsAdapter.class);
+		InterfaceClientsAdapter adapter = beanFactory.getBean(InterfaceClientsAdapter.class);
 		Class<?> beanClass = toClass(beanClassName);
 		BeanDefinition definition = BeanDefinitionBuilder
-				.rootBeanDefinition(ResolvableType.forClass(beanClass),
-						() -> adapter.createClient(beanFactory, clientId, beanClass))
-				.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
-				.getBeanDefinition();
+			.rootBeanDefinition(ResolvableType.forClass(beanClass),
+					() -> adapter.createClient(beanFactory, clientId, beanClass))
+			.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
+			.getBeanDefinition();
 		BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, beanName, new String[] { clientId });
 		BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
 	}
@@ -163,16 +154,16 @@ public abstract class AbstractInterfaceClientsImportRegistrar
 		return camelCased + INTERFACE_CLIENT_SUFFIX;
 	}
 
-	private static @NotNull Class<?> toClass(String beanClassName) {
+	private static Class<?> toClass(String beanClassName) {
 		Class<?> beanClass;
 		try {
 			beanClass = Class.forName(beanClassName);
 		}
-		catch (ClassNotFoundException e) {
+		catch (ClassNotFoundException ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Class not found for interface client " + beanClassName + ": " + e.getMessage());
+				logger.debug("Class not found for interface client " + beanClassName + ": " + ex.getMessage());
 			}
-			throw new RuntimeException(e);
+			throw new RuntimeException(ex);
 		}
 		return beanClass;
 	}

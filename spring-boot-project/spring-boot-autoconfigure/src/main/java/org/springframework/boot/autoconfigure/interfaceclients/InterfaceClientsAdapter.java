@@ -17,15 +17,20 @@
 package org.springframework.boot.autoconfigure.interfaceclients;
 
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.core.Ordered;
 
 /**
+ * Creates an Interface Client bean for the specified {@code type} and {@code clientId}.
+ *
  * @author Josh Long
  * @author Olga Maciaszek-Sharma
+ * @since 3.4.0
  */
 public interface InterfaceClientsAdapter {
 
-	String DEFAULT_QUALIFIER = "interfaceClients";
+	/**
+	 * Default qualifier for user-provided beans used for creating Interface Clients.
+	 */
+	String INTERFACE_CLIENTS_DEFAULT_QUALIFIER = "interfaceClients";
 
 	<T> T createClient(ListableBeanFactory beanFactory, String clientId, Class<T> type);
 
