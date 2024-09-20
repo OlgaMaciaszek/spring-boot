@@ -35,6 +35,8 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.testsupport.classpath.ForkedClassPath;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,6 +57,7 @@ class BaggagePropagationIntegrationTests {
 	@BeforeEach
 	@AfterEach
 	void setup() {
+		OpenTelemetryEventPublisherBeansApplicationListener.addWrapper();
 		MDC.clear();
 	}
 
@@ -155,6 +158,7 @@ class BaggagePropagationIntegrationTests {
 	enum AutoConfig implements Supplier<ApplicationContextRunner> {
 
 		BRAVE_DEFAULT {
+
 			@Override
 			public ApplicationContextRunner get() {
 				return new ApplicationContextRunner()
@@ -162,20 +166,24 @@ class BaggagePropagationIntegrationTests {
 					.withPropertyValues("management.tracing.baggage.remote-fields=x-vcap-request-id,country-code,bp",
 							"management.tracing.baggage.correlation.fields=country-code,bp");
 			}
+
 		},
 
 		OTEL_DEFAULT {
+
 			@Override
 			public ApplicationContextRunner get() {
-				return new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(
-						OpenTelemetryAutoConfiguration.class,
-						org.springframework.boot.actuate.autoconfigure.tracing.OpenTelemetryAutoConfiguration.class))
+				return new ApplicationContextRunner().withInitializer(new OtelApplicationContextInitializer())
+					.withConfiguration(AutoConfigurations.of(OpenTelemetryAutoConfiguration.class,
+							org.springframework.boot.actuate.autoconfigure.tracing.OpenTelemetryTracingAutoConfiguration.class))
 					.withPropertyValues("management.tracing.baggage.remote-fields=x-vcap-request-id,country-code,bp",
 							"management.tracing.baggage.correlation.fields=country-code,bp");
 			}
+
 		},
 
 		BRAVE_W3C {
+
 			@Override
 			public ApplicationContextRunner get() {
 				return new ApplicationContextRunner()
@@ -184,21 +192,25 @@ class BaggagePropagationIntegrationTests {
 							"management.tracing.baggage.remote-fields=x-vcap-request-id,country-code,bp",
 							"management.tracing.baggage.correlation.fields=country-code,bp");
 			}
+
 		},
 
 		OTEL_W3C {
+
 			@Override
 			public ApplicationContextRunner get() {
-				return new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(
-						OpenTelemetryAutoConfiguration.class,
-						org.springframework.boot.actuate.autoconfigure.tracing.OpenTelemetryAutoConfiguration.class))
+				return new ApplicationContextRunner().withInitializer(new OtelApplicationContextInitializer())
+					.withConfiguration(AutoConfigurations.of(OpenTelemetryAutoConfiguration.class,
+							org.springframework.boot.actuate.autoconfigure.tracing.OpenTelemetryTracingAutoConfiguration.class))
 					.withPropertyValues("management.tracing.propagation.type=W3C",
 							"management.tracing.baggage.remote-fields=x-vcap-request-id,country-code,bp",
 							"management.tracing.baggage.correlation.fields=country-code,bp");
 			}
+
 		},
 
 		BRAVE_B3 {
+
 			@Override
 			public ApplicationContextRunner get() {
 				return new ApplicationContextRunner()
@@ -207,9 +219,11 @@ class BaggagePropagationIntegrationTests {
 							"management.tracing.baggage.remote-fields=x-vcap-request-id,country-code,bp",
 							"management.tracing.baggage.correlation.fields=country-code,bp");
 			}
+
 		},
 
 		BRAVE_B3_MULTI {
+
 			@Override
 			public ApplicationContextRunner get() {
 				return new ApplicationContextRunner()
@@ -218,33 +232,39 @@ class BaggagePropagationIntegrationTests {
 							"management.tracing.baggage.remote-fields=x-vcap-request-id,country-code,bp",
 							"management.tracing.baggage.correlation.fields=country-code,bp");
 			}
+
 		},
 
 		OTEL_B3 {
+
 			@Override
 			public ApplicationContextRunner get() {
-				return new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(
-						OpenTelemetryAutoConfiguration.class,
-						org.springframework.boot.actuate.autoconfigure.tracing.OpenTelemetryAutoConfiguration.class))
+				return new ApplicationContextRunner().withInitializer(new OtelApplicationContextInitializer())
+					.withConfiguration(AutoConfigurations.of(OpenTelemetryAutoConfiguration.class,
+							org.springframework.boot.actuate.autoconfigure.tracing.OpenTelemetryTracingAutoConfiguration.class))
 					.withPropertyValues("management.tracing.propagation.type=B3",
 							"management.tracing.baggage.remote-fields=x-vcap-request-id,country-code,bp",
 							"management.tracing.baggage.correlation.fields=country-code,bp");
 			}
+
 		},
 
 		OTEL_B3_MULTI {
+
 			@Override
 			public ApplicationContextRunner get() {
-				return new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(
-						OpenTelemetryAutoConfiguration.class,
-						org.springframework.boot.actuate.autoconfigure.tracing.OpenTelemetryAutoConfiguration.class))
+				return new ApplicationContextRunner().withInitializer(new OtelApplicationContextInitializer())
+					.withConfiguration(AutoConfigurations.of(OpenTelemetryAutoConfiguration.class,
+							org.springframework.boot.actuate.autoconfigure.tracing.OpenTelemetryTracingAutoConfiguration.class))
 					.withPropertyValues("management.tracing.propagation.type=B3_MULTI",
 							"management.tracing.baggage.remote-fields=x-vcap-request-id,country-code,bp",
 							"management.tracing.baggage.correlation.fields=country-code,bp");
 			}
+
 		},
 
 		BRAVE_LOCAL_FIELDS {
+
 			@Override
 			public ApplicationContextRunner get() {
 				return new ApplicationContextRunner()
@@ -252,6 +272,7 @@ class BaggagePropagationIntegrationTests {
 					.withPropertyValues("management.tracing.baggage.local-fields=country-code,bp",
 							"management.tracing.baggage.correlation.fields=country-code,bp");
 			}
+
 		};
 
 		boolean isOtel() {
@@ -260,6 +281,16 @@ class BaggagePropagationIntegrationTests {
 
 		boolean isBrave() {
 			return name().startsWith("BRAVE_");
+		}
+
+	}
+
+	static class OtelApplicationContextInitializer
+			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+		@Override
+		public void initialize(ConfigurableApplicationContext applicationContext) {
+			applicationContext.addApplicationListener(new OpenTelemetryEventPublisherBeansApplicationListener());
 		}
 
 	}

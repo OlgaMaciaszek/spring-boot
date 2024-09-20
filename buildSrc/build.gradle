@@ -10,8 +10,11 @@ repositories {
 	gradlePluginPortal()
 }
 
-sourceCompatibility = 17
-targetCompatibility = 17
+java {
+	sourceCompatibility = 17
+	targetCompatibility = 17
+}
+
 
 def versions = [:]
 new File(projectDir.parentFile, "gradle.properties").withInputStream {
@@ -40,12 +43,11 @@ dependencies {
 	checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:${javaFormatVersion}")
 
 	implementation(platform("org.springframework:spring-framework-bom:${versions.springFramework}"))
-	implementation("com.diffplug.gradle:goomph:3.37.2")
 	implementation("dev.adamko.dokkatoo:dokkatoo-plugin:2.3.1")
 	implementation("com.fasterxml.jackson.core:jackson-databind:${versions.jackson}")
 	implementation("com.github.node-gradle:gradle-node-plugin:3.5.1")
 	implementation("com.gradle:develocity-gradle-plugin:3.17.2")
-	implementation("com.tngtech.archunit:archunit:1.0.0")
+	implementation("com.tngtech.archunit:archunit:1.3.0")
 	implementation("commons-codec:commons-codec:${versions.commonsCodec}")
 	implementation("de.undercouch.download:de.undercouch.download.gradle.plugin:5.5.0")
 	implementation("io.spring.gradle.antora:spring-antora-plugin:0.0.1")
@@ -128,10 +130,6 @@ gradlePlugin {
 		optionalDependenciesPlugin {
 			id = "org.springframework.boot.optional-dependencies"
 			implementationClass = "org.springframework.boot.build.optional.OptionalDependenciesPlugin"
-		}
-		processedAnnotationsPlugin {
-			id = "org.springframework.boot.processed-annotations"
-			implementationClass = "org.springframework.boot.build.processors.ProcessedAnnotationsPlugin"
 		}
 		starterPlugin {
 			id = "org.springframework.boot.starter"

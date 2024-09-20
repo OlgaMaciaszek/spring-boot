@@ -22,8 +22,8 @@ import zipkin2.reporter.Encoding;
 import zipkin2.reporter.HttpEndpointSupplier.Factory;
 
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -31,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Moritz Halbritter
  * @author Stefan Bratanov
+ * @deprecated since 3.3.0 for removal in 3.5.0 in favor of {@link ZipkinHttpClientSender}
  */
 @Deprecated(since = "3.3.0", forRemoval = true)
 class ZipkinRestTemplateSender extends HttpSender {
@@ -44,7 +45,7 @@ class ZipkinRestTemplateSender extends HttpSender {
 	}
 
 	@Override
-	void postSpans(URI endpoint, HttpHeaders headers, byte[] body) {
+	void postSpans(URI endpoint, MultiValueMap<String, String> headers, byte[] body) {
 		HttpEntity<byte[]> request = new HttpEntity<>(body, headers);
 		this.restTemplate.exchange(endpoint, HttpMethod.POST, request, Void.class);
 	}

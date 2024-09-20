@@ -46,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FlywayPropertiesTests {
 
 	@Test
+	@SuppressWarnings("removal")
 	void defaultValuesAreConsistent() {
 		FlywayProperties properties = new FlywayProperties();
 		Configuration configuration = new FluentConfiguration();
@@ -115,6 +116,8 @@ class FlywayPropertiesTests {
 				"oracleWalletLocation", "sqlServerKerberosLoginFile");
 		// Properties that are managed by specific extensions
 		ignoreProperties(properties, "oracle", "postgresql", "sqlserver");
+		// Properties that are only used on the command line
+		ignoreProperties(configuration, "jarDirs");
 		// https://github.com/flyway/flyway/issues/3732
 		ignoreProperties(configuration, "environment");
 		// High level object we can't set with properties
@@ -124,7 +127,7 @@ class FlywayPropertiesTests {
 		ignoreProperties(configuration, "resolversAsClassNames", "callbacksAsClassNames", "driver", "modernConfig",
 				"currentResolvedEnvironment", "reportFilename", "reportEnabled", "workingDirectory",
 				"cachedDataSources", "cachedResolvedEnvironments", "currentEnvironmentName", "allEnvironments",
-				"environmentProvisionMode");
+				"environmentProvisionMode", "provisionMode");
 		// Handled by the conversion service
 		ignoreProperties(configuration, "baselineVersionAsString", "encodingAsString", "locationsAsStrings",
 				"targetAsString");

@@ -20,7 +20,7 @@ Spring Boot Actuator provides dependency management and auto-configuration for {
 - xref:actuator/metrics.adoc#actuator.metrics.export.signalfx[]
 - xref:actuator/metrics.adoc#actuator.metrics.export.simple[] (in-memory)
 - xref:actuator/metrics.adoc#actuator.metrics.export.stackdriver[]
-- xref:actuator/metrics.adoc#actuator.metrics.export.statsd[D]
+- xref:actuator/metrics.adoc#actuator.metrics.export.statsd[]
 - xref:actuator/metrics.adoc#actuator.metrics.export.wavefront[]
 
 TIP: To learn more about Micrometer's capabilities, see its {url-micrometer-docs}[reference documentation], in particular the {url-micrometer-docs-concepts}[concepts section].
@@ -1082,7 +1082,7 @@ Auto-configuration registers a `MongoMetricsConnectionPoolListener` with the aut
 
 The following gauge metrics are created for the connection pool:
 
-* `mongodb.driver.pool.size` reports the current size of the connection pool, including idle and and in-use members.
+* `mongodb.driver.pool.size` reports the current size of the connection pool, including idle and in-use members.
 * `mongodb.driver.pool.checkedout` reports the count of connections that are currently in use.
 * `mongodb.driver.pool.waitqueuesize` reports the current size of the wait queue for a connection from the pool.
 

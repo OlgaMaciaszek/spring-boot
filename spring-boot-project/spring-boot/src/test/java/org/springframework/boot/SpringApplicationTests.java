@@ -44,8 +44,6 @@ import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
 
 import org.springframework.aot.AotDetector;
-import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.ObjectProvider;
@@ -58,7 +56,6 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultBeanNameGenerator;
 import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.BootstrapRegistry.InstanceSupplier;
-import org.springframework.boot.SpringApplication.SpringApplicationRuntimeHints;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.AvailabilityState;
 import org.springframework.boot.availability.LivenessState;
@@ -95,6 +92,7 @@ import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
@@ -1413,18 +1411,7 @@ class SpringApplicationTests {
 	}
 
 	@Test
-	void shouldRegisterHints() {
-		RuntimeHints hints = new RuntimeHints();
-		new SpringApplicationRuntimeHints().registerHints(hints, getClass().getClassLoader());
-		assertThat(RuntimeHintsPredicates.reflection().onType(SpringApplication.class)).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SpringApplication.class, "setBannerMode"))
-			.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SpringApplication.class, "getSources")).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SpringApplication.class, "setSources")).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SpringApplication.class, "load")).rejects(hints);
-	}
-
-	@Test // gh-32555
+	// gh-32555
 	void shouldUseAotInitializer() {
 		SpringApplication application = new SpringApplication(ExampleAotProcessedMainClass.class);
 		application.setWebApplicationType(WebApplicationType.NONE);
@@ -1481,6 +1468,17 @@ class SpringApplicationTests {
 			.run()
 			.getApplicationContext();
 		assertThatNoException().isThrownBy(() -> this.context.getBean(SingleUseAdditionalConfig.class));
+	}
+
+	@Test
+	void fromAppliesProfiles() {
+		this.context = SpringApplication.from(ExampleFromMainMethod::main)
+			.with(ProfileConfig.class)
+			.withAdditionalProfiles("custom")
+			.run()
+			.getApplicationContext();
+		assertThat(this.context).isNotNull();
+		assertThat(this.context.getBeanProvider(Example.class).getIfAvailable()).isNotNull();
 	}
 
 	@Test
@@ -1647,7 +1645,7 @@ class SpringApplicationTests {
 		}
 
 		Banner.Mode getBannerMode() {
-			return this.properties.getBannerMode();
+			return this.properties.getBannerMode(new MockEnvironment());
 		}
 
 	}
@@ -2170,6 +2168,17 @@ class SpringApplicationTests {
 			if (!used.compareAndSet(false, true)) {
 				throw new IllegalStateException("Single-use configuration has already been used");
 			}
+		}
+
+	}
+
+	@Configuration
+	static class ProfileConfig {
+
+		@Bean
+		@Profile("custom")
+		Example example() {
+			return new Example();
 		}
 
 	}

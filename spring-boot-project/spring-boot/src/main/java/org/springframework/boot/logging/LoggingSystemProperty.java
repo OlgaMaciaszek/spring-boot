@@ -32,6 +32,7 @@ public enum LoggingSystemProperty {
 
 	/**
 	 * Logging system property for the application group that should be logged.
+	 * @since 3.4.0
 	 */
 	APPLICATION_GROUP("APPLICATION_GROUP", "spring.application.group", "logging.include-application-group"),
 
@@ -140,7 +141,13 @@ public enum LoggingSystemProperty {
 		return this.environmentVariableName;
 	}
 
-	String getApplicationPropertyName() {
+	/**
+	 * Return the name of the application property name that can be used to set this
+	 * property.
+	 * @return the application property name
+	 * @since 3.4.0
+	 */
+	public String getApplicationPropertyName() {
 		return this.applicationPropertyName;
 	}
 

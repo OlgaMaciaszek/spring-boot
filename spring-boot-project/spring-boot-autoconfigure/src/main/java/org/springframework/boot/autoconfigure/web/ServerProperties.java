@@ -109,7 +109,7 @@ public class ServerProperties {
 	/**
 	 * Type of shutdown that the server will support.
 	 */
-	private Shutdown shutdown = Shutdown.IMMEDIATE;
+	private Shutdown shutdown = Shutdown.GRACEFUL;
 
 	@NestedConfigurationProperty
 	private Ssl ssl;
@@ -491,6 +491,7 @@ public class ServerProperties {
 
 		/**
 		 * Whether to reject requests with illegal header names or values.
+		 * @deprecated since 2.7.12 for removal in 3.3.0
 		 */
 		@Deprecated(since = "2.7.12", forRemoval = true) // Remove in 3.3
 		private boolean rejectIllegalHeader = true;
@@ -924,12 +925,14 @@ public class ServerProperties {
 		public static class Threads {
 
 			/**
-			 * Maximum amount of worker threads.
+			 * Maximum amount of worker threads. Doesn't have an effect if virtual threads
+			 * are enabled.
 			 */
 			private int max = 200;
 
 			/**
-			 * Minimum amount of worker threads.
+			 * Minimum amount of worker threads. Doesn't have an effect if virtual threads
+			 * are enabled.
 			 */
 			private int minSpare = 10;
 
@@ -1349,12 +1352,14 @@ public class ServerProperties {
 			private Integer selectors = -1;
 
 			/**
-			 * Maximum number of threads.
+			 * Maximum number of threads. Doesn't have an effect if virtual threads are
+			 * enabled.
 			 */
 			private Integer max = 200;
 
 			/**
-			 * Minimum number of threads.
+			 * Minimum number of threads. Doesn't have an effect if virtual threads are
+			 * enabled.
 			 */
 			private Integer min = 8;
 
