@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package smoketest.web.thymeleaf;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.assertj.core.api.HamcrestCondition;
@@ -54,10 +55,14 @@ class MessageControllerWebTests {
 		assertThat(this.mvc.post().uri("/").param("text", "FOO text").param("summary", "FOO"))
 			.hasStatus(HttpStatus.FOUND)
 			.headers()
-			.hasEntrySatisfying("Location",
-					(values) -> assertThat(values).hasSize(1)
-						.element(0)
-						.satisfies(HamcrestCondition.matching(RegexMatcher.matches("/[0-9]+"))));
+			.satisfies(headers -> {
+				// FIXME: https://github.com/spring-projects/spring-framework/issues/34168
+				List<String> locations = headers.get("Location");
+				assertThat(locations).isNotNull()
+					.hasSize(1)
+					.singleElement()
+					.satisfies(HamcrestCondition.matching(RegexMatcher.matches("/[0-9]+")));
+			});
 	}
 
 	@Test
