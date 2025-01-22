@@ -6,6 +6,7 @@ plugins {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 	gradlePluginPortal()
 }
@@ -53,7 +54,7 @@ dependencies {
 	testImplementation("org.mockito:mockito-core:${mockitoVersion}")
 	testImplementation("org.springframework:spring-test")
 
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.9.1")
 }
 
 configurations.all {
