@@ -16,12 +16,21 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
+import org.springframework.web.service.registry.HttpServiceProxyGroup;
 import org.springframework.web.service.registry.HttpServiceProxyRegistry;
 
 /**
@@ -37,10 +46,26 @@ public class HttpInterfaceClientsRegistrar implements ImportBeanDefinitionRegist
 		// TODO - consider separate Registrars for various registries
 		HttpServiceProxyRegistry.Builder registryBuilder = beanFactory.getBean(HttpServiceProxyRegistry.Builder.class);
 
+		// TODO: get clientBuilder and proxyFactoryBuilder setup from properties
 		registryBuilder.discoverAndAddClients(AutoConfigurationPackages.get(beanFactory), clientBuilder -> { // dosth
 		}, proxyFactoryBuilderConsumer -> {
 			// do sth
 		});
+		HttpServiceProxyRegistry interfaceClientRegistry = registryBuilder.build();
+
+		for (HttpServiceProxyGroup client : interfaceClientRegistry.getProxyGroups()) {
+			Map<Class<?>, Object> proxies = client.proxies();
+			for (Class<?> proxyClass : proxies.keySet()) {
+				BeanDefinition definition = BeanDefinitionBuilder
+					.rootBeanDefinition(ResolvableType.forClass(proxyClass), () -> proxies.get(proxyClass))
+					.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
+					.getBeanDefinition();
+				// TODO: * create better names from urls?
+				String beanName = client.name() + proxyClass.getSimpleName();
+				BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, beanName);
+				BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
+			}
+		}
 
 	}
 
