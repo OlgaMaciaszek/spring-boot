@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.actuate.autoconfigure.interfaceclients.http;
+package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import org.springframework.boot.actuate.autoconfigure.interfaceclients.EnableInterfaceClients;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
 import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
@@ -32,6 +32,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.client.support.RestClientProxyRegistry;
@@ -39,12 +40,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.reactive.function.client.support.WebClientProxyRegistry;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+import org.springframework.web.service.registry.InterfaceClient;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for HTTP Interface Clients.
  * <p>
  * This will result in the creation of Interface Client beans from
- * {@link EnableInterfaceClients}-annotated interfaces.
+ * {@link InterfaceClient}-annotated interfaces.
  *
  * @author Olga Maciaszek-Sharma
  * @since 4.0.0
@@ -52,8 +54,9 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 @AutoConfiguration(after = { RestTemplateAutoConfiguration.class, RestClientAutoConfiguration.class,
 		WebClientAutoConfiguration.class })
 @EnableConfigurationProperties(HttpInterfaceClientsProperties.class)
+@ConditionalOnProperty(value = "spring.interfaceclients.enabled", havingValue = "true", matchIfMissing = true)
+@Import(HttpInterfaceClientsRegistrar.class)
 public class HttpInterfaceClientsAutoConfiguration {
-
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
@@ -66,10 +69,10 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@ConditionalOnMissingBean
 		RestClientProxyRegistry.Builder httpServiceProxyRegistry(RestClient.Builder baseRestClientBuilder) {
 			return RestClientProxyRegistry.builder(baseRestClientBuilder);
+			// pre-add clients from the scan
 		}
 
 	}
-
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ WebClient.class, WebClientAdapter.class, HttpServiceProxyFactory.class })

@@ -14,27 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.actuate.autoconfigure.interfaceclients.http;
-
 /**
- * Properties for HTTP Interface Clients.
- *
- * @author Olga Maciaszek-Sharma
- * @since 4.0.0
+ * AutoConfiguration for Spring Interface Clients.
  */
-public class HttpInterfaceClientsBaseProperties {
-
-	/**
-	 * Base url to set in the underlying HTTP client. By default, set to null.
-	 */
-	private String baseUrl = null;
-
-	public String getBaseUrl() {
-		return this.baseUrl;
-	}
-
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
-	}
-
-}
+package org.springframework.boot.autoconfigure.interfaceclients;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.actuate.autoconfigure.interfaceclients.http;
+package org.springframework.boot.autoconfigure.interfaceclients.http;
 
 import java.util.HashMap;
 import java.util.Map;
