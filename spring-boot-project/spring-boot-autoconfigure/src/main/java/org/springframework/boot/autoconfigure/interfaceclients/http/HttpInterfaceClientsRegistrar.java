@@ -43,8 +43,8 @@ public class HttpInterfaceClientsRegistrar implements ImportBeanDefinitionRegist
 		Assert.isInstanceOf(ListableBeanFactory.class, registry,
 				"Registry must be an instance of " + ListableBeanFactory.class.getSimpleName());
 		ListableBeanFactory beanFactory = (ListableBeanFactory) registry;
-		// TODO - consider separate Registrars for various registries
-		HttpServiceProxyRegistry.Builder registryBuilder = beanFactory.getBean(HttpServiceProxyRegistry.Builder.class);
+		HttpServiceProxyRegistry.Builder<?, ?> registryBuilder = beanFactory
+			.getBean(HttpServiceProxyRegistry.Builder.class);
 
 		// TODO: get clientBuilder and proxyFactoryBuilder setup from properties
 		registryBuilder.discoverAndAddClients(AutoConfigurationPackages.get(beanFactory), clientBuilder -> { // dosth
@@ -52,21 +52,28 @@ public class HttpInterfaceClientsRegistrar implements ImportBeanDefinitionRegist
 			// do sth
 		});
 		HttpServiceProxyRegistry interfaceClientRegistry = registryBuilder.build();
+		registerBeanDefinition(registry, "httpInterfaceClientRegistry", HttpServiceProxyRegistry.class,
+				interfaceClientRegistry);
 
-		for (HttpServiceProxyGroup client : interfaceClientRegistry.getProxyGroups()) {
-			Map<Class<?>, Object> proxies = client.proxies();
+		for (HttpServiceProxyGroup clientGroup : interfaceClientRegistry.getProxyGroups()) {
+			Map<Class<?>, Object> proxies = clientGroup.proxies();
 			for (Class<?> proxyClass : proxies.keySet()) {
-				BeanDefinition definition = BeanDefinitionBuilder
-					.rootBeanDefinition(ResolvableType.forClass(proxyClass), () -> proxies.get(proxyClass))
-					.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
-					.getBeanDefinition();
-				// TODO: * create better names from urls?
-				String beanName = client.name() + proxyClass.getSimpleName();
-				BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, beanName);
-				BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
+				// TODO: * create better bean names from urls?
+				String beanName = clientGroup.name() + proxyClass.getSimpleName();
+				registerBeanDefinition(registry, beanName, proxyClass, proxies.get(proxyClass));
 			}
 		}
 
+	}
+
+	private static void registerBeanDefinition(BeanDefinitionRegistry registry, String beanName, Class<?> beanClass,
+			Object object) {
+		BeanDefinition definition = BeanDefinitionBuilder
+			.rootBeanDefinition(ResolvableType.forClass(beanClass), () -> object)
+			.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
+			.getBeanDefinition();
+		BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, beanName);
+		BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
 	}
 
 }
