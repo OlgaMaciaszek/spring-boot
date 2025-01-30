@@ -16,25 +16,27 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
+import java.util.function.Consumer;
+
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClient.Builder;
+
 /**
- * Properties for HTTP Interface Clients.
- *
  * @author Olga Maciaszek-Sharma
- * @since 4.0.0
  */
-public class HttpInterfaceClientsBaseProperties {
+public class WebClientBuilderConfigurer implements InterfaceClientsBuilderConfigurer<WebClient.Builder> {
 
-	/**
-	 * Base url to set in the underlying HTTP client. By default, set to null.
-	 */
-	private String baseUrl = null;
+	private final ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider;
 
-	public String getBaseUrl() {
-		return this.baseUrl;
+	public WebClientBuilderConfigurer(ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
+		this.propertiesProvider = propertiesProvider;
 	}
 
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
+	@Override
+	public Consumer<Builder> buildClientConsumer(String name) {
+		// FIXME
+		throw new UnsupportedOperationException("Please, implement me.");
 	}
 
 }

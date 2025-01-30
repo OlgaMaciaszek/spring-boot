@@ -17,6 +17,7 @@
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -32,25 +33,31 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 import org.springframework.web.service.registry.HttpServiceProxyGroup;
 import org.springframework.web.service.registry.HttpServiceProxyRegistry;
+import org.springframework.web.service.registry.InterfaceClientData;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class HttpInterfaceClientsRegistrar implements ImportBeanDefinitionRegistrar {
+public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRegistrar {
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 		Assert.isInstanceOf(ListableBeanFactory.class, registry,
 				"Registry must be an instance of " + ListableBeanFactory.class.getSimpleName());
 		ListableBeanFactory beanFactory = (ListableBeanFactory) registry;
-		HttpServiceProxyRegistry.Builder<?, ?> registryBuilder = beanFactory
+		HttpServiceProxyRegistry.Builder<?, CB> registryBuilder = beanFactory
 			.getBean(HttpServiceProxyRegistry.Builder.class);
 
-		// TODO: get clientBuilder and proxyFactoryBuilder setup from properties
-		registryBuilder.discoverAndAddClients(AutoConfigurationPackages.get(beanFactory), clientBuilder -> { // dosth
-		}, proxyFactoryBuilderConsumer -> {
-			// do sth
-		});
+		Set<InterfaceClientData> clientData = registryBuilder
+			.discoverClients(AutoConfigurationPackages.get(beanFactory));
+
+		InterfaceClientsBuilderConfigurer<CB> configurer = beanFactory.getBean(InterfaceClientsBuilderConfigurer.class);
+
+		for (InterfaceClientData interfaceClientData : clientData) {
+			registryBuilder.addClient(interfaceClientData, configurer.buildClientConsumer(interfaceClientData.name()));
+		}
+
 		HttpServiceProxyRegistry interfaceClientRegistry = registryBuilder.build();
 		registerBeanDefinition(registry, "httpInterfaceClientRegistry", HttpServiceProxyRegistry.class,
 				interfaceClientRegistry);

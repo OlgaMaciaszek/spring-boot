@@ -1626,6 +1626,12 @@
       "defaultValue": "classpath:git.properties"
     },
     {
+      "name": "spring.interface-clients.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to automatically instantiate client beans from annotated interfaces.",
+      "defaultValue": true
+    },
+    {
       "name": "spring.jackson.constructor-detector",
       "defaultValue": "default"
     },

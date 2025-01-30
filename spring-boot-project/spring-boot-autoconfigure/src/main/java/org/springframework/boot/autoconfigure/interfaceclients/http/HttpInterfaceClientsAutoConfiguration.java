@@ -16,6 +16,7 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -54,7 +55,7 @@ import org.springframework.web.service.registry.InterfaceClient;
 @AutoConfiguration(after = { RestTemplateAutoConfiguration.class, RestClientAutoConfiguration.class,
 		WebClientAutoConfiguration.class })
 @EnableConfigurationProperties(HttpInterfaceClientsProperties.class)
-@ConditionalOnProperty(value = "spring.interfaceclients.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(value = "spring.interface-clients.enabled", havingValue = "true", matchIfMissing = true)
 @Import(HttpInterfaceClientsRegistrar.class)
 public class HttpInterfaceClientsAutoConfiguration {
 
@@ -63,13 +64,19 @@ public class HttpInterfaceClientsAutoConfiguration {
 	@Conditional(NotReactiveWebApplicationCondition.class)
 	protected static class RestClientInterfaceClientsConfiguration {
 
-		// TODO: * consider creating a registry bean instead
 		@Bean
 		@ConditionalOnBean(RestClient.Builder.class)
 		@ConditionalOnMissingBean
 		RestClientProxyRegistry.Builder httpServiceProxyRegistry(RestClient.Builder baseRestClientBuilder) {
 			return RestClientProxyRegistry.builder(baseRestClientBuilder);
-			// pre-add clients from the scan
+		}
+
+		@Bean
+		@ConditionalOnBean(RestClient.Builder.class)
+		@ConditionalOnMissingBean
+		InterfaceClientsBuilderConfigurer<RestClient.Builder> interfaceClientsRestClientBuilderConfigurer(
+				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
+			return new RestClientBuilderConfigurer(propertiesProvider);
 		}
 
 	}
@@ -79,12 +86,19 @@ public class HttpInterfaceClientsAutoConfiguration {
 	@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 	protected static class WebClientInterfaceClientsConfiguration {
 
-		// TODO: * consider creating a registry bean instead
 		@Bean
 		@ConditionalOnBean(WebClient.Builder.class)
 		@ConditionalOnMissingBean
-		WebClientProxyRegistry.Builder httpServiceProxyRegistry(WebClient.Builder baseRestClientBuilder) {
-			return WebClientProxyRegistry.builder(baseRestClientBuilder);
+		WebClientProxyRegistry.Builder httpServiceProxyRegistry(WebClient.Builder baseWebClientBuilder) {
+			return WebClientProxyRegistry.builder(baseWebClientBuilder);
+		}
+
+		@Bean
+		@ConditionalOnBean(WebClient.Builder.class)
+		@ConditionalOnMissingBean
+		InterfaceClientsBuilderConfigurer<WebClient.Builder> interfaceClientsWebClientBuilderConfigurer(
+				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
+			return new WebClientBuilderConfigurer(propertiesProvider);
 		}
 
 	}

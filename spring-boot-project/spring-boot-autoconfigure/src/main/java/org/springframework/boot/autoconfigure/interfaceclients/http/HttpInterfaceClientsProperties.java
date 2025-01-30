@@ -31,26 +31,30 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Olga Maciaszek-Sharma
  * @since 4.0.0
  */
-@ConfigurationProperties("spring.interfaceclients.http")
-public class HttpInterfaceClientsProperties extends HttpInterfaceClientsBaseProperties {
+@ConfigurationProperties("spring.interface-clients.http")
+public class HttpInterfaceClientsProperties extends HttpInterfaceClientGroupProperties {
 
 	/**
-	 * Client-specific interface client properties.
+	 * Group-specific interface client properties.
 	 */
-	private final Map<String, HttpInterfaceClientsBaseProperties> clients = new HashMap<>();
+	private Map<String, HttpInterfaceClientGroupProperties> clientGroups = new HashMap<>();
 
-	public Map<String, HttpInterfaceClientsBaseProperties> getClients() {
-		return this.clients;
+	public Map<String, HttpInterfaceClientGroupProperties> getClientGroups() {
+		return this.clientGroups;
 	}
 
-	public HttpInterfaceClientsBaseProperties getProperties(String clientId) {
-		if (clientId == null || !this.getClients().containsKey(clientId)) {
+	public void setClientGroups(Map<String, HttpInterfaceClientGroupProperties> clientGroups) {
+		this.clientGroups = clientGroups;
+	}
+
+	public HttpInterfaceClientGroupProperties getProperties(String clientGroupName) {
+		if (clientGroupName == null || !this.getClientGroups().containsKey(clientGroupName)) {
 			// no specific client properties, return default
 			return this;
 		}
 		// because specifics are overlaid on top of defaults, everything in `properties`,
 		// unless overridden, is in `clientsProperties`
-		return this.getClients().get(clientId);
+		return this.getClientGroups().get(clientGroupName);
 	}
 
 }
