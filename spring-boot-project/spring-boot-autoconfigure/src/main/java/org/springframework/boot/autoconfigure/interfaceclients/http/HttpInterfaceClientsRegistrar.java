@@ -16,9 +16,13 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -27,10 +31,14 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.service.registry.HttpServiceProxyGroup;
 import org.springframework.web.service.registry.HttpServiceProxyRegistry;
 import org.springframework.web.service.registry.InterfaceClientData;
@@ -52,35 +60,70 @@ public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRe
 		Set<InterfaceClientData> clientData = registryBuilder
 			.discoverClients(AutoConfigurationPackages.get(beanFactory));
 
-		InterfaceClientsBuilderConfigurer<CB> configurer = beanFactory.getBean(InterfaceClientsBuilderConfigurer.class);
-
 		for (InterfaceClientData interfaceClientData : clientData) {
-			registryBuilder.addClient(interfaceClientData, configurer.buildClientConsumer(interfaceClientData.name()));
+			registryBuilder.addClient(interfaceClientData,
+					new RestClientBuilderConsumer<>(beanFactory, interfaceClientData.name()));
 		}
 
 		HttpServiceProxyRegistry interfaceClientRegistry = registryBuilder.build();
 		registerBeanDefinition(registry, "httpInterfaceClientRegistry", HttpServiceProxyRegistry.class,
-				interfaceClientRegistry);
+				registryBuilder::build);
 
 		for (HttpServiceProxyGroup clientGroup : interfaceClientRegistry.getProxyGroups()) {
 			Map<Class<?>, Object> proxies = clientGroup.proxies();
 			for (Class<?> proxyClass : proxies.keySet()) {
 				// TODO: * create better bean names from urls?
 				String beanName = clientGroup.name() + proxyClass.getSimpleName();
-				registerBeanDefinition(registry, beanName, proxyClass, proxies.get(proxyClass));
+				registerBeanDefinition(registry, beanName, proxyClass,
+						() -> interfaceClientRegistry.getClient(clientGroup.name(), proxyClass));
 			}
 		}
 
 	}
 
-	private static void registerBeanDefinition(BeanDefinitionRegistry registry, String beanName, Class<?> beanClass,
-			Object object) {
+	private static <T> void registerBeanDefinition(BeanDefinitionRegistry registry, String beanName, Class<?> beanClass,
+			Supplier<T> instanceSupplier) {
 		BeanDefinition definition = BeanDefinitionBuilder
-			.rootBeanDefinition(ResolvableType.forClass(beanClass), () -> object)
+				.rootBeanDefinition(ResolvableType.forClass(beanClass), instanceSupplier)
 			.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
 			.getBeanDefinition();
 		BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, beanName);
 		BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
+	}
+
+}
+
+class RestClientBuilderConsumer<CB> implements Consumer<CB> {
+
+	private final BeanFactory beanFactory;
+
+	private final String clientGroupName;
+
+	public RestClientBuilderConsumer(BeanFactory beanFactory, String clientGroupName) {
+		this.beanFactory = beanFactory;
+		this.clientGroupName = clientGroupName;
+	}
+
+	@Override
+	public void accept(CB cb) {
+		if (cb instanceof RestClient.Builder builder) {
+			HttpInterfaceClientsProperties properties = this.beanFactory.getBean(HttpInterfaceClientsProperties.class);
+			HttpInterfaceClientGroupProperties clientGroupProperties = properties.getProperties(this.clientGroupName);
+			builder.requestFactory(buildClientHttpRequestFactory(clientGroupProperties));
+			Map<String, List<String>> defaultHeaders = clientGroupProperties.getDefaultHeaders();
+			for (String headerName : defaultHeaders.keySet()) {
+				builder.defaultHeader(headerName, defaultHeaders.get(headerName).toArray(String[]::new));
+			}
+		}
+
+	}
+
+	private ClientHttpRequestFactory buildClientHttpRequestFactory(
+			HttpInterfaceClientGroupProperties clientGroupProperties) {
+		ClientHttpRequestFactorySettings factorySettings = ClientHttpRequestFactorySettings.defaults()
+				.withConnectTimeout(clientGroupProperties.getConnectTimeout())
+				.withReadTimeout(clientGroupProperties.getReadTimeout());
+		return ClientHttpRequestFactoryBuilder.detect().build(factorySettings);
 	}
 
 }

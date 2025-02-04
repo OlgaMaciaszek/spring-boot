@@ -37,14 +37,10 @@ public class HttpInterfaceClientsProperties extends HttpInterfaceClientGroupProp
 	/**
 	 * Group-specific interface client properties.
 	 */
-	private Map<String, HttpInterfaceClientGroupProperties> clientGroups = new HashMap<>();
+	private final Map<String, HttpInterfaceClientGroupProperties> clientGroups = new HashMap<>();
 
 	public Map<String, HttpInterfaceClientGroupProperties> getClientGroups() {
 		return this.clientGroups;
-	}
-
-	public void setClientGroups(Map<String, HttpInterfaceClientGroupProperties> clientGroups) {
-		this.clientGroups = clientGroups;
 	}
 
 	public HttpInterfaceClientGroupProperties getProperties(String clientGroupName) {
