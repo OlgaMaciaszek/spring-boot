@@ -19,8 +19,6 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 /**
  * Configuration properties for HTTP Interface Clients.
  * <p>
@@ -31,30 +29,25 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Olga Maciaszek-Sharma
  * @since 4.0.0
  */
-@ConfigurationProperties("spring.interface-clients.http")
 public class HttpInterfaceClientsProperties extends HttpInterfaceClientGroupProperties {
 
 	/**
 	 * Group-specific interface client properties.
 	 */
-	private Map<String, HttpInterfaceClientGroupProperties> clientGroups = new HashMap<>();
+	private final Map<String, HttpInterfaceClientGroupProperties> clientGroups = new HashMap<>();
 
 	public Map<String, HttpInterfaceClientGroupProperties> getClientGroups() {
 		return this.clientGroups;
 	}
 
-	public void setClientGroups(Map<String, HttpInterfaceClientGroupProperties> clientGroups) {
-		this.clientGroups = clientGroups;
-	}
-
 	public HttpInterfaceClientGroupProperties getProperties(String clientGroupName) {
-		if (clientGroupName == null || !this.getClientGroups().containsKey(clientGroupName)) {
+		if (clientGroupName == null || !this.clientGroups.containsKey(clientGroupName)) {
 			// no specific client properties, return default
 			return this;
 		}
 		// because specifics are overlaid on top of defaults, everything in `properties`,
 		// unless overridden, is in `clientsProperties`
-		return this.getClientGroups().get(clientGroupName);
+		return this.clientGroups.get(clientGroupName);
 	}
 
 }

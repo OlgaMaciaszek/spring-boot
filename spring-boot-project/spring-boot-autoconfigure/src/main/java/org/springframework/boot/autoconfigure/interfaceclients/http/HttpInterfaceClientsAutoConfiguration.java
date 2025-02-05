@@ -54,7 +54,6 @@ import org.springframework.web.service.registry.InterfaceClient;
  */
 @AutoConfiguration(after = { RestTemplateAutoConfiguration.class, RestClientAutoConfiguration.class,
 		WebClientAutoConfiguration.class })
-@EnableConfigurationProperties(HttpInterfaceClientsProperties.class)
 @ConditionalOnProperty(value = "spring.interface-clients.enabled", havingValue = "true", matchIfMissing = true)
 @Import(HttpInterfaceClientsRegistrar.class)
 public class HttpInterfaceClientsAutoConfiguration {

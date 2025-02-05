@@ -27,8 +27,10 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 import org.springframework.web.service.registry.HttpServiceProxyGroup;
@@ -46,6 +48,13 @@ public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRe
 		Assert.isInstanceOf(ListableBeanFactory.class, registry,
 				"Registry must be an instance of " + ListableBeanFactory.class.getSimpleName());
 		ListableBeanFactory beanFactory = (ListableBeanFactory) registry;
+		HttpInterfaceClientsProperties httpInterfaceClientsProperties = Binder
+			.get(beanFactory.getBean(Environment.class))
+			.bindOrCreate("spring.interface-clients.http", HttpInterfaceClientsProperties.class);
+
+		registerBeanDefinition(registry, "httpInterfaceClientProperties", HttpInterfaceClientsProperties.class,
+				httpInterfaceClientsProperties);
+
 		HttpServiceProxyRegistry.Builder<?, CB> registryBuilder = beanFactory
 			.getBean(HttpServiceProxyRegistry.Builder.class);
 
