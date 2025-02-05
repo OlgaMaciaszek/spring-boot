@@ -31,18 +31,17 @@ import org.springframework.web.client.RestClient.Builder;
  */
 public class PropertyBasedRestClientBuilderConfigurer implements RestClientInterfaceClientsBuilderConfigurer {
 
-	// FIXME: field naming
-	private final ObjectProvider<HttpInterfaceClientsProperties> properties;
+	private final ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider;
 
-	public PropertyBasedRestClientBuilderConfigurer(ObjectProvider<HttpInterfaceClientsProperties> properties) {
-		this.properties = properties;
+	public PropertyBasedRestClientBuilderConfigurer(ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
+		this.propertiesProvider = propertiesProvider;
 	}
 
 	@Override
 	public Consumer<Builder> buildClientConsumer(String clientGroupName) {
-		HttpInterfaceClientGroupProperties clientGroupProperties = this.properties.getObject()
-			.getProperties(clientGroupName);
 		return (builder) -> {
+			HttpInterfaceClientGroupProperties clientGroupProperties = this.propertiesProvider.getObject()
+				.getProperties(clientGroupName);
 			builder.requestFactory(buildClientHttpRequestFactory(clientGroupProperties));
 			Map<String, List<String>> defaultHeaders = clientGroupProperties.getDefaultHeaders();
 			for (String headerName : defaultHeaders.keySet()) {
