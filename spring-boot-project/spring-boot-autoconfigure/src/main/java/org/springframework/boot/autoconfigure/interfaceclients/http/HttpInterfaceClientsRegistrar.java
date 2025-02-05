@@ -39,7 +39,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.service.registry.HttpServiceProxyGroup;
+import org.springframework.web.service.registry.HttpServiceGroup;
 import org.springframework.web.service.registry.HttpServiceProxyRegistry;
 import org.springframework.web.service.registry.InterfaceClientData;
 
@@ -67,11 +67,10 @@ public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRe
 
 		HttpServiceProxyRegistry interfaceClientRegistry = registryBuilder.build();
 		registerBeanDefinition(registry, "httpInterfaceClientRegistry", HttpServiceProxyRegistry.class,
-				registryBuilder::build);
+				() -> interfaceClientRegistry);
 
-		for (HttpServiceProxyGroup clientGroup : interfaceClientRegistry.getProxyGroups()) {
-			Map<Class<?>, Object> proxies = clientGroup.proxies();
-			for (Class<?> proxyClass : proxies.keySet()) {
+		for (HttpServiceGroup<?> clientGroup : interfaceClientRegistry.getProxyGroups()) {
+			for (Class<?> proxyClass : clientGroup.httpServices()) {
 				// TODO: * create better bean names from urls?
 				String beanName = clientGroup.name() + proxyClass.getSimpleName();
 				registerBeanDefinition(registry, beanName, proxyClass,
@@ -81,10 +80,10 @@ public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRe
 
 	}
 
-	private static <T> void registerBeanDefinition(BeanDefinitionRegistry registry, String beanName, Class<?> beanClass,
+	private <T> void registerBeanDefinition(BeanDefinitionRegistry registry, String beanName, Class<?> beanClass,
 			Supplier<T> instanceSupplier) {
 		BeanDefinition definition = BeanDefinitionBuilder
-				.rootBeanDefinition(ResolvableType.forClass(beanClass), instanceSupplier)
+			.rootBeanDefinition(ResolvableType.forClass(beanClass), instanceSupplier)
 			.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
 			.getBeanDefinition();
 		BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, beanName);
@@ -121,8 +120,8 @@ class RestClientBuilderConsumer<CB> implements Consumer<CB> {
 	private ClientHttpRequestFactory buildClientHttpRequestFactory(
 			HttpInterfaceClientGroupProperties clientGroupProperties) {
 		ClientHttpRequestFactorySettings factorySettings = ClientHttpRequestFactorySettings.defaults()
-				.withConnectTimeout(clientGroupProperties.getConnectTimeout())
-				.withReadTimeout(clientGroupProperties.getReadTimeout());
+			.withConnectTimeout(clientGroupProperties.getConnectTimeout())
+			.withReadTimeout(clientGroupProperties.getReadTimeout());
 		return ClientHttpRequestFactoryBuilder.detect().build(factorySettings);
 	}
 
