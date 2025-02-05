@@ -16,13 +16,10 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -31,14 +28,10 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
-import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
-import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.service.registry.HttpServiceGroup;
 import org.springframework.web.service.registry.HttpServiceProxyRegistry;
 import org.springframework.web.service.registry.InterfaceClientData;
@@ -46,7 +39,7 @@ import org.springframework.web.service.registry.InterfaceClientData;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRegistrar {
+public abstract class AbstractHttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRegistrar {
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -61,8 +54,7 @@ public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRe
 			.discoverClients(AutoConfigurationPackages.get(beanFactory));
 
 		for (InterfaceClientData interfaceClientData : clientData) {
-			registryBuilder.addClient(interfaceClientData,
-					new RestClientBuilderConsumer<>(beanFactory, interfaceClientData.name()));
+			registryBuilder.addClient(interfaceClientData, buildConsumer(beanFactory, interfaceClientData.name()));
 		}
 
 		HttpServiceProxyRegistry interfaceClientRegistry = registryBuilder.build();
@@ -80,6 +72,8 @@ public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRe
 
 	}
 
+	protected abstract Consumer<CB> buildConsumer(ListableBeanFactory beanFactory, String clientGroupName);
+
 	private <T> void registerBeanDefinition(BeanDefinitionRegistry registry, String beanName, Class<?> beanClass,
 			Supplier<T> instanceSupplier) {
 		BeanDefinition definition = BeanDefinitionBuilder
@@ -88,41 +82,6 @@ public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRe
 			.getBeanDefinition();
 		BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, beanName);
 		BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
-	}
-
-}
-
-class RestClientBuilderConsumer<CB> implements Consumer<CB> {
-
-	private final BeanFactory beanFactory;
-
-	private final String clientGroupName;
-
-	public RestClientBuilderConsumer(BeanFactory beanFactory, String clientGroupName) {
-		this.beanFactory = beanFactory;
-		this.clientGroupName = clientGroupName;
-	}
-
-	@Override
-	public void accept(CB cb) {
-		if (cb instanceof RestClient.Builder builder) {
-			HttpInterfaceClientsProperties properties = this.beanFactory.getBean(HttpInterfaceClientsProperties.class);
-			HttpInterfaceClientGroupProperties clientGroupProperties = properties.getProperties(this.clientGroupName);
-			builder.requestFactory(buildClientHttpRequestFactory(clientGroupProperties));
-			Map<String, List<String>> defaultHeaders = clientGroupProperties.getDefaultHeaders();
-			for (String headerName : defaultHeaders.keySet()) {
-				builder.defaultHeader(headerName, defaultHeaders.get(headerName).toArray(String[]::new));
-			}
-		}
-
-	}
-
-	private ClientHttpRequestFactory buildClientHttpRequestFactory(
-			HttpInterfaceClientGroupProperties clientGroupProperties) {
-		ClientHttpRequestFactorySettings factorySettings = ClientHttpRequestFactorySettings.defaults()
-			.withConnectTimeout(clientGroupProperties.getConnectTimeout())
-			.withReadTimeout(clientGroupProperties.getReadTimeout());
-		return ClientHttpRequestFactoryBuilder.detect().build(factorySettings);
 	}
 
 }

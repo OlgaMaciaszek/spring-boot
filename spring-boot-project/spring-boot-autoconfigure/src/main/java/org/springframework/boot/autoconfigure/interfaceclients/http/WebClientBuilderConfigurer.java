@@ -34,7 +34,7 @@ public class WebClientBuilderConfigurer implements InterfaceClientsBuilderConfig
 	}
 
 	@Override
-	public Consumer<Builder> buildClientConsumer(String name) {
+	public Consumer<Builder> buildClientConsumer(String clientGroupName) {
 		// FIXME
 		throw new UnsupportedOperationException("Please, implement me.");
 	}

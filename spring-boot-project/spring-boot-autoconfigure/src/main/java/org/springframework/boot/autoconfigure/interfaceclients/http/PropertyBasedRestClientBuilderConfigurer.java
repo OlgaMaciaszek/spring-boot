@@ -24,24 +24,24 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClient.Builder;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class RestClientBuilderConfigurer implements InterfaceClientsBuilderConfigurer<RestClient.Builder> {
+public class PropertyBasedRestClientBuilderConfigurer implements RestClientInterfaceClientsBuilderConfigurer {
 
-	private final ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider;
+	// FIXME: field naming
+	private final ObjectProvider<HttpInterfaceClientsProperties> properties;
 
-	public RestClientBuilderConfigurer(ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-		this.propertiesProvider = propertiesProvider;
+	public PropertyBasedRestClientBuilderConfigurer(ObjectProvider<HttpInterfaceClientsProperties> properties) {
+		this.properties = properties;
 	}
 
 	@Override
-	public Consumer<Builder> buildClientConsumer(String name) {
-		HttpInterfaceClientsProperties properties = this.propertiesProvider.getObject();
-		HttpInterfaceClientGroupProperties clientGroupProperties = properties.getProperties(name);
+	public Consumer<Builder> buildClientConsumer(String clientGroupName) {
+		HttpInterfaceClientGroupProperties clientGroupProperties = this.properties.getObject()
+			.getProperties(clientGroupName);
 		return (builder) -> {
 			builder.requestFactory(buildClientHttpRequestFactory(clientGroupProperties));
 			Map<String, List<String>> defaultHeaders = clientGroupProperties.getDefaultHeaders();

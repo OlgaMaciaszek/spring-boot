@@ -56,12 +56,12 @@ import org.springframework.web.service.registry.InterfaceClient;
 		WebClientAutoConfiguration.class })
 @EnableConfigurationProperties(HttpInterfaceClientsProperties.class)
 @ConditionalOnProperty(value = "spring.interface-clients.enabled", havingValue = "true", matchIfMissing = true)
-@Import(HttpInterfaceClientsRegistrar.class)
 public class HttpInterfaceClientsAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
 	@Conditional(NotReactiveWebApplicationCondition.class)
+	@Import(RestClientInterfaceClientsRegistrar.class)
 	protected static class RestClientInterfaceClientsConfiguration {
 
 		@Bean
@@ -73,10 +73,9 @@ public class HttpInterfaceClientsAutoConfiguration {
 
 		@Bean
 		@ConditionalOnBean(RestClient.Builder.class)
-		@ConditionalOnMissingBean
-		InterfaceClientsBuilderConfigurer<RestClient.Builder> interfaceClientsRestClientBuilderConfigurer(
-				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-			return new RestClientBuilderConfigurer(propertiesProvider);
+		RestClientInterfaceClientsBuilderConfigurer interfaceClientsRestClientBuilderConfigurer(
+				ObjectProvider<HttpInterfaceClientsProperties> properties) {
+			return new PropertyBasedRestClientBuilderConfigurer(properties);
 		}
 
 	}
