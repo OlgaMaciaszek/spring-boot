@@ -30,6 +30,7 @@ import java.util.Map;
 public class HttpInterfaceClientGroupProperties {
 
 	// FIXME
+
 	/**
 	 * Base url to set in the underlying HTTP client. By default, set to null.
 	 */

@@ -18,6 +18,7 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -40,7 +41,7 @@ import org.springframework.web.service.registry.InterfaceClientData;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRegistrar {
+public abstract class AbstractHttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRegistrar {
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -48,6 +49,7 @@ public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRe
 		Assert.isInstanceOf(ListableBeanFactory.class, registry,
 				"Registry must be an instance of " + ListableBeanFactory.class.getSimpleName());
 		ListableBeanFactory beanFactory = (ListableBeanFactory) registry;
+
 		HttpInterfaceClientsProperties httpInterfaceClientsProperties = Binder
 			.get(beanFactory.getBean(Environment.class))
 			.bindOrCreate("spring.interface-clients.http", HttpInterfaceClientsProperties.class);
@@ -61,10 +63,8 @@ public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRe
 		Set<InterfaceClientData> clientData = registryBuilder
 			.discoverClients(AutoConfigurationPackages.get(beanFactory));
 
-		InterfaceClientsBuilderConfigurer<CB> configurer = beanFactory.getBean(InterfaceClientsBuilderConfigurer.class);
-
 		for (InterfaceClientData interfaceClientData : clientData) {
-			registryBuilder.addClient(interfaceClientData, configurer.buildClientConsumer(interfaceClientData.name()));
+			registryBuilder.addClient(interfaceClientData, buildConsumer(beanFactory, interfaceClientData.name()));
 		}
 
 		HttpServiceProxyRegistry interfaceClientRegistry = registryBuilder.build();
@@ -81,6 +81,17 @@ public class HttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRe
 		}
 
 	}
+
+	protected Consumer<CB> buildConsumer(ListableBeanFactory beanFactory, String clientGroupName) {
+		return beanFactory.getBeansOfType(getConfigurerType())
+			.values()
+			.stream()
+			.map(configurer -> configurer.buildClientConsumer(clientGroupName))
+			.reduce(builder -> {
+			}, Consumer::andThen);
+	}
+
+	protected abstract Class<? extends InterfaceClientsBuilderConfigurer<CB>> getConfigurerType();
 
 	private static void registerBeanDefinition(BeanDefinitionRegistry registry, String beanName, Class<?> beanClass,
 			Object object) {

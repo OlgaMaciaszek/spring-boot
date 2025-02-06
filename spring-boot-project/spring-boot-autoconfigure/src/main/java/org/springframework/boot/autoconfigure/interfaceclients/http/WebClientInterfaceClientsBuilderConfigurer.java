@@ -16,27 +16,11 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import java.util.function.Consumer;
-
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class WebClientBuilderConfigurer implements InterfaceClientsBuilderConfigurer<WebClient.Builder> {
-
-	private final ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider;
-
-	public WebClientBuilderConfigurer(ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-		this.propertiesProvider = propertiesProvider;
-	}
-
-	@Override
-	public Consumer<Builder> buildClientConsumer(String name) {
-		// FIXME
-		throw new UnsupportedOperationException("Please, implement me.");
-	}
+public interface WebClientInterfaceClientsBuilderConfigurer extends InterfaceClientsBuilderConfigurer<Builder> {
 
 }

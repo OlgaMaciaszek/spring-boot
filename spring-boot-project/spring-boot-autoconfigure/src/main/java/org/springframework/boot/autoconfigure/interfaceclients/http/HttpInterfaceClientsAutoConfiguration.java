@@ -29,7 +29,6 @@ import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
 import org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -55,12 +54,12 @@ import org.springframework.web.service.registry.InterfaceClient;
 @AutoConfiguration(after = { RestTemplateAutoConfiguration.class, RestClientAutoConfiguration.class,
 		WebClientAutoConfiguration.class })
 @ConditionalOnProperty(value = "spring.interface-clients.enabled", havingValue = "true", matchIfMissing = true)
-@Import(HttpInterfaceClientsRegistrar.class)
 public class HttpInterfaceClientsAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
 	@Conditional(NotReactiveWebApplicationCondition.class)
+	@Import(RestClientInterfaceClientsRegistrar.class)
 	protected static class RestClientInterfaceClientsConfiguration {
 
 		@Bean
@@ -72,10 +71,9 @@ public class HttpInterfaceClientsAutoConfiguration {
 
 		@Bean
 		@ConditionalOnBean(RestClient.Builder.class)
-		@ConditionalOnMissingBean
-		InterfaceClientsBuilderConfigurer<RestClient.Builder> interfaceClientsRestClientBuilderConfigurer(
-				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-			return new RestClientBuilderConfigurer(propertiesProvider);
+		RestClientInterfaceClientsBuilderConfigurer interfaceClientsRestClientBuilderConfigurer(
+				ObjectProvider<HttpInterfaceClientsProperties> properties) {
+			return new PropertyBasedRestClientBuilderConfigurer(properties);
 		}
 
 	}
@@ -83,6 +81,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ WebClient.class, WebClientAdapter.class, HttpServiceProxyFactory.class })
 	@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+	@Import(WebClientInterfaceClientsRegistrar.class)
 	protected static class WebClientInterfaceClientsConfiguration {
 
 		@Bean
@@ -97,7 +96,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@ConditionalOnMissingBean
 		InterfaceClientsBuilderConfigurer<WebClient.Builder> interfaceClientsWebClientBuilderConfigurer(
 				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-			return new WebClientBuilderConfigurer(propertiesProvider);
+			return new PropertyBasedWebClientBuilderConfigurer(propertiesProvider);
 		}
 
 	}

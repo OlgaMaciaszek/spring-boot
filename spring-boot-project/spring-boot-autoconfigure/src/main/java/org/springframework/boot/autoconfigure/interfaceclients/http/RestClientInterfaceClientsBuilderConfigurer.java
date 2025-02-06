@@ -16,15 +16,11 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import java.util.function.Consumer;
+import org.springframework.web.client.RestClient.Builder;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-// TODO: move to Framework?
-@FunctionalInterface
-public interface InterfaceClientsBuilderConfigurer<CB> {
-
-	Consumer<CB> buildClientConsumer(String clientGroupName);
+public interface RestClientInterfaceClientsBuilderConfigurer extends InterfaceClientsBuilderConfigurer<Builder> {
 
 }
