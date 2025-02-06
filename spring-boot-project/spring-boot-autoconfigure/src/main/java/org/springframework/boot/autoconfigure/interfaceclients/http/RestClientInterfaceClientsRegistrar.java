@@ -16,25 +16,16 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import java.util.function.Consumer;
-
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClient.Builder;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class RestClientInterfaceClientsRegistrar extends AbstractHttpInterfaceClientsRegistrar<RestClient.Builder> {
+public class RestClientInterfaceClientsRegistrar extends AbstractHttpInterfaceClientsRegistrar<Builder> {
 
 	@Override
-	protected Consumer<Builder> buildConsumer(ListableBeanFactory beanFactory, String clientGroupName) {
-		return beanFactory.getBeansOfType(RestClientInterfaceClientsBuilderConfigurer.class)
-			.values()
-			.stream()
-			.map(configurer -> configurer.buildClientConsumer(clientGroupName))
-			.reduce(builder -> {
-			}, Consumer::andThen);
+	protected Class<? extends InterfaceClientsBuilderConfigurer<Builder>> getConfigurerType() {
+		return RestClientInterfaceClientsBuilderConfigurer.class;
 	}
 
 }

@@ -16,12 +16,11 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClient.Builder;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public interface RestClientInterfaceClientsBuilderConfigurer
-		extends InterfaceClientsBuilderConfigurer<RestClient.Builder> {
+public interface RestClientInterfaceClientsBuilderConfigurer extends InterfaceClientsBuilderConfigurer<Builder> {
 
 }

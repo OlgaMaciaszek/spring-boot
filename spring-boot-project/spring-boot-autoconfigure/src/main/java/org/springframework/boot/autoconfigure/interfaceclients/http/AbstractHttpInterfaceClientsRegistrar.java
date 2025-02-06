@@ -39,6 +39,7 @@ import org.springframework.web.service.registry.InterfaceClientData;
 /**
  * @author Olga Maciaszek-Sharma
  */
+// TODO: add separate packages for RestClient and WebClient based implementations?
 public abstract class AbstractHttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRegistrar {
 
 	@SuppressWarnings("unchecked")
@@ -72,7 +73,16 @@ public abstract class AbstractHttpInterfaceClientsRegistrar<CB> implements Impor
 
 	}
 
-	protected abstract Consumer<CB> buildConsumer(ListableBeanFactory beanFactory, String clientGroupName);
+	protected Consumer<CB> buildConsumer(ListableBeanFactory beanFactory, String clientGroupName) {
+		return beanFactory.getBeansOfType(getConfigurerType())
+			.values()
+			.stream()
+			.map(configurer -> configurer.buildClientConsumer(clientGroupName))
+			.reduce(builder -> {
+			}, Consumer::andThen);
+	}
+
+	protected abstract Class<? extends InterfaceClientsBuilderConfigurer<CB>> getConfigurerType();
 
 	private <T> void registerBeanDefinition(BeanDefinitionRegistry registry, String beanName, Class<?> beanClass,
 			Supplier<T> instanceSupplier) {
