@@ -34,7 +34,7 @@ public class PropertyBasedWebClientBuilderConfigurer implements InterfaceClients
 	}
 
 	@Override
-	public Consumer<Builder> buildClientConsumer(String clientGroupName) {
+	public Consumer<Builder> buildClientBuilderConsumer(String clientGroupName) {
 		// TODO
 		throw new UnsupportedOperationException("Please, implement me.");
 	}

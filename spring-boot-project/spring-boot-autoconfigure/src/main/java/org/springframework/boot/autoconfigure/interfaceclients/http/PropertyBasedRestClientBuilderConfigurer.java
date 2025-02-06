@@ -38,7 +38,7 @@ public class PropertyBasedRestClientBuilderConfigurer implements RestClientInter
 	}
 
 	@Override
-	public Consumer<Builder> buildClientConsumer(String clientGroupName) {
+	public Consumer<Builder> buildClientBuilderConsumer(String clientGroupName) {
 		return (builder) -> {
 			HttpInterfaceClientGroupProperties clientGroupProperties = this.propertiesProvider.getObject()
 				.getProperties(clientGroupName);

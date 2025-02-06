@@ -25,6 +25,6 @@ import java.util.function.Consumer;
 @FunctionalInterface
 public interface InterfaceClientsBuilderConfigurer<CB> {
 
-	Consumer<CB> buildClientConsumer(String clientGroupName);
+	Consumer<CB> buildClientBuilderConsumer(String clientGroupName);
 
 }

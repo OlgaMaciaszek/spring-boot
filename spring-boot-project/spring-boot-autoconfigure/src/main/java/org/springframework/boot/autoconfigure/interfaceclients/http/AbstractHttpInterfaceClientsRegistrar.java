@@ -86,7 +86,7 @@ public abstract class AbstractHttpInterfaceClientsRegistrar<CB> implements Impor
 		return beanFactory.getBeansOfType(getConfigurerType())
 			.values()
 			.stream()
-			.map(configurer -> configurer.buildClientConsumer(clientGroupName))
+			.map(configurer -> configurer.buildClientBuilderConsumer(clientGroupName))
 			.reduce(builder -> {
 			}, Consumer::andThen);
 	}
