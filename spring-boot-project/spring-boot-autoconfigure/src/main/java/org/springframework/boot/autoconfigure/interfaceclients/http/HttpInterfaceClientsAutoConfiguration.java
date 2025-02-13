@@ -32,21 +32,20 @@ import org.springframework.boot.autoconfigure.web.reactive.function.client.WebCl
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.client.support.RestClientProxyRegistry;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.reactive.function.client.support.WebClientProxyRegistry;
+import org.springframework.web.service.config.EnableInterfaceClients;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
-import org.springframework.web.service.registry.InterfaceClient;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for HTTP Interface Clients.
  * <p>
- * This will result in the creation of Interface Client beans from
- * {@link InterfaceClient}-annotated interfaces.
+ * This will result in the creation of Interface Client beans defined by
+ * {@link EnableInterfaceClients} annotations.
  *
  * @author Olga Maciaszek-Sharma
  * @since 4.0.0
@@ -54,12 +53,12 @@ import org.springframework.web.service.registry.InterfaceClient;
 @AutoConfiguration(after = { RestTemplateAutoConfiguration.class, RestClientAutoConfiguration.class,
 		WebClientAutoConfiguration.class })
 @ConditionalOnProperty(value = "spring.interface-clients.enabled", havingValue = "true", matchIfMissing = true)
+@EnableInterfaceClients
 public class HttpInterfaceClientsAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
 	@Conditional(NotReactiveWebApplicationCondition.class)
-	@Import(RestClientInterfaceClientsRegistrar.class)
 	protected static class RestClientInterfaceClientsConfiguration {
 
 		@Bean
@@ -81,7 +80,6 @@ public class HttpInterfaceClientsAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ WebClient.class, WebClientAdapter.class, HttpServiceProxyFactory.class })
 	@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
-	@Import(WebClientInterfaceClientsRegistrar.class)
 	protected static class WebClientInterfaceClientsConfiguration {
 
 		@Bean
