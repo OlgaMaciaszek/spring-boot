@@ -29,6 +29,7 @@ import org.springframework.web.client.RestClient.Builder;
 import org.springframework.web.service.config.RestClientHttpServiceGroupConfigurer;
 import org.springframework.web.service.registry.HttpServiceGroup;
 
+// TODO: add corresponding WebClient-based implementation
 /**
  * @author Olga Maciaszek-Sharma
  */
