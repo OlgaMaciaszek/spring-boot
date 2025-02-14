@@ -16,6 +16,7 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -24,15 +25,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
-import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
 import org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.client.support.RestClientProxyRegistry;
@@ -54,8 +53,17 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 @AutoConfiguration(after = { RestTemplateAutoConfiguration.class, RestClientAutoConfiguration.class,
 		WebClientAutoConfiguration.class })
 @ConditionalOnProperty(value = "spring.interface-clients.enabled", havingValue = "true", matchIfMissing = true)
+// TODO*: should this be in the autoconfig or only user-provided?
 @EnableInterfaceClients
 public class HttpInterfaceClientsAutoConfiguration {
+
+	// TODO*: consider making registry more lazy and converting this into a
+	// `@ConfigurationProperties` bean
+	@Bean
+	HttpInterfaceClientsProperties httpInterfaceClientsProperties(ListableBeanFactory beanFactory) {
+		return Binder.get(beanFactory.getBean(Environment.class))
+			.bindOrCreate("spring.interface-clients.http", HttpInterfaceClientsProperties.class);
+	}
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
@@ -71,9 +79,9 @@ public class HttpInterfaceClientsAutoConfiguration {
 
 		@Bean
 		@ConditionalOnBean(RestClient.Builder.class)
-		RestClientInterfaceClientsBuilderConfigurer interfaceClientsRestClientBuilderConfigurer(
-				ObjectProvider<HttpInterfaceClientsProperties> properties) {
-			return new PropertyBasedRestClientBuilderConfigurer(properties);
+		RestClientPropertyBasedHttpServiceGroupConfigurer restClientPropertyBasedHttpServiceGroupConfigurer(
+				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
+			return new RestClientPropertyBasedHttpServiceGroupConfigurer(propertiesProvider);
 		}
 
 	}
@@ -87,27 +95,6 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@ConditionalOnMissingBean
 		WebClientProxyRegistry.Builder httpServiceProxyRegistry(WebClient.Builder baseWebClientBuilder) {
 			return WebClientProxyRegistry.builder(baseWebClientBuilder);
-		}
-
-		@Bean
-		@ConditionalOnBean(WebClient.Builder.class)
-		@ConditionalOnMissingBean
-		InterfaceClientsBuilderConfigurer<WebClient.Builder> interfaceClientsWebClientBuilderConfigurer(
-				ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
-			return new PropertyBasedWebClientBuilderConfigurer(propertiesProvider);
-		}
-
-	}
-
-	static class NotReactiveWebApplicationCondition extends NoneNestedConditions {
-
-		NotReactiveWebApplicationCondition() {
-			super(ConfigurationPhase.PARSE_CONFIGURATION);
-		}
-
-		@ConditionalOnWebApplication(type = Type.REACTIVE)
-		private static final class ReactiveWebApplication {
-
 		}
 
 	}

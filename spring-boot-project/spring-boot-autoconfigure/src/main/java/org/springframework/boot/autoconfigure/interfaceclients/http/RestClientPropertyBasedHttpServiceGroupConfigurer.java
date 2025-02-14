@@ -24,21 +24,30 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClient.Builder;
+import org.springframework.web.service.config.RestClientHttpServiceGroupConfigurer;
+import org.springframework.web.service.registry.HttpServiceGroup;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class PropertyBasedRestClientBuilderConfigurer implements RestClientInterfaceClientsBuilderConfigurer {
+public class RestClientPropertyBasedHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
 
 	private final ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider;
 
-	public PropertyBasedRestClientBuilderConfigurer(ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
+	public RestClientPropertyBasedHttpServiceGroupConfigurer(
+			ObjectProvider<HttpInterfaceClientsProperties> propertiesProvider) {
 		this.propertiesProvider = propertiesProvider;
 	}
 
 	@Override
-	public Consumer<Builder> buildClientBuilderConsumer(String clientGroupName) {
+	public void configure(HttpServiceGroup<RestClient.Builder> group) {
+		// TODO: handle only url scenario
+		group.configureClient(buildClientBuilderConsumer(group.name()));
+	}
+
+	private Consumer<Builder> buildClientBuilderConsumer(String clientGroupName) {
 		return (builder) -> {
 			HttpInterfaceClientGroupProperties clientGroupProperties = this.propertiesProvider.getObject()
 				.getProperties(clientGroupName);
