@@ -22,6 +22,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
@@ -58,7 +59,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
-	@Conditional(NotReactiveWebApplicationCondition.class)
+	@ConditionalOnMissingClass("org.springframework.web.reactive.function.client.WebClient")
 	protected static class RestClientInterfaceClientsConfiguration {
 
 		@Bean
@@ -79,7 +80,6 @@ public class HttpInterfaceClientsAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ WebClient.class, WebClientAdapter.class, HttpServiceProxyFactory.class })
-	@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 	protected static class WebClientInterfaceClientsConfiguration {
 
 		@Bean
