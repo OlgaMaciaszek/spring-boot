@@ -15,8 +15,19 @@ subprojects {
 	apply plugin: "org.springframework.boot.conventions"
 
 	repositories {
+		mavenLocal()
 		mavenCentral()
 		spring.mavenRepositories()
+		if (version.contains('-')) {
+			maven {
+				url = "https://repo.spring.io/milestone"
+			}
+		}
+		if (version.endsWith('-SNAPSHOT')) {
+			maven {
+				url = "https://repo.spring.io/snapshot"
+			}
+		}
 	}
 
 	configurations.all {
