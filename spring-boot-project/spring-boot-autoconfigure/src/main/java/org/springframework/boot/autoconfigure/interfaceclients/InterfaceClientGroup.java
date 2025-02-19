@@ -43,17 +43,18 @@ import org.springframework.core.type.filter.TypeFilter;
 public @interface InterfaceClientGroup {
 
 	/**
-	 * The {@code baseUrl}  of the host or service the client communicates with.
-	 * @return An absolute URL or resolvable serviceId
+	 * The {@code name}  of the host or service the client communicates with.
+	 * @return client name
 	 */
 	String value();
 
 
+	// TODO*: baseUrl from name; make optional
 	/**
 	 * Name of the client. If not provided, resolved from url host value.
-	 * @return client name
+	 * @return An absolute URL or resolvable serviceId
 	 */
-	String name() default "";
+	String baseUrl();
 
 
 	/**
@@ -95,6 +96,7 @@ public @interface InterfaceClientGroup {
 	 */
 	InterfaceFilter[] excludeFilters() default {};
 
+	// TODO*: not sure if we even need it
 	/**
 	 * Declares the type filter to be used as an {@linkplain InterfaceClientGroup#includeFilters
 	 * include filter} or {@linkplain InterfaceClientGroup#excludeFilters exclude filter}.
