@@ -46,6 +46,9 @@ public class HttpInterfaceClientGroupProperties {
 	 */
 	private String name = null;
 
+	// basePackages, httpServiceTypes??? - in Boot generally the code concerns would not go there
+	// making name obligatory to avoid url being a key
+
 	/**
 	 * Default request connect timeout for interface client group. By default, set to
 	 * {@code null}.
