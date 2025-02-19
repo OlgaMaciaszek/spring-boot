@@ -36,10 +36,11 @@ import org.springframework.web.service.registry.HttpServiceGroup;
 import org.springframework.web.service.registry.HttpServiceProxyRegistry;
 import org.springframework.web.service.registry.InterfaceClientData;
 
+// TODO: add separate packages for RestClient and WebClient based implementations?
+// TODO: handle AOT
 /**
  * @author Olga Maciaszek-Sharma
  */
-// TODO: add separate packages for RestClient and WebClient based implementations?
 public abstract class AbstractHttpInterfaceClientsRegistrar<CB> implements ImportBeanDefinitionRegistrar {
 
 	@SuppressWarnings("unchecked")

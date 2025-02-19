@@ -24,7 +24,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.web.client.RestClient.Builder;
+import org.springframework.web.client.RestClient;
 
 /**
  * @author Olga Maciaszek-Sharma
@@ -38,7 +38,7 @@ public class PropertyBasedRestClientBuilderConfigurer implements RestClientInter
 	}
 
 	@Override
-	public Consumer<Builder> buildClientConsumer(String clientGroupName) {
+	public Consumer<RestClient.Builder> buildClientConsumer(String clientGroupName) {
 		return (builder) -> {
 			HttpInterfaceClientGroupProperties clientGroupProperties = this.propertiesProvider.getObject()
 				.getProperties(clientGroupName);
