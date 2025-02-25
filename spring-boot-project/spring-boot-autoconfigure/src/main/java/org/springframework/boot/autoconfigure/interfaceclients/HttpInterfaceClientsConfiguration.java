@@ -13,8 +13,8 @@ public class HttpInterfaceClientsConfiguration {
 
 	@Bean
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-	static HttpClientsRegistryPostProcessor httpInterfaceClientsRegistryPostProcessor() {
-		return new HttpClientsRegistryPostProcessor();
+	static HttpInterfaceClientsRegistryPostProcessor httpInterfaceClientsRegistryPostProcessor() {
+		return new HttpInterfaceClientsRegistryPostProcessor();
 	}
 
 }

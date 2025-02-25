@@ -25,6 +25,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.interfaceclients.EnableInterfaceClients;
 import org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
@@ -34,11 +35,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
-import org.springframework.web.client.support.RestClientProxyRegistry;
+import org.springframework.web.client.support.RestClientHttpServiceProxyRegistry;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
-import org.springframework.web.reactive.function.client.support.WebClientProxyRegistry;
-import org.springframework.web.service.config.EnableInterfaceClients;
+import org.springframework.web.reactive.function.client.support.WebClientHttpServiceProxyRegistry;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
@@ -62,7 +62,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 	@Bean
 	HttpInterfaceClientsProperties httpInterfaceClientsProperties(ListableBeanFactory beanFactory) {
 		return Binder.get(beanFactory.getBean(Environment.class))
-			.bindOrCreate("spring.interface-clients.http", HttpInterfaceClientsProperties.class);
+				.bindOrCreate("spring.interface-clients.http", HttpInterfaceClientsProperties.class);
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -73,8 +73,8 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(RestClient.Builder.class)
 		@ConditionalOnMissingBean
-		RestClientProxyRegistry.Builder httpServiceProxyRegistry(RestClient.Builder baseRestClientBuilder) {
-			return RestClientProxyRegistry.builder(baseRestClientBuilder);
+		RestClientHttpServiceProxyRegistry httpServiceProxyRegistry(RestClient.Builder baseRestClientBuilder) {
+			return RestClientHttpServiceProxyRegistry.create(baseRestClientBuilder);
 		}
 
 		@Bean
@@ -93,8 +93,8 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(WebClient.Builder.class)
 		@ConditionalOnMissingBean
-		WebClientProxyRegistry.Builder httpServiceProxyRegistry(WebClient.Builder baseWebClientBuilder) {
-			return WebClientProxyRegistry.builder(baseWebClientBuilder);
+		WebClientHttpServiceProxyRegistry httpServiceProxyRegistry(WebClient.Builder baseWebClientBuilder) {
+			return WebClientHttpServiceProxyRegistry.create(baseWebClientBuilder);
 		}
 
 	}

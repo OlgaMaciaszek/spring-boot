@@ -11,10 +11,11 @@ import org.springframework.context.annotation.Import;
 /**
  * Container annotation that aggregates several {@link InterfaceClientGroup} annotations.
  *
- * <p>Can be used natively, declaring several nested {@link InterfaceClientGroup} annotations.
- * Can also be used in conjunction with Java 8's support for repeatable annotations,
- * where {@link InterfaceClientGroup} can simply be declared several times on the same method,
- * implicitly generating this container annotation.
+ * <p>
+ * Can be used natively, declaring several nested {@link InterfaceClientGroup}
+ * annotations. Can also be used in conjunction with Java 8's support for repeatable
+ * annotations, where {@link InterfaceClientGroup} can simply be declared several times on
+ * the same method, implicitly generating this container annotation.
  *
  * @author Olga Maciaszek-Sharma
  * @since 4.0
@@ -27,5 +28,5 @@ import org.springframework.context.annotation.Import;
 public @interface EnableInterfaceClients {
 
 	InterfaceClientGroup[] value() default {};
-}
 
+}

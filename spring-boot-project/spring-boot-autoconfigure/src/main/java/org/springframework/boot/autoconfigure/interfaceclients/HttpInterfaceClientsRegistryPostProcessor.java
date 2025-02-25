@@ -21,12 +21,9 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.support.RestClientHttpServiceGroup;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
 import org.springframework.web.client.support.RestClientHttpServiceProxyRegistry;
-import org.springframework.web.service.registry.HttpServiceProxyRegistry;
 
 // TODO - Boot: add separate packages for RestClient and WebClient based implementations?
 // TODO: handle AOT
@@ -35,7 +32,7 @@ import org.springframework.web.service.registry.HttpServiceProxyRegistry;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class HttpClientsRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
+public class HttpInterfaceClientsRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
 	@Override
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
@@ -44,11 +41,12 @@ public class HttpClientsRegistryPostProcessor implements BeanDefinitionRegistryP
 		ListableBeanFactory beanFactory = (ListableBeanFactory) registry;
 
 		// TODO: support both RestClient and WebClient registries at different levels
-		RestClientHttpServiceProxyRegistry interfaceClientRegistry
-				= beanFactory.getBean(RestClientHttpServiceProxyRegistry.class);
+		RestClientHttpServiceProxyRegistry interfaceClientRegistry = beanFactory
+				.getBean(RestClientHttpServiceProxyRegistry.class);
 
 		// TODO: also support configuring proxy factory
-		beanFactory.getBeansOfType(RestClientHttpServiceGroupConfigurer.class).values()
+		beanFactory.getBeansOfType(RestClientHttpServiceGroupConfigurer.class)
+				.values()
 				.forEach(interfaceClientRegistry::apply);
 
 		Map<String, Set<MergedAnnotation<InterfaceClientGroup>>> annotationsMap = getAnnotations(beanFactory, registry);
@@ -62,9 +60,6 @@ public class HttpClientsRegistryPostProcessor implements BeanDefinitionRegistryP
 
 		addClientGroups(annotationsMap, interfaceClientRegistry);
 
-		registerBeanDefinitions(registry, "httpInterfaceClientRegistry", HttpServiceProxyRegistry.class,
-				() -> interfaceClientRegistry);
-
 		for (RestClientHttpServiceGroup group : interfaceClientRegistry.getGroups()) {
 			for (Class<?> httpServiceType : group.httpServiceTypes()) {
 				// TODO: improve bean naming:
@@ -73,8 +68,7 @@ public class HttpClientsRegistryPostProcessor implements BeanDefinitionRegistryP
 				// name clashes (use just simple name to begin with, but proactively use
 				// a more advanced naming strategy: groupName + FQN if required)
 				String beanName = group.name() + httpServiceType.getSimpleName();
-				registerBeanDefinitions(registry, beanName, httpServiceType,
-						() -> group.getProxy(httpServiceType));
+				registerBeanDefinitions(registry, beanName, httpServiceType, () -> group.getProxy(httpServiceType));
 			}
 		}
 	}
@@ -87,30 +81,33 @@ public class HttpClientsRegistryPostProcessor implements BeanDefinitionRegistryP
 				Class<?>[] serviceTypes = annotation.getClassArray("httpServiceTypes");
 
 				interfaceClientRegistry.registerGroup(annotation.getString("baseUrl"),
-						annotation.getString(MergedAnnotation.VALUE),
-						group -> group.detectHttpServiceTypes(scanSpec -> {
-							scanSpec.assignableTypes(serviceTypes);
-							scanSpec.basePackages(annotation.getStringArray("basePackages"));
-							scanSpec.basePackages(annotation.getClassArray("basePackageClasses"));
-						})
-				);
+						annotation.getString(MergedAnnotation.VALUE), group -> {
+							group.addHttpServiceTypes(serviceTypes);
+							String[] basePackages = annotation.getStringArray("basePackages");
+							Class<?>[] basePackageClasses = annotation.getClassArray("basePackageClasses");
+							if (basePackages.length > 0 || basePackageClasses.length > 0) {
+								group.detectHttpServiceTypes(scanSpec -> {
+									scanSpec.basePackages(basePackages);
+									scanSpec.basePackages(basePackageClasses);
+								});
+							}
+						});
 			}
 		}
 	}
 
-	private <T> void registerBeanDefinitions(BeanDefinitionRegistry registry, String beanName,
-			Class<?> beanClass,
+	private <T> void registerBeanDefinitions(BeanDefinitionRegistry registry, String beanName, Class<?> beanClass,
 			Supplier<T> instanceSupplier) {
 		BeanDefinition definition = BeanDefinitionBuilder
-				.rootBeanDefinition(ResolvableType.forClass(beanClass), () -> instanceSupplier)
+				.rootBeanDefinition(ResolvableType.forClass(beanClass), instanceSupplier)
 				.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
 				.getBeanDefinition();
 		BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, beanName);
 		BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
 	}
 
-	private static Map<String, Set<MergedAnnotation<InterfaceClientGroup>>> getAnnotations(ListableBeanFactory beanFactory,
-			BeanDefinitionRegistry registry) {
+	private static Map<String, Set<MergedAnnotation<InterfaceClientGroup>>> getAnnotations(
+			ListableBeanFactory beanFactory, BeanDefinitionRegistry registry) {
 		String[] annotatedBeanNames = beanFactory.getBeanNamesForAnnotation(InterfaceClientGroup.class);
 		Map<String, Set<MergedAnnotation<InterfaceClientGroup>>> annotations = new HashMap<>();
 		for (String beanName : annotatedBeanNames) {
@@ -123,8 +120,8 @@ public class HttpClientsRegistryPostProcessor implements BeanDefinitionRegistryP
 					.getAnnotations()
 					.get(EnableInterfaceClients.class);
 			if (containerAnnotation.isPresent()) {
-				Collections.addAll(annotationSet, containerAnnotation
-						.getAnnotationArray(MergedAnnotation.VALUE, InterfaceClientGroup.class));
+				Collections.addAll(annotationSet,
+						containerAnnotation.getAnnotationArray(MergedAnnotation.VALUE, InterfaceClientGroup.class));
 			}
 			MergedAnnotation<InterfaceClientGroup> annotation = annotatedBeanDefinition.getMetadata()
 					.getAnnotations()
@@ -136,6 +133,5 @@ public class HttpClientsRegistryPostProcessor implements BeanDefinitionRegistryP
 		}
 		return annotations;
 	}
+
 }
-
-

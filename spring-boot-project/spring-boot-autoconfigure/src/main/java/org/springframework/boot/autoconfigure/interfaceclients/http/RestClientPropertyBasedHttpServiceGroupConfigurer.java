@@ -25,10 +25,11 @@ import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestClient.Builder;
-import org.springframework.web.service.config.RestClientHttpServiceGroupConfigurer;
-import org.springframework.web.service.registry.HttpServiceGroup;
+import org.springframework.web.client.support.RestClientHttpServiceGroup;
+import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
 
 // TODO: add corresponding WebClient-based implementation
+
 /**
  * @author Olga Maciaszek-Sharma
  */
@@ -42,15 +43,15 @@ public class RestClientPropertyBasedHttpServiceGroupConfigurer implements RestCl
 	}
 
 	@Override
-	public void configure(HttpServiceGroup<Builder> group) {
-		// TODO: handle only url scenario
+	public void configure(RestClientHttpServiceGroup group) {
+		// TODO: handle null name and only url scenario
 		group.configureClient(buildClientBuilderConsumer(group.name()));
 	}
 
 	private Consumer<Builder> buildClientBuilderConsumer(String clientGroupName) {
 		return (builder) -> {
 			HttpInterfaceClientGroupProperties clientGroupProperties = this.propertiesProvider.getObject()
-				.getProperties(clientGroupName);
+					.getProperties(clientGroupName);
 			builder.requestFactory(buildClientHttpRequestFactory(clientGroupProperties));
 			Map<String, List<String>> defaultHeaders = clientGroupProperties.getDefaultHeaders();
 			for (String headerName : defaultHeaders.keySet()) {
@@ -62,8 +63,8 @@ public class RestClientPropertyBasedHttpServiceGroupConfigurer implements RestCl
 	private ClientHttpRequestFactory buildClientHttpRequestFactory(
 			HttpInterfaceClientGroupProperties clientProperties) {
 		ClientHttpRequestFactorySettings factorySettings = ClientHttpRequestFactorySettings.defaults()
-			.withConnectTimeout(clientProperties.getConnectTimeout())
-			.withReadTimeout(clientProperties.getReadTimeout());
+				.withConnectTimeout(clientProperties.getConnectTimeout())
+				.withReadTimeout(clientProperties.getReadTimeout());
 		return ClientHttpRequestFactoryBuilder.detect().build(factorySettings);
 	}
 

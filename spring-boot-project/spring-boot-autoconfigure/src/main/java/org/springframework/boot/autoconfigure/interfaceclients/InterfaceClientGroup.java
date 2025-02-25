@@ -29,9 +29,9 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.type.filter.TypeFilter;
 
 /**
- * Registers an HTTP service client along with associated interface clients.
- * Scans the listed packages for {@link @HttpExchange}-annotated interfaces
- * to add or adds the directly provided interfaces to the client.
+ * Registers an HTTP service client along with associated interface clients. Scans the
+ * listed packages for {@link @HttpExchange}-annotated interfaces to add or adds the
+ * directly provided interfaces to the client.
  *
  * @author Olga Maciaszek-Sharma
  * @since 4.0
@@ -43,24 +43,22 @@ import org.springframework.core.type.filter.TypeFilter;
 public @interface InterfaceClientGroup {
 
 	/**
-	 * The {@code name}  of the host or service the client communicates with.
+	 * The {@code name} of the host or service the client communicates with.
 	 * @return client name
 	 */
 	String value();
 
-
 	// TODO*: baseUrl from name; make optional
+
 	/**
 	 * Name of the client. If not provided, resolved from url host value.
 	 * @return An absolute URL or resolvable serviceId
 	 */
 	String baseUrl();
 
-
 	/**
-	 * Base packages to scan for annotated components.
-	 * Use {@link #basePackageClasses()} for a type-safe alternative to String-based
-	 * package names.
+	 * Base packages to scan for annotated components. Use {@link #basePackageClasses()}
+	 * for a type-safe alternative to String-based package names.
 	 * @return the array of 'basePackages'
 	 */
 	String[] basePackages() default {};
@@ -76,20 +74,21 @@ public @interface InterfaceClientGroup {
 	Class<?>[] basePackageClasses() default {};
 
 	/**
-	 * List of interface types to instantiate for the client. If not empty, disables classpath
-	 * scanning.
-	 * @return an array of {@link org.springframework.web.service.annotation.HttpExchange} classes
+	 * List of interface types to instantiate for the client. If not empty, disables
+	 * classpath scanning.
+	 * @return an array of {@link org.springframework.web.service.annotation.HttpExchange}
+	 * classes
 	 */
 	Class<?>[] httpServiceTypes() default {};
 
-	//	TODO*: decide if we need it; if yes, add matching implementation
+	// TODO*: decide if we need it; if yes, add matching implementation
 
 	/**
 	 * Specifies which types are eligible for component scanning.
 	 */
 	InterfaceFilter[] includeFilters() default {};
 
-	//	TODO*: decide if we need it; if yes, add matching implementation
+	// TODO*: decide if we need it; if yes, add matching implementation
 
 	/**
 	 * Specifies which types are not eligible for Interface Client scanning.
@@ -97,11 +96,13 @@ public @interface InterfaceClientGroup {
 	InterfaceFilter[] excludeFilters() default {};
 
 	// TODO*: not sure if we even need it
+
 	/**
-	 * Declares the type filter to be used as an {@linkplain InterfaceClientGroup#includeFilters
-	 * include filter} or {@linkplain InterfaceClientGroup#excludeFilters exclude filter}.
-	 * Mirrors the behaviour of {@link ComponentScan.Filter}.
-	 * Code based on {@link ComponentScan.Filter}.
+	 * Declares the type filter to be used as an
+	 * {@linkplain InterfaceClientGroup#includeFilters include filter} or
+	 * {@linkplain InterfaceClientGroup#excludeFilters exclude filter}. Mirrors the
+	 * behaviour of {@link ComponentScan.Filter}. Code based on
+	 * {@link ComponentScan.Filter}.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({})
@@ -109,7 +110,8 @@ public @interface InterfaceClientGroup {
 
 		/**
 		 * The type of filter to use.
-		 * <p>Default is {@link FilterType#ANNOTATION}.
+		 * <p>
+		 * Default is {@link FilterType#ANNOTATION}.
 		 * @see #classes
 		 * @see #pattern
 		 */
@@ -124,29 +126,44 @@ public @interface InterfaceClientGroup {
 
 		/**
 		 * The class or classes to use as the filter.
-		 * <p>The following table explains how the classes will be interpreted
-		 * based on the configured value of the {@link #type} attribute.
+		 * <p>
+		 * The following table explains how the classes will be interpreted based on the
+		 * configured value of the {@link #type} attribute.
 		 * <table border="1">
-		 * <tr><th>{@code FilterType}</th><th>Class Interpreted As</th></tr>
-		 * <tr><td>{@link FilterType#ANNOTATION ANNOTATION}</td>
-		 * <td>the annotation itself</td></tr>
-		 * <tr><td>{@link FilterType#ASSIGNABLE_TYPE ASSIGNABLE_TYPE}</td>
-		 * <td>the type that detected components should be assignable to</td></tr>
-		 * <tr><td>{@link FilterType#CUSTOM CUSTOM}</td>
-		 * <td>an implementation of {@link TypeFilter}</td></tr>
+		 * <tr>
+		 * <th>{@code FilterType}</th>
+		 * <th>Class Interpreted As</th>
+		 * </tr>
+		 * <tr>
+		 * <td>{@link FilterType#ANNOTATION ANNOTATION}</td>
+		 * <td>the annotation itself</td>
+		 * </tr>
+		 * <tr>
+		 * <td>{@link FilterType#ASSIGNABLE_TYPE ASSIGNABLE_TYPE}</td>
+		 * <td>the type that detected components should be assignable to</td>
+		 * </tr>
+		 * <tr>
+		 * <td>{@link FilterType#CUSTOM CUSTOM}</td>
+		 * <td>an implementation of {@link TypeFilter}</td>
+		 * </tr>
 		 * </table>
-		 * <p>When multiple classes are specified, <em>OR</em> logic is applied
-		 * &mdash; for example, "include types annotated with {@code @Foo} OR {@code @Bar}".
-		 * <p>Custom {@link TypeFilter TypeFilters} may optionally implement any of the
+		 * <p>
+		 * When multiple classes are specified, <em>OR</em> logic is applied &mdash; for
+		 * example, "include types annotated with {@code @Foo} OR {@code @Bar}".
+		 * <p>
+		 * Custom {@link TypeFilter TypeFilters} may optionally implement any of the
 		 * following {@link org.springframework.beans.factory.Aware Aware} interfaces, and
-		 * their respective methods will be called prior to {@link TypeFilter#match match}:
+		 * their respective methods will be called prior to {@link TypeFilter#match
+		 * match}:
 		 * <ul>
 		 * <li>{@link org.springframework.context.EnvironmentAware EnvironmentAware}</li>
 		 * <li>{@link org.springframework.beans.factory.BeanFactoryAware BeanFactoryAware}
-		 * <li>{@link org.springframework.beans.factory.BeanClassLoaderAware BeanClassLoaderAware}
+		 * <li>{@link org.springframework.beans.factory.BeanClassLoaderAware
+		 * BeanClassLoaderAware}
 		 * <li>{@link org.springframework.context.ResourceLoaderAware ResourceLoaderAware}
 		 * </ul>
-		 * <p>Specifying zero classes is permitted but will have no effect on interface
+		 * <p>
+		 * Specifying zero classes is permitted but will have no effect on interface
 		 * scanning.
 		 * @since 4.2
 		 * @see #value
@@ -156,16 +173,18 @@ public @interface InterfaceClientGroup {
 		Class<?>[] classes() default {};
 
 		/**
-		 * The pattern (or patterns) to use for the filter, as an alternative
-		 * to specifying a Class {@link #value}.
-		 * <p>If {@link #type} is set to {@link FilterType#ASPECTJ ASPECTJ},
-		 * this is an AspectJ type pattern expression. If {@link #type} is
-		 * set to {@link FilterType#REGEX REGEX}, this is a regex pattern
-		 * for the fully-qualified class names to match.
+		 * The pattern (or patterns) to use for the filter, as an alternative to
+		 * specifying a Class {@link #value}.
+		 * <p>
+		 * If {@link #type} is set to {@link FilterType#ASPECTJ ASPECTJ}, this is an
+		 * AspectJ type pattern expression. If {@link #type} is set to
+		 * {@link FilterType#REGEX REGEX}, this is a regex pattern for the fully-qualified
+		 * class names to match.
 		 * @see #type
 		 * @see #classes
 		 */
 		String[] pattern() default {};
 
 	}
+
 }
