@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.autoconfigure.interfaceclients;
+package org.springframework.boot.autoconfigure.interfaceclients.http;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

@@ -14,10 +14,23 @@
  * limitations under the License.
  */
 
-/**
- * AutoConfiguration for Spring Interface Clients.
- */
-@NullMarked
-package org.springframework.boot.autoconfigure.interfaceclients;
+package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import org.jspecify.annotations.NullMarked;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
+
+/**
+ * @author Olga Maciaszek-Sharma
+ */
+@Configuration
+public class HttpInterfaceClientsConfiguration {
+
+	@Bean
+	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+	static HttpInterfaceClientsRegistryPostProcessor httpInterfaceClientsRegistryPostProcessor() {
+		return new HttpInterfaceClientsRegistryPostProcessor();
+	}
+
+}
