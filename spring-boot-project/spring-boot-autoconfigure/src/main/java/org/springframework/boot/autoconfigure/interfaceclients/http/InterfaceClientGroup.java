@@ -16,7 +16,6 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
@@ -24,13 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.registry.HttpServiceGroup;
-import org.springframework.web.service.registry.HttpServiceGroup.ScanSpec;
 
 /**
  * Registers an HTTP service client along with associated interface clients. Scans the
@@ -47,8 +41,8 @@ import org.springframework.web.service.registry.HttpServiceGroup.ScanSpec;
 public @interface InterfaceClientGroup {
 
 	/**
-	 * The {@code id} of the interface client group.
-	 * Set to {@code default} if none provided.
+	 * The {@code id} of the interface client group. Set to {@code default} if none
+	 * provided.
 	 *
 	 * @see HttpServiceGroup#id()
 	 * @return interface client group id
@@ -57,24 +51,19 @@ public @interface InterfaceClientGroup {
 	String value() default "";
 
 	/**
-	 * The {@code id} of the interface client group.
-	 * Alias for {@link #value() value}.
-	 * Set to {@code default} if none provided.
-	 *
+	 * The {@code id} of the interface client group. Alias for {@link #value() value}. Set
+	 * to {@code default} if none provided.
 	 * @return interface client group id
 	 * @see HttpServiceGroup#id()
 	 */
 	@AliasFor("value")
-	String name() default "";
-
+	String id() default "";
 
 	/**
 	 * Base packages to scan for annotated components. Use {@link #basePackageClasses()}
-	 * for a type-safe alternative to String-based package names.
-	 * Uses the package of the annotated class if none provided.
-	 *
-	 * @return the array of base packages
-	 * @see ScanSpec#basePackages(String...)
+	 * for a type-safe alternative to String-based package names. Uses the package of the
+	 * annotated class if none provided.
+	 * @return the array of base packages // FIXME * @see ScanSpec#basePackages(String...)
 	 */
 	String[] basePackages() default {};
 
@@ -85,18 +74,15 @@ public @interface InterfaceClientGroup {
 	 * <p>
 	 * Consider creating a special no-op marker class or interface in each package that
 	 * serves no purpose other than being referenced by this attribute.
-	 *
-	 * @return the array of base package classes
-	 * @see ScanSpec#basePackages(Class[])
+	 * @return the array of base package classes // FIXME * @see
+	 * ScanSpec#basePackages(Class[])
 	 */
 	Class<?>[] basePackageClasses() default {};
 
 	/**
 	 * Array of interface types to instantiate for the client.
-	 *
 	 * @return an array of {@link org.springframework.web.service.annotation.HttpExchange}
-	 * interfaces
-	 * @see ScanSpec#httpServiceTypes()
+	 * interfaces // FIXME * @see ScanSpec#httpServiceTypes()
 	 */
 	Class<?>[] httpServiceTypes() default {};
 
