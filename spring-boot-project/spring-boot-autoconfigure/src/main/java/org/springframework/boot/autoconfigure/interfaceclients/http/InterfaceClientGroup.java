@@ -61,8 +61,8 @@ public @interface InterfaceClientGroup {
 	 * Alias for {@link #value() value}.
 	 * Set to {@code default} if none provided.
 	 *
-	 * @see HttpServiceGroup#id()
 	 * @return interface client group id
+	 * @see HttpServiceGroup#id()
 	 */
 	@AliasFor("value")
 	String name() default "";
@@ -74,6 +74,7 @@ public @interface InterfaceClientGroup {
 	 * Uses the package of the annotated class if none provided.
 	 *
 	 * @return the array of base packages
+	 * @see ScanSpec#basePackages(String...)
 	 */
 	String[] basePackages() default {};
 
@@ -86,6 +87,7 @@ public @interface InterfaceClientGroup {
 	 * serves no purpose other than being referenced by this attribute.
 	 *
 	 * @return the array of base package classes
+	 * @see ScanSpec#basePackages(Class[])
 	 */
 	Class<?>[] basePackageClasses() default {};
 
@@ -94,6 +96,7 @@ public @interface InterfaceClientGroup {
 	 *
 	 * @return an array of {@link org.springframework.web.service.annotation.HttpExchange}
 	 * interfaces
+	 * @see ScanSpec#httpServiceTypes()
 	 */
 	Class<?>[] httpServiceTypes() default {};
 
