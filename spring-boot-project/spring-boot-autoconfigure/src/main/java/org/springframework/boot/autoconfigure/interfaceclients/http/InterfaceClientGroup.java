@@ -89,5 +89,12 @@ public @interface InterfaceClientGroup {
 	 */
 	Class<?>[] basePackageClasses() default {};
 
+	/**
+	 * Array of interface types to instantiate for the client.
+	 *
+	 * @return an array of {@link org.springframework.web.service.annotation.HttpExchange}
+	 * interfaces
+	 */
+	Class<?>[] httpServiceTypes() default {};
 
 }
