@@ -61,7 +61,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 	@Bean
 	HttpInterfaceClientsProperties httpInterfaceClientsProperties(ListableBeanFactory beanFactory) {
 		return Binder.get(beanFactory.getBean(Environment.class))
-				.bindOrCreate("spring.interface-clients.http", HttpInterfaceClientsProperties.class);
+			.bindOrCreate("spring.interface-clients.http", HttpInterfaceClientsProperties.class);
 	}
 
 	@Configuration(proxyBeanMethods = false)
