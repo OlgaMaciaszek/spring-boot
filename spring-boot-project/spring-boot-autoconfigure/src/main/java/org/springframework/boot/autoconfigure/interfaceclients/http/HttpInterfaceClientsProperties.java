@@ -19,6 +19,8 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 /**
  * Configuration properties for HTTP Interface Clients.
  * <p>
@@ -29,6 +31,7 @@ import java.util.Map;
  * @author Olga Maciaszek-Sharma
  * @since 4.0.0
  */
+@ConfigurationProperties
 public class HttpInterfaceClientsProperties extends HttpInterfaceClientGroupProperties {
 
 	// TODO: TBD if we settle for: properties.getProperties("default").getBaseUrl() or

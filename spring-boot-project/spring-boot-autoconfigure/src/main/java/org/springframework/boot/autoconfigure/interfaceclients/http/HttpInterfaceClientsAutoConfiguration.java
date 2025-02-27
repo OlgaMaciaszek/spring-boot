@@ -28,6 +28,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,16 +54,19 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 		WebClientAutoConfiguration.class })
 @ConditionalOnProperty(value = "spring.interface-clients.enabled", havingValue = "true", matchIfMissing = true)
 // TODO*: should this be in the autoconfig or only user-provided?
+@EnableConfigurationProperties(HttpInterfaceClientsProperties.class)
 @EnableInterfaceClients
 public class HttpInterfaceClientsAutoConfiguration {
 
 	// TODO*: consider making registry more lazy and converting this into a
 	// `@ConfigurationProperties` bean
-	@Bean
-	HttpInterfaceClientsProperties httpInterfaceClientsProperties(ListableBeanFactory beanFactory) {
-		return Binder.get(beanFactory.getBean(Environment.class))
-			.bindOrCreate("spring.interface-clients.http", HttpInterfaceClientsProperties.class);
-	}
+	// @Bean
+	// HttpInterfaceClientsProperties httpInterfaceClientsProperties(ListableBeanFactory
+	// beanFactory) {
+	// return Binder.get(beanFactory.getBean(Environment.class))
+	// .bindOrCreate("spring.interface-clients.http",
+	// HttpInterfaceClientsProperties.class);
+	// }
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })

@@ -16,6 +16,7 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,23 +66,26 @@ public class HttpInterfaceClientsRegistryPostProcessor implements BeanDefinition
 		addClientGroups(annotationsMap, interfaceClientRegistry);
 
 		// TODO: also support configuring proxy factory
-		beanFactory.getBeansOfType(RestClientHttpServiceGroupConfigurer.class)
-			.values()
-			.forEach(interfaceClientRegistry::apply);
 
-		registerBeanDefinitions(registry, interfaceClientRegistry);
+		registerBeanDefinitions(registry, beanFactory, interfaceClientRegistry);
 	}
 
-	private void registerBeanDefinitions(BeanDefinitionRegistry registry,
+	private void registerBeanDefinitions(BeanDefinitionRegistry registry, ListableBeanFactory beanFactory,
 			RestClientHttpServiceProxyRegistry interfaceClientRegistry) {
+
+		Collection<RestClientHttpServiceGroupConfigurer> groupConfigurers = beanFactory
+			.getBeansOfType(RestClientHttpServiceGroupConfigurer.class)
+			.values();
 
 		for (RestClientHttpServiceGroup group : interfaceClientRegistry.getGroups().values()) {
 			for (Class<?> httpServiceType : group.httpServiceTypes()) {
 
 				String beanName = BeanDefinitionReaderUtils.uniqueBeanName(group.id() + httpServiceType.getSimpleName(),
 						registry);
-				registerBeanDefinitions(registry, beanName, httpServiceType,
-						() -> group.getClientProxy(httpServiceType));
+				registerBeanDefinitions(registry, beanName, httpServiceType, () -> {
+					groupConfigurers.forEach(interfaceClientRegistry::apply);
+					return group.getClientProxy(httpServiceType);
+				});
 			}
 		}
 	}
