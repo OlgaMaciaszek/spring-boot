@@ -69,21 +69,17 @@ public class HttpInterfaceClientsRegistryPostProcessor implements BeanDefinition
 			.values()
 			.forEach(interfaceClientRegistry::apply);
 
-		registerBeanDefinitions(registry, annotationsMap, interfaceClientRegistry);
+		registerBeanDefinitions(registry, interfaceClientRegistry);
 	}
 
 	private void registerBeanDefinitions(BeanDefinitionRegistry registry,
-			Map<String, Set<MergedAnnotation<InterfaceClientGroup>>> annotationsMap,
 			RestClientHttpServiceProxyRegistry interfaceClientRegistry) {
 
 		for (RestClientHttpServiceGroup group : interfaceClientRegistry.getGroups().values()) {
 			for (Class<?> httpServiceType : group.httpServiceTypes()) {
-				// TODO: improve bean naming:
-				// - better handle missing group names (set to null and check
-				// for that while constructing group lookup in registry) and
-				// name clashes (use just simple name to begin with, but proactively use
-				// a more advanced naming strategy: groupName + FQN if required)
-				String beanName = group.id() + httpServiceType.getSimpleName();
+
+				String beanName = BeanDefinitionReaderUtils.uniqueBeanName(group.id() + httpServiceType.getSimpleName(),
+						registry);
 				registerBeanDefinitions(registry, beanName, httpServiceType,
 						() -> group.getClientProxy(httpServiceType));
 			}

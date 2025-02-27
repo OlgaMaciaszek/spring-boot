@@ -31,8 +31,9 @@ import java.util.Map;
  */
 public class HttpInterfaceClientsProperties extends HttpInterfaceClientGroupProperties {
 
-	// TODO: TBD if we settle for: properties.getProperties("default").getBaseUrl() or properties.getBaseUrl()
-	//  for retrieving default setup
+	// TODO: TBD if we settle for: properties.getProperties("default").getBaseUrl() or
+	// properties.getBaseUrl()
+	// for retrieving default setup
 
 	/**
 	 * Group-specific interface client properties.
