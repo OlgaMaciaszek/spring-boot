@@ -37,10 +37,10 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.client.support.RestClientHttpServiceGroup;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
 import org.springframework.web.client.support.RestClientHttpServiceProxyRegistry;
-import org.springframework.web.service.registry.HttpServiceGroup;
 
 // TODO - Boot: add separate packages for RestClient and WebClient based implementations?
 // TODO: handle AOT
@@ -92,19 +92,19 @@ public class HttpInterfaceClientsRegistryPostProcessor implements BeanDefinition
 			Set<MergedAnnotation<InterfaceClientGroup>> annotations = annotationsMap.get(key);
 			for (MergedAnnotation<InterfaceClientGroup> annotation : annotations) {
 				Class<?>[] serviceTypes = annotation.getClassArray("httpServiceTypes");
-
+				String[] basePackages = annotation.getStringArray("basePackages");
+				Class<?>[] basePackageClasses = annotation.getClassArray("basePackageClasses");
 				String groupId = annotation.getString(MergedAnnotation.VALUE);
 				interfaceClientRegistry.registerGroup(groupId, group -> {
-					group.addHttpServiceTypes(serviceTypes);
-					String[] basePackages = annotation.getStringArray("basePackages");
-					Class<?>[] basePackageClasses = annotation.getClassArray("basePackageClasses");
-					if (basePackages.length > 0 || basePackageClasses.length > 0) {
+					if (serviceTypes.length > 0 || basePackages.length > 0 || basePackageClasses.length > 0) {
+						group.addHttpServiceTypes(serviceTypes);
 						group.detectHttpServiceTypes(basePackages);
 						group.detectHttpServiceTypes(basePackageClasses);
 					}
+					else {
+						group.detectHttpServiceTypes(ClassUtils.getPackageName(key));
+					}
 				});
-				HttpServiceGroup<?, ?> group = interfaceClientRegistry.getGroups().get(groupId);
-				group.addHttpServiceTypes(serviceTypes);
 			}
 
 		}

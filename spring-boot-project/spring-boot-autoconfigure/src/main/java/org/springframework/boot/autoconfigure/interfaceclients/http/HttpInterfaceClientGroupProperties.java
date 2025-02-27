@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.boot.autoconfigure.http.client.HttpClientProperties;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings.Redirects;
 
@@ -39,12 +41,12 @@ public class HttpInterfaceClientGroupProperties {
 	 * Base url to set in the underlying HTTP client group. By default, set to
 	 * {@code null}.
 	 */
-	private String baseUrl = null;
+	private @Nullable String baseUrl = null;
 
 	/**
 	 * Name to set in the underlying HTTP client group. By default, set to {@code null}.
 	 */
-	private String name = null;
+	private @Nullable String name = null;
 
 	// basePackages, httpServiceTypes??? - in Boot generally the code concerns would not
 	// go there
@@ -54,13 +56,13 @@ public class HttpInterfaceClientGroupProperties {
 	 * Default request connect timeout for interface client group. By default, set to
 	 * {@code null}.
 	 */
-	private Duration connectTimeout = null;
+	private @Nullable Duration connectTimeout = null;
 
 	/**
 	 * Default request read timeout for interface client group. By default, set to
 	 * {@code null}.
 	 */
-	private Duration readTimeout = null;
+	private @Nullable Duration readTimeout = null;
 
 	/**
 	 * Default request headers for interface client group. By default, set to empty
@@ -81,7 +83,7 @@ public class HttpInterfaceClientGroupProperties {
 	 */
 	private final HttpClientProperties.Ssl ssl = new HttpClientProperties.Ssl();
 
-	public String getBaseUrl() {
+	public @Nullable String getBaseUrl() {
 		return this.baseUrl;
 	}
 
@@ -89,7 +91,7 @@ public class HttpInterfaceClientGroupProperties {
 		this.baseUrl = baseUrl;
 	}
 
-	public String getName() {
+	public @Nullable String getName() {
 		return this.name;
 	}
 
@@ -97,7 +99,7 @@ public class HttpInterfaceClientGroupProperties {
 		this.name = name;
 	}
 
-	public Duration getConnectTimeout() {
+	public @Nullable Duration getConnectTimeout() {
 		return this.connectTimeout;
 	}
 
@@ -105,7 +107,7 @@ public class HttpInterfaceClientGroupProperties {
 		this.connectTimeout = connectTimeout;
 	}
 
-	public Duration getReadTimeout() {
+	public @Nullable Duration getReadTimeout() {
 		return this.readTimeout;
 	}
 
@@ -141,9 +143,9 @@ public class HttpInterfaceClientGroupProperties {
 		/**
 		 * SSL bundle to use.
 		 */
-		private String bundle;
+		private @Nullable String bundle;
 
-		public String getBundle() {
+		public @Nullable String getBundle() {
 			return this.bundle;
 		}
 
