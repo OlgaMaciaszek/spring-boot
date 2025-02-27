@@ -48,7 +48,7 @@ public @interface InterfaceClientGroup {
 	 * @return interface client group id
 	 */
 	@AliasFor("id")
-	String value() default "";
+	String value() default "default";
 
 	/**
 	 * The {@code id} of the interface client group. Alias for {@link #value() value}. Set
@@ -57,7 +57,7 @@ public @interface InterfaceClientGroup {
 	 * @see HttpServiceGroup#id()
 	 */
 	@AliasFor("value")
-	String id() default "";
+	String id() default "default";
 
 	/**
 	 * Base packages to scan for annotated components. Use {@link #basePackageClasses()}
