@@ -44,14 +44,14 @@ public class HttpInterfaceClientsProperties extends HttpInterfaceClientGroupProp
 		return this.clientGroups;
 	}
 
-	public HttpInterfaceClientGroupProperties getProperties(String clientGroupName) {
-		if (clientGroupName == null || !this.clientGroups.containsKey(clientGroupName)) {
+	public HttpInterfaceClientGroupProperties getProperties(String groupId) {
+		if (groupId == null || !this.clientGroups.containsKey(groupId)) {
 			// no specific client properties, return default
-			return this;
+			return this.clientGroups.get(InterfaceClientGroup.DEFAULT_GROUP_NAME);
 		}
 		// because specifics are overlaid on top of defaults, everything in `properties`,
 		// unless overridden, is in `clientsProperties`
-		return this.clientGroups.get(clientGroupName);
+		return this.clientGroups.get(groupId);
 	}
 
 }

@@ -40,6 +40,8 @@ import org.springframework.web.service.registry.HttpServiceGroup;
 @Repeatable(EnableInterfaceClients.class)
 public @interface InterfaceClientGroup {
 
+	String DEFAULT_GROUP_NAME = "default";
+
 	/**
 	 * The {@code id} of the interface client group. Set to {@code default} if none
 	 * provided.
@@ -48,7 +50,7 @@ public @interface InterfaceClientGroup {
 	 * @return interface client group id
 	 */
 	@AliasFor("id")
-	String value() default "default";
+	String value() default DEFAULT_GROUP_NAME;
 
 	/**
 	 * The {@code id} of the interface client group. Alias for {@link #value() value}. Set
@@ -57,7 +59,7 @@ public @interface InterfaceClientGroup {
 	 * @see HttpServiceGroup#id()
 	 */
 	@AliasFor("value")
-	String id() default "default";
+	String id() default DEFAULT_GROUP_NAME;
 
 	/**
 	 * Base packages to scan for annotated components. Use {@link #basePackageClasses()}
