@@ -84,9 +84,8 @@ public class HttpInterfaceClientsRegistryPostProcessor implements BeanDefinition
 				// name clashes (use just simple name to begin with, but proactively use
 				// a more advanced naming strategy: groupName + FQN if required)
 				String beanName = group.id() + httpServiceType.getSimpleName();
-				registerBeanDefinitions(registry, beanName, httpServiceType, () -> {
-					return group.getClientProxy(httpServiceType);
-				});
+				registerBeanDefinitions(registry, beanName, httpServiceType,
+						() -> group.getClientProxy(httpServiceType));
 			}
 		}
 	}
@@ -100,19 +99,18 @@ public class HttpInterfaceClientsRegistryPostProcessor implements BeanDefinition
 
 				String groupId = annotation.getString(MergedAnnotation.VALUE);
 				interfaceClientRegistry.registerGroup(groupId, group -> {
+					group.addHttpServiceTypes(serviceTypes);
+					String[] basePackages = annotation.getStringArray("basePackages");
+					Class<?>[] basePackageClasses = annotation.getClassArray("basePackageClasses");
+					if (basePackages.length > 0 || basePackageClasses.length > 0) {
+						group.detectHttpServiceTypes(basePackages);
+						group.detectHttpServiceTypes(basePackageClasses);
+					}
 				});
 				HttpServiceGroup<?, ?> group = interfaceClientRegistry.getGroups().get(groupId);
 				group.addHttpServiceTypes(serviceTypes);
-				String[] basePackages = annotation.getStringArray("basePackages");
-				Class<?>[] basePackageClasses = annotation.getClassArray("basePackageClasses");
-				if (basePackages.length > 0 || basePackageClasses.length > 0) {
-					// TODO: handle annotating class package if no types or packages
-					// specified
-					group.detectHttpServiceTypes(basePackages);
-					group.detectHttpServiceTypes(basePackageClasses);
-				}
-
 			}
+
 		}
 	}
 

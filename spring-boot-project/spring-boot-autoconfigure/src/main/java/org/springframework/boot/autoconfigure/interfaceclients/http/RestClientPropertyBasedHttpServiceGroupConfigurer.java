@@ -45,13 +45,14 @@ public class RestClientPropertyBasedHttpServiceGroupConfigurer implements RestCl
 	@Override
 	public void configure(RestClientHttpServiceGroup group) {
 		// TODO: handle null name and only url scenario
-		group.configureClient(buildClientBuilderConsumer(group.id()));
+		HttpInterfaceClientGroupProperties clientGroupProperties = this.propertiesProvider.getObject()
+			.getProperties(group.id());
+		group.baseUrl(clientGroupProperties.getBaseUrl());
+		group.configureClient(buildClientBuilderConsumer(clientGroupProperties));
 	}
 
-	private Consumer<Builder> buildClientBuilderConsumer(String clientGroupId) {
+	private Consumer<Builder> buildClientBuilderConsumer(HttpInterfaceClientGroupProperties clientGroupProperties) {
 		return (builder) -> {
-			HttpInterfaceClientGroupProperties clientGroupProperties = this.propertiesProvider.getObject()
-				.getProperties(clientGroupId);
 			builder.requestFactory(buildClientHttpRequestFactory(clientGroupProperties));
 			Map<String, List<String>> defaultHeaders = clientGroupProperties.getDefaultHeaders();
 			for (String headerName : defaultHeaders.keySet()) {
