@@ -24,9 +24,9 @@ import org.springframework.web.reactive.function.client.support.WebClientHttpSer
  */
 public class WebClientPropertyBasedConfigurer implements WebClientHttpServiceGroupConfigurer {
 
-	private final HttpInterfaceClientsProperties properties;
+	private final HttpInterfaceGroupsProperties properties;
 
-	public WebClientPropertyBasedConfigurer(HttpInterfaceClientsProperties properties) {
+	public WebClientPropertyBasedConfigurer(HttpInterfaceGroupsProperties properties) {
 		this.properties = properties;
 	}
 

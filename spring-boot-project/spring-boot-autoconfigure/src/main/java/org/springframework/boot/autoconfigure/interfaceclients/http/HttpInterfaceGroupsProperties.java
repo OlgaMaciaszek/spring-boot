@@ -35,18 +35,18 @@ import org.springframework.web.service.registry.HttpServiceGroup;
  * @since 4.0.0
  */
 @ConfigurationProperties("spring.interface-clients.http")
-public class HttpInterfaceClientsProperties extends HttpInterfaceClientGroupProperties {
+public class HttpInterfaceGroupsProperties {
 
 	/**
 	 * Group-specific interface client properties.
 	 */
-	private final Map<String, HttpInterfaceClientGroupProperties> clientGroups = new HashMap<>();
+	private final Map<String, HttpInterfaceGroupProperties> clientGroups = new HashMap<>();
 
-	public Map<String, HttpInterfaceClientGroupProperties> getClientGroups() {
+	public Map<String, HttpInterfaceGroupProperties> getClientGroups() {
 		return this.clientGroups;
 	}
 
-	public @Nullable HttpInterfaceClientGroupProperties getProperties(@Nullable String groupId) {
+	public @Nullable HttpInterfaceGroupProperties getProperties(@Nullable String groupId) {
 		if (groupId == null || !this.clientGroups.containsKey(groupId)) {
 			// no specific client properties, return default
 			return this.clientGroups.get(HttpServiceGroup.DEFAULT_GROUP_NAME);

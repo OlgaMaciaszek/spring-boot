@@ -33,7 +33,7 @@ import org.springframework.boot.http.client.ClientHttpRequestFactorySettings.Red
  * @author Olga Maciaszek-Sharma
  * @since 4.0.0
  */
-public class HttpInterfaceClientGroupProperties {
+public class HttpInterfaceGroupProperties {
 
 	// FIXME: use for adding clients
 

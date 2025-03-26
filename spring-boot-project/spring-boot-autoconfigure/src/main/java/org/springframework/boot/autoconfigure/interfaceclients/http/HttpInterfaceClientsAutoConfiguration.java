@@ -45,7 +45,7 @@ import org.springframework.web.service.registry.ImportHttpServices;
  */
 @AutoConfiguration(after = { RestClientAutoConfiguration.class, WebClientAutoConfiguration.class })
 @ConditionalOnProperty(value = "spring.interface-clients.enabled", havingValue = "true", matchIfMissing = true)
-@EnableConfigurationProperties(HttpInterfaceClientsProperties.class)
+@EnableConfigurationProperties(HttpInterfaceGroupsProperties.class)
 public class HttpInterfaceClientsAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
@@ -55,7 +55,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 
 		@Bean
 		RestClientPropertyBasedHttpServiceGroupConfigurer restClientPropertyBasedHttpServiceGroupConfigurer(
-				HttpInterfaceClientsProperties properties) {
+				HttpInterfaceGroupsProperties properties) {
 			return new RestClientPropertyBasedHttpServiceGroupConfigurer(properties);
 		}
 
@@ -67,7 +67,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 
 		@Bean
 		WebClientHttpServiceGroupConfigurer webClientHttpServiceGroupConfigurer(
-				HttpInterfaceClientsProperties properties) {
+				HttpInterfaceGroupsProperties properties) {
 			return new WebClientPropertyBasedConfigurer(properties);
 		}
 

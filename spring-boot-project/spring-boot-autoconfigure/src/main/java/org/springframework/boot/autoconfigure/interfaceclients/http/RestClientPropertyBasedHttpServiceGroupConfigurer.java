@@ -32,14 +32,13 @@ import org.springframework.web.client.support.RestClientHttpServiceGroupConfigur
  */
 public class RestClientPropertyBasedHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
 
-	private final HttpInterfaceClientsProperties properties;
+	private final HttpInterfaceGroupsProperties properties;
 
-	public RestClientPropertyBasedHttpServiceGroupConfigurer(HttpInterfaceClientsProperties properties) {
+	public RestClientPropertyBasedHttpServiceGroupConfigurer(HttpInterfaceGroupsProperties properties) {
 		this.properties = properties;
 	}
 
-	private ClientHttpRequestFactory buildClientHttpRequestFactory(
-			HttpInterfaceClientGroupProperties clientProperties) {
+	private ClientHttpRequestFactory buildClientHttpRequestFactory(HttpInterfaceGroupProperties clientProperties) {
 		// FIXME - retrieve default Boot Builder level settings
 		// FIXME - handle other properties
 		ClientHttpRequestFactorySettings factorySettings = ClientHttpRequestFactorySettings.defaults()
@@ -51,7 +50,7 @@ public class RestClientPropertyBasedHttpServiceGroupConfigurer implements RestCl
 	@Override
 	public void configureGroups(Groups<Builder> groups) {
 		groups.configureClient((group, builder) -> {
-			HttpInterfaceClientGroupProperties clientGroupProperties = this.properties.getProperties(group.name());
+			HttpInterfaceGroupProperties clientGroupProperties = this.properties.getProperties(group.name());
 			if (clientGroupProperties == null) {
 				return;
 			}
