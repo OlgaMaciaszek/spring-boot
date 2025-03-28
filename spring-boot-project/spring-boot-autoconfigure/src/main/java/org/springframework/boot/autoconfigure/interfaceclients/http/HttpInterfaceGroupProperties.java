@@ -73,10 +73,10 @@ public class HttpInterfaceGroupProperties {
 	// TODO: add implementation
 
 	/**
-	 * Handling for HTTP redirects. By default, set to
-	 * {@link Redirects#FOLLOW_WHEN_POSSIBLE}
+	 * Handling for HTTP redirects. By default,
+	 * falls back to {@link HttpClientProperties#getRedirects()}
 	 */
-	private Redirects redirects = Redirects.FOLLOW_WHEN_POSSIBLE;
+	private @Nullable Redirects redirects = null;
 
 	/**
 	 * Default SSL configuration for a client HTTP request.
@@ -123,7 +123,7 @@ public class HttpInterfaceGroupProperties {
 		this.defaultHeaders = defaultHeaders;
 	}
 
-	public Redirects getRedirects() {
+	public @Nullable Redirects getRedirects() {
 		return this.redirects;
 	}
 
