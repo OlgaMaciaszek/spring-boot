@@ -20,56 +20,122 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.http.client.HttpClientProperties;
-import org.springframework.boot.autoconfigure.web.client.RestClientBuilderConfigurer;
+import org.springframework.boot.autoconfigure.interfaceclients.http.HttpInterfaceGroupProperties.Ssl;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings.Redirects;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslBundles;
+import org.springframework.core.Ordered;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClient.Builder;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
 
-// TODO: add corresponding WebClient-based implementation
-
 /**
+ * A {@link RestClientHttpServiceGroupConfigurer} that configures the group
+ * and its underlying {@link RestClient .Builder} using property values.
+ * For {@link ClientHttpRequestFactorySettings}, the configuration falls back
+ * to {@link HttpClientProperties} if the property is not set for the group.
+ *
  * @author Olga Maciaszek-Sharma
  */
 public class RestClientPropertyBasedHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
 
 	private final HttpClientProperties httpClientProperties;
 
-	private final HttpInterfaceGroupsProperties properties;
+	private final HttpInterfaceGroupsProperties clientGroupProperties;
 
-	private final RestClientBuilderConfigurer restClientBuilderConfigurer;
+	private final ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder;
+
+	private final ClientHttpRequestFactorySettings requestFactorySettings;
 
 	private final ObjectProvider<SslBundles> sslBundles;
 
-	public RestClientPropertyBasedHttpServiceGroupConfigurer(
-			HttpClientProperties httpClientProperties,
-			HttpInterfaceGroupsProperties properties,
-			RestClientBuilderConfigurer restClientBuilderConfigurer,
+	public RestClientPropertyBasedHttpServiceGroupConfigurer(HttpClientProperties httpClientProperties,
+			HttpInterfaceGroupsProperties clientGroupProperties,
+			@Nullable ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder,
+			@Nullable ClientHttpRequestFactorySettings requestFactorySettings,
 			ObjectProvider<SslBundles> sslBundles) {
 		this.httpClientProperties = httpClientProperties;
-		this.properties = properties;
-		this.restClientBuilderConfigurer = restClientBuilderConfigurer;
+		this.clientGroupProperties = clientGroupProperties;
+		this.requestFactoryBuilder = requestFactoryBuilder != null ? requestFactoryBuilder
+				: ClientHttpRequestFactoryBuilder.detect();
+		this.requestFactorySettings = requestFactorySettings != null ? requestFactorySettings
+				: ClientHttpRequestFactorySettings.defaults();
 		this.sslBundles = sslBundles;
 	}
 
-	private ClientHttpRequestFactory buildClientHttpRequestFactory(HttpInterfaceGroupProperties clientGroupProperties) {
-		// Rebuild entire request factory
-		SslBundle sslBundle = getSslBundle(clientGroupProperties.getSsl(), this.sslBundles);
-		ClientHttpRequestFactorySettings factorySettings = new ClientHttpRequestFactorySettings(getRedirects(clientGroupProperties),
-				getConnectTimeout(clientGroupProperties), getReadTimeout(clientGroupProperties), sslBundle);
-		return ClientHttpRequestFactoryBuilder.detect().build(factorySettings);
+	@Override
+	public void configureGroups(Groups<Builder> groups) {
+		groups.configureClient((group, builder) -> {
+			HttpInterfaceGroupProperties clientGroupProperties = this.clientGroupProperties.getProperties(group.name());
+			if (clientGroupProperties == null) {
+				this.requestFactoryBuilder.build(this.requestFactorySettings);
+				return;
+			}
+			if (clientGroupProperties.getBaseUrl() != null) {
+				builder.baseUrl(clientGroupProperties.getBaseUrl());
+			}
+			Map<String, List<String>> defaultHeaders = clientGroupProperties.getDefaultHeaders();
+			for (String headerName : defaultHeaders.keySet()) {
+				builder.defaultHeader(headerName, defaultHeaders.get(headerName).toArray(String[]::new));
+			}
+			builder.requestFactory(getRequestFactory(clientGroupProperties));
+		});
 	}
 
-	private boolean requiresNewRequestFactory(HttpInterfaceGroupProperties clientGroupProperties) {
-		return clientGroupProperties.getConnectTimeout() != null
-				|| clientGroupProperties.getReadTimeout() != null || clientGroupProperties.getSsl().getBundle() != null;
+	@Override
+	public int getOrder() {
+		return Ordered.HIGHEST_PRECEDENCE;
+	}
+
+	private ClientHttpRequestFactory getRequestFactory(HttpInterfaceGroupProperties clientGroupProperties) {
+		ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = clientGroupProperties.getFactory() != null
+				? clientGroupProperties.getFactory().builder() : this.requestFactoryBuilder;
+		if (customRequestFactorySettings(clientGroupProperties)) {
+			ClientHttpRequestFactorySettings requestFactorySettings =
+					buildClientHttpRequestFactorySettings(clientGroupProperties);
+			return requestFactoryBuilder.build(requestFactorySettings);
+		}
+		// Fall back ClientHttpRequestFactorySettings provided by the user
+		// or created from HttpClientProperties
+		return requestFactoryBuilder.build(this.requestFactorySettings);
+	}
+
+	private boolean customRequestFactorySettings(HttpInterfaceGroupProperties clientGroupProperties) {
+		return clientGroupProperties.getRedirects() != null
+				|| clientGroupProperties.getConnectTimeout() != null
+				|| clientGroupProperties.getReadTimeout() != null
+				|| clientGroupProperties.getSsl().getBundle() != null;
+	}
+
+	private ClientHttpRequestFactorySettings buildClientHttpRequestFactorySettings(
+			HttpInterfaceGroupProperties clientGroupProperties) {
+		// Rebuild entire request factory
+		SslBundle sslBundle = getSslBundle(getSsl(clientGroupProperties), this.sslBundles);
+		return new ClientHttpRequestFactorySettings(
+				getRedirects(clientGroupProperties), getConnectTimeout(clientGroupProperties),
+				getReadTimeout(clientGroupProperties), sslBundle);
+	}
+
+	private Ssl getSsl(HttpInterfaceGroupProperties clientGroupProperties) {
+		if (clientGroupProperties.getSsl().getBundle() != null) {
+			return clientGroupProperties.getSsl();
+		}
+		Ssl ssl = new Ssl();
+		ssl.setBundle(clientGroupProperties.getSsl().getBundle());
+		return ssl;
+	}
+
+	private @Nullable SslBundle getSslBundle(HttpInterfaceGroupProperties.Ssl properties, ObjectProvider<SslBundles> sslBundles) {
+		String name = properties.getBundle();
+		return (StringUtils.hasLength(name)) ? sslBundles.getObject().getBundle(name) : null;
 	}
 
 	private Redirects getRedirects(HttpInterfaceGroupProperties clientGroupProperties) {
@@ -77,41 +143,13 @@ public class RestClientPropertyBasedHttpServiceGroupConfigurer implements RestCl
 				: this.httpClientProperties.getRedirects();
 	}
 
-	private Duration getReadTimeout(HttpInterfaceGroupProperties clientGroupProperties) {
-		return clientGroupProperties.getReadTimeout() != null ?
-				clientGroupProperties.getReadTimeout() : this.httpClientProperties.getReadTimeout();
-	}
-
 	private Duration getConnectTimeout(HttpInterfaceGroupProperties clientGroupProperties) {
 		return clientGroupProperties.getConnectTimeout() != null ? clientGroupProperties.getConnectTimeout()
 				: this.httpClientProperties.getConnectTimeout();
 	}
 
-	@Override
-	public void configureGroups(Groups<Builder> groups) {
-		groups.configureClient((group, builder) -> {
-			this.restClientBuilderConfigurer.configure(builder);
-			HttpInterfaceGroupProperties clientGroupProperties = this.properties.getProperties(group.name());
-			if (clientGroupProperties == null) {
-				return;
-			}
-			if (clientGroupProperties.getBaseUrl() != null) {
-				builder.baseUrl(clientGroupProperties.getBaseUrl());
-			}
-			if (requiresNewRequestFactory(clientGroupProperties)) {
-				builder.requestFactory(buildClientHttpRequestFactory(clientGroupProperties));
-			}
-			Map<String, List<String>> defaultHeaders = clientGroupProperties.getDefaultHeaders();
-			for (String headerName : defaultHeaders.keySet()) {
-				builder.defaultHeader(headerName, defaultHeaders.get(headerName).toArray(String[]::new));
-			}
-		});
-
+	private Duration getReadTimeout(HttpInterfaceGroupProperties clientGroupProperties) {
+		return clientGroupProperties.getReadTimeout() != null ? clientGroupProperties.getReadTimeout()
+				: this.httpClientProperties.getReadTimeout();
 	}
-
-	private SslBundle getSslBundle(HttpClientProperties.Ssl properties, ObjectProvider<SslBundles> sslBundles) {
-		String name = properties.getBundle();
-		return (StringUtils.hasLength(name)) ? sslBundles.getObject().getBundle(name) : null;
-	}
-
 }

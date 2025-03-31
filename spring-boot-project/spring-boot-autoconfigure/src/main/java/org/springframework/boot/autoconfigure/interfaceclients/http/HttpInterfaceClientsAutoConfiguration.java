@@ -16,14 +16,19 @@
 
 package org.springframework.boot.autoconfigure.interfaceclients.http;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.http.client.HttpClientProperties;
 import org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -55,8 +60,13 @@ public class HttpInterfaceClientsAutoConfiguration {
 
 		@Bean
 		RestClientPropertyBasedHttpServiceGroupConfigurer restClientPropertyBasedHttpServiceGroupConfigurer(
-				HttpInterfaceGroupsProperties properties) {
-			return new RestClientPropertyBasedHttpServiceGroupConfigurer(properties);
+				HttpClientProperties httpClientProperties, HttpInterfaceGroupsProperties groupsProperties,
+				ObjectProvider<ClientHttpRequestFactoryBuilder<?>> clientFactoryBuilder,
+				ObjectProvider<ClientHttpRequestFactorySettings> clientHttpRequestFactorySettings,
+				ObjectProvider<SslBundles> sslBundles) {
+			return new RestClientPropertyBasedHttpServiceGroupConfigurer(httpClientProperties, groupsProperties,
+					clientFactoryBuilder.getIfAvailable(), clientHttpRequestFactorySettings.getIfAvailable(),
+					sslBundles);
 		}
 
 	}

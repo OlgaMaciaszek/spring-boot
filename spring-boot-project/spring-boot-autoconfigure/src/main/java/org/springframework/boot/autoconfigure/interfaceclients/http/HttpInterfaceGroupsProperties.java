@@ -46,14 +46,14 @@ public class HttpInterfaceGroupsProperties {
 		return this.clientGroups;
 	}
 
-	public @Nullable HttpInterfaceGroupProperties getProperties(@Nullable String groupId) {
-		if (groupId == null || !this.clientGroups.containsKey(groupId)) {
+	public @Nullable HttpInterfaceGroupProperties getProperties(@Nullable String groupName) {
+		if (groupName == null || !this.clientGroups.containsKey(groupName)) {
 			// no specific client properties, return default
 			return this.clientGroups.get(HttpServiceGroup.DEFAULT_GROUP_NAME);
 		}
 		// because specifics are overlaid on top of defaults, everything in `properties`,
 		// unless overridden, is in `clientsProperties`
-		return this.clientGroups.get(groupId);
+		return this.clientGroups.get(groupName);
 	}
 
 }

@@ -20,49 +20,30 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.boot.autoconfigure.http.client.HttpClientProperties;
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings.Redirects;
+import org.springframework.web.client.RestClient;
 
 /**
  * Properties for HTTP Interface Client Groups. Contains group registration properties and
- * HTTP client properties.
+ * HTTP client properties that mirror the default {@link HttpClientProperties}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Phillip Webb
  * @since 4.0.0
  */
 public class HttpInterfaceGroupProperties {
-
-	// FIXME: use for adding clients
 
 	/**
 	 * Base url to set in the underlying HTTP client group. By default, set to
 	 * {@code null}.
 	 */
-	private @Nullable String baseUrl = null;
-
-	/**
-	 * Name to set in the underlying HTTP client group. By default, set to {@code null}.
-	 */
-	private @Nullable String name = null;
-
-	// basePackages, httpServiceTypes??? - in Boot generally the code concerns would not
-	// go there
-	// making name obligatory to avoid url being a key
-
-	/**
-	 * Default request connect timeout for interface client group. By default, set to
-	 * {@code null}.
-	 */
-	private @Nullable Duration connectTimeout = null;
-
-	/**
-	 * Default request read timeout for interface client group. By default, set to
-	 * {@code null}.
-	 */
-	private @Nullable Duration readTimeout = null;
+	private @Nullable String baseUrl;
 
 	/**
 	 * Default request headers for interface client group. By default, set to empty
@@ -70,18 +51,42 @@ public class HttpInterfaceGroupProperties {
 	 */
 	private Map<String, List<String>> defaultHeaders = Collections.emptyMap();
 
-	// TODO: add implementation
+	/**
+	 * Default factory used for a client HTTP request.By default,
+	 * falls back to {@link HttpClientProperties#getFactory()}.
+	 * Currently only supports {@link RestClient}.
+	 */
+	private @Nullable Factory factory;
 
 	/**
 	 * Handling for HTTP redirects. By default,
-	 * falls back to {@link HttpClientProperties#getRedirects()}
+	 * falls back to {@link HttpClientProperties#getRedirects()}.
+	 * Currently only supports {@link RestClient}.
 	 */
-	private @Nullable Redirects redirects = null;
+	private @Nullable Redirects redirects;
+
+	/**
+	 * Default request connect timeout for interface client group. By default,
+	 * falls back to {@link HttpClientProperties#getConnectTimeout()}.
+	 * Currently only supports {@link RestClient}.
+	 */
+	@Nullable
+	Duration connectTimeout;
+
+
+	/**
+	 * Default request read timeout for interface client group. By default,
+	 * falls back to {@link HttpClientProperties#getReadTimeout()}.
+	 * Currently only supports {@link RestClient}.
+	 */
+	private @Nullable Duration readTimeout;
+
 
 	/**
 	 * Default SSL configuration for a client HTTP request.
 	 */
-	private final HttpClientProperties.Ssl ssl = new HttpClientProperties.Ssl();
+	private final Ssl ssl = new Ssl();
+
 
 	public @Nullable String getBaseUrl() {
 		return this.baseUrl;
@@ -91,12 +96,28 @@ public class HttpInterfaceGroupProperties {
 		this.baseUrl = baseUrl;
 	}
 
-	public @Nullable String getName() {
-		return this.name;
+	public Map<String, List<String>> getDefaultHeaders() {
+		return this.defaultHeaders;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setDefaultHeaders(Map<String, List<String>> defaultHeaders) {
+		this.defaultHeaders = defaultHeaders;
+	}
+
+	public @Nullable Factory getFactory() {
+		return this.factory;
+	}
+
+	public void setFactory(Factory factory) {
+		this.factory = factory;
+	}
+
+	public @Nullable Redirects getRedirects() {
+		return this.redirects;
+	}
+
+	public void setRedirects(Redirects redirects) {
+		this.redirects = redirects;
 	}
 
 	public @Nullable Duration getConnectTimeout() {
@@ -115,24 +136,50 @@ public class HttpInterfaceGroupProperties {
 		this.readTimeout = readTimeout;
 	}
 
-	public Map<String, List<String>> getDefaultHeaders() {
-		return this.defaultHeaders;
-	}
-
-	public void setDefaultHeaders(Map<String, List<String>> defaultHeaders) {
-		this.defaultHeaders = defaultHeaders;
-	}
-
-	public @Nullable Redirects getRedirects() {
-		return this.redirects;
-	}
-
-	public void setRedirects(Redirects redirects) {
-		this.redirects = redirects;
-	}
-
-	public HttpClientProperties.Ssl getSsl() {
+	public Ssl getSsl() {
 		return this.ssl;
+	}
+
+	/**
+	 * Supported factory types.
+	 */
+	public enum Factory {
+
+		/**
+		 * Apache HttpComponents HttpClient.
+		 */
+		HTTP_COMPONENTS(ClientHttpRequestFactoryBuilder::httpComponents),
+
+		/**
+		 * Jetty's HttpClient.
+		 */
+		JETTY(ClientHttpRequestFactoryBuilder::jetty),
+
+		/**
+		 * Reactor-Netty.
+		 */
+		REACTOR(ClientHttpRequestFactoryBuilder::reactor),
+
+		/**
+		 * Java's HttpClient.
+		 */
+		JDK(ClientHttpRequestFactoryBuilder::jdk),
+
+		/**
+		 * Standard JDK facilities.
+		 */
+		SIMPLE(ClientHttpRequestFactoryBuilder::simple);
+
+		private final Supplier<ClientHttpRequestFactoryBuilder<?>> builderSupplier;
+
+		Factory(Supplier<ClientHttpRequestFactoryBuilder<?>> builderSupplier) {
+			this.builderSupplier = builderSupplier;
+		}
+
+		ClientHttpRequestFactoryBuilder<?> builder() {
+			return this.builderSupplier.get();
+		}
+
 	}
 
 	/**
