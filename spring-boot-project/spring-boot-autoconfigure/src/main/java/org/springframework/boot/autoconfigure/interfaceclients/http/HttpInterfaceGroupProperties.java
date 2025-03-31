@@ -52,41 +52,38 @@ public class HttpInterfaceGroupProperties {
 	private Map<String, List<String>> defaultHeaders = Collections.emptyMap();
 
 	/**
-	 * Default factory used for a client HTTP request.By default,
-	 * falls back to {@link HttpClientProperties#getFactory()}.
-	 * Currently only supports {@link RestClient}.
+	 * Default factory used for a client HTTP request.By default, falls back to
+	 * {@link HttpClientProperties#getFactory()}. Currently only supports
+	 * {@link RestClient}.
 	 */
 	private @Nullable Factory factory;
 
 	/**
-	 * Handling for HTTP redirects. By default,
-	 * falls back to {@link HttpClientProperties#getRedirects()}.
-	 * Currently only supports {@link RestClient}.
+	 * Handling for HTTP redirects. By default, falls back to
+	 * {@link HttpClientProperties#getRedirects()}. Currently only supports
+	 * {@link RestClient}.
 	 */
 	private @Nullable Redirects redirects;
 
 	/**
-	 * Default request connect timeout for interface client group. By default,
-	 * falls back to {@link HttpClientProperties#getConnectTimeout()}.
-	 * Currently only supports {@link RestClient}.
+	 * Default request connect timeout for interface client group. By default, falls back
+	 * to {@link HttpClientProperties#getConnectTimeout()}. Currently only supports
+	 * {@link RestClient}.
 	 */
 	@Nullable
 	Duration connectTimeout;
 
-
 	/**
-	 * Default request read timeout for interface client group. By default,
-	 * falls back to {@link HttpClientProperties#getReadTimeout()}.
-	 * Currently only supports {@link RestClient}.
+	 * Default request read timeout for interface client group. By default, falls back to
+	 * {@link HttpClientProperties#getReadTimeout()}. Currently only supports
+	 * {@link RestClient}.
 	 */
 	private @Nullable Duration readTimeout;
-
 
 	/**
 	 * Default SSL configuration for a client HTTP request.
 	 */
 	private final Ssl ssl = new Ssl();
-
 
 	public @Nullable String getBaseUrl() {
 		return this.baseUrl;

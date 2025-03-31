@@ -38,10 +38,10 @@ import org.springframework.web.client.RestClient.Builder;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
 
 /**
- * A {@link RestClientHttpServiceGroupConfigurer} that configures the group
- * and its underlying {@link RestClient .Builder} using property values.
- * For {@link ClientHttpRequestFactorySettings}, the configuration falls back
- * to {@link HttpClientProperties} if the property is not set for the group.
+ * A {@link RestClientHttpServiceGroupConfigurer} that configures the group and its
+ * underlying {@link RestClient .Builder} using property values. For
+ * {@link ClientHttpRequestFactorySettings}, the configuration falls back to
+ * {@link HttpClientProperties} if the property is not set for the group.
  *
  * @author Olga Maciaszek-Sharma
  * @since 4.0.0
@@ -61,13 +61,12 @@ public class RestClientPropertiesHttpServiceGroupConfigurer implements RestClien
 	public RestClientPropertiesHttpServiceGroupConfigurer(HttpClientProperties httpClientProperties,
 			HttpInterfaceGroupsProperties clientGroupProperties,
 			@Nullable ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder,
-			@Nullable ClientHttpRequestFactorySettings requestFactorySettings,
-			ObjectProvider<SslBundles> sslBundles) {
+			@Nullable ClientHttpRequestFactorySettings requestFactorySettings, ObjectProvider<SslBundles> sslBundles) {
 		this.httpClientProperties = httpClientProperties;
 		this.clientGroupProperties = clientGroupProperties;
-		this.requestFactoryBuilder = requestFactoryBuilder != null ? requestFactoryBuilder
+		this.requestFactoryBuilder = (requestFactoryBuilder != null) ? requestFactoryBuilder
 				: ClientHttpRequestFactoryBuilder.detect();
-		this.requestFactorySettings = requestFactorySettings != null ? requestFactorySettings
+		this.requestFactorySettings = (requestFactorySettings != null) ? requestFactorySettings
 				: ClientHttpRequestFactorySettings.defaults();
 		this.sslBundles = sslBundles;
 	}
@@ -87,7 +86,7 @@ public class RestClientPropertiesHttpServiceGroupConfigurer implements RestClien
 			for (String headerName : defaultHeaders.keySet()) {
 				builder.defaultHeader(headerName, defaultHeaders.get(headerName).toArray(String[]::new));
 			}
-			builder.requestFactory(getRequestFactory(clientGroupProperties));
+			builder.requestFactory(buildRequestFactory(clientGroupProperties));
 		});
 	}
 
@@ -96,12 +95,12 @@ public class RestClientPropertiesHttpServiceGroupConfigurer implements RestClien
 		return Ordered.HIGHEST_PRECEDENCE;
 	}
 
-	private ClientHttpRequestFactory getRequestFactory(HttpInterfaceGroupProperties clientGroupProperties) {
-		ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = clientGroupProperties.getFactory() != null
+	private ClientHttpRequestFactory buildRequestFactory(HttpInterfaceGroupProperties clientGroupProperties) {
+		ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = (clientGroupProperties.getFactory() != null)
 				? clientGroupProperties.getFactory().builder() : this.requestFactoryBuilder;
 		if (customRequestFactorySettings(clientGroupProperties)) {
-			ClientHttpRequestFactorySettings requestFactorySettings =
-					buildClientHttpRequestFactorySettings(clientGroupProperties);
+			ClientHttpRequestFactorySettings requestFactorySettings = buildClientHttpRequestFactorySettings(
+					clientGroupProperties);
 			return requestFactoryBuilder.build(requestFactorySettings);
 		}
 		// Fall back ClientHttpRequestFactorySettings provided by the user
@@ -110,19 +109,16 @@ public class RestClientPropertiesHttpServiceGroupConfigurer implements RestClien
 	}
 
 	private boolean customRequestFactorySettings(HttpInterfaceGroupProperties clientGroupProperties) {
-		return clientGroupProperties.getRedirects() != null
-				|| clientGroupProperties.getConnectTimeout() != null
-				|| clientGroupProperties.getReadTimeout() != null
-				|| clientGroupProperties.getSsl().getBundle() != null;
+		return clientGroupProperties.getRedirects() != null || clientGroupProperties.getConnectTimeout() != null
+				|| clientGroupProperties.getReadTimeout() != null || clientGroupProperties.getSsl().getBundle() != null;
 	}
 
 	private ClientHttpRequestFactorySettings buildClientHttpRequestFactorySettings(
 			HttpInterfaceGroupProperties clientGroupProperties) {
 		// Rebuild entire request factory
 		SslBundle sslBundle = getSslBundle(getSsl(clientGroupProperties), this.sslBundles);
-		return new ClientHttpRequestFactorySettings(
-				getRedirects(clientGroupProperties), getConnectTimeout(clientGroupProperties),
-				getReadTimeout(clientGroupProperties), sslBundle);
+		return new ClientHttpRequestFactorySettings(getRedirects(clientGroupProperties),
+				getConnectTimeout(clientGroupProperties), getReadTimeout(clientGroupProperties), sslBundle);
 	}
 
 	private Ssl getSsl(HttpInterfaceGroupProperties clientGroupProperties) {
@@ -134,23 +130,25 @@ public class RestClientPropertiesHttpServiceGroupConfigurer implements RestClien
 		return ssl;
 	}
 
-	private @Nullable SslBundle getSslBundle(HttpInterfaceGroupProperties.Ssl properties, ObjectProvider<SslBundles> sslBundles) {
+	private @Nullable SslBundle getSslBundle(HttpInterfaceGroupProperties.Ssl properties,
+			ObjectProvider<SslBundles> sslBundles) {
 		String name = properties.getBundle();
 		return (StringUtils.hasLength(name)) ? sslBundles.getObject().getBundle(name) : null;
 	}
 
 	private Redirects getRedirects(HttpInterfaceGroupProperties clientGroupProperties) {
-		return clientGroupProperties.getRedirects() != null ? clientGroupProperties.getRedirects()
+		return (clientGroupProperties.getRedirects() != null) ? clientGroupProperties.getRedirects()
 				: this.httpClientProperties.getRedirects();
 	}
 
 	private Duration getConnectTimeout(HttpInterfaceGroupProperties clientGroupProperties) {
-		return clientGroupProperties.getConnectTimeout() != null ? clientGroupProperties.getConnectTimeout()
+		return (clientGroupProperties.getConnectTimeout() != null) ? clientGroupProperties.getConnectTimeout()
 				: this.httpClientProperties.getConnectTimeout();
 	}
 
 	private Duration getReadTimeout(HttpInterfaceGroupProperties clientGroupProperties) {
-		return clientGroupProperties.getReadTimeout() != null ? clientGroupProperties.getReadTimeout()
+		return (clientGroupProperties.getReadTimeout() != null) ? clientGroupProperties.getReadTimeout()
 				: this.httpClientProperties.getReadTimeout();
 	}
+
 }

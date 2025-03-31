@@ -24,8 +24,8 @@ import org.springframework.web.reactive.function.client.WebClient.Builder;
 import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
 
 /**
- * A {@link WebClientHttpServiceGroupConfigurer} that configures the group
- * and its underlying {@link WebClient .Builder} using property values.
+ * A {@link WebClientHttpServiceGroupConfigurer} that configures the group and its
+ * underlying {@link WebClient .Builder} using property values.
  *
  * @author Olga Maciaszek-Sharma
  * @since 4.0.0
@@ -54,4 +54,5 @@ public class WebClientPropertiesHttpServiceGroupConfigurer implements WebClientH
 			}
 		});
 	}
+
 }

@@ -19,12 +19,17 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 import java.util.List;
 
 import org.springframework.boot.web.client.RestClientCustomizer;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClient.Builder;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
 
 /**
+ * A {@link RestClientHttpServiceGroupConfigurer} that picks and applies auto-configured
+ * {@link RestClientCustomizer}s to the group's {@link RestClient.Builder}.
+ *
  * @author Olga Maciaszek-Sharma
  * @author Phillip Webb
+ * @since 4.0.0
  */
 public class RestClientCustomizerHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
 
@@ -36,7 +41,7 @@ public class RestClientCustomizerHttpServiceGroupConfigurer implements RestClien
 
 	@Override
 	public void configureGroups(Groups<Builder> groups) {
-		groups.configureClient(builder -> {
+		groups.configureClient((builder) -> {
 			for (RestClientCustomizer customizer : this.customizers) {
 				customizer.customize(builder);
 			}
@@ -44,10 +49,11 @@ public class RestClientCustomizerHttpServiceGroupConfigurer implements RestClien
 
 	}
 
-	// Allow plugging in  user-provided configurers
+	// Allow plugging in user-provided configurers
 	// between the properties-based configurers and this one
 	@Override
 	public int getOrder() {
 		return 0;
 	}
+
 }
