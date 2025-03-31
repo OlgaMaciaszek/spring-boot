@@ -16,6 +16,12 @@
 
 /**
  * AutoConfiguration for Spring Interface Clients.
+ *
+ * @author Olga Maciaszek-Sharma
+ * @author Phillip Webb
+ * @author Rossen Stoyanchev
+ *
+ * @since 4.0.0
  */
 @NullMarked
 package org.springframework.boot.autoconfigure.interfaceclients;

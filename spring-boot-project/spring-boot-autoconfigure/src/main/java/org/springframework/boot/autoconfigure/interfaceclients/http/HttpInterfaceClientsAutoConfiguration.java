@@ -59,12 +59,12 @@ public class HttpInterfaceClientsAutoConfiguration {
 	protected static class RestClientInterfaceClientsConfiguration {
 
 		@Bean
-		RestClientPropertyBasedHttpServiceGroupConfigurer restClientPropertyBasedHttpServiceGroupConfigurer(
+		RestClientPropertiesHttpServiceGroupConfigurer restClientPropertyBasedHttpServiceGroupConfigurer(
 				HttpClientProperties httpClientProperties, HttpInterfaceGroupsProperties groupsProperties,
 				ObjectProvider<ClientHttpRequestFactoryBuilder<?>> clientFactoryBuilder,
 				ObjectProvider<ClientHttpRequestFactorySettings> clientHttpRequestFactorySettings,
 				ObjectProvider<SslBundles> sslBundles) {
-			return new RestClientPropertyBasedHttpServiceGroupConfigurer(httpClientProperties, groupsProperties,
+			return new RestClientPropertiesHttpServiceGroupConfigurer(httpClientProperties, groupsProperties,
 					clientFactoryBuilder.getIfAvailable(), clientHttpRequestFactorySettings.getIfAvailable(),
 					sslBundles);
 		}
@@ -78,7 +78,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 		@Bean
 		WebClientHttpServiceGroupConfigurer webClientHttpServiceGroupConfigurer(
 				HttpInterfaceGroupsProperties properties) {
-			return new WebClientPropertyBasedConfigurer(properties);
+			return new WebClientPropertiesHttpServiceGroupConfigurer(properties);
 		}
 
 	}

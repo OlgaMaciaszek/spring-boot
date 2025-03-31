@@ -44,8 +44,9 @@ import org.springframework.web.client.support.RestClientHttpServiceGroupConfigur
  * to {@link HttpClientProperties} if the property is not set for the group.
  *
  * @author Olga Maciaszek-Sharma
+ * @since 4.0.0
  */
-public class RestClientPropertyBasedHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
+public class RestClientPropertiesHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
 
 	private final HttpClientProperties httpClientProperties;
 
@@ -57,7 +58,7 @@ public class RestClientPropertyBasedHttpServiceGroupConfigurer implements RestCl
 
 	private final ObjectProvider<SslBundles> sslBundles;
 
-	public RestClientPropertyBasedHttpServiceGroupConfigurer(HttpClientProperties httpClientProperties,
+	public RestClientPropertiesHttpServiceGroupConfigurer(HttpClientProperties httpClientProperties,
 			HttpInterfaceGroupsProperties clientGroupProperties,
 			@Nullable ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder,
 			@Nullable ClientHttpRequestFactorySettings requestFactorySettings,
