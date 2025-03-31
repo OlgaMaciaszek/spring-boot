@@ -29,6 +29,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.boot.ssl.SslBundles;
+import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -40,12 +41,15 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import org.springframework.web.service.registry.ImportHttpServices;
 
 /**
- * {@link EnableAutoConfiguration Auto-configuration} for HTTP Interface Clients.
+ * AutoConfiguration for Spring HTTP Interface Clients.
  * <p>
- * FIXME This will result in the creation of Interface Client beans defined by
+ * This will result in the creation of Interface Client beans defined by
  * {@link ImportHttpServices} annotations.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Rossen Stoyanchev
+ * @author Phillip Webb
+ *
  * @since 4.0.0
  */
 @AutoConfiguration(after = { RestClientAutoConfiguration.class, WebClientAutoConfiguration.class })
@@ -55,7 +59,6 @@ public class HttpInterfaceClientsAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
-	@ConditionalOnMissingClass("org.springframework.web.reactive.function.client.WebClient")
 	protected static class RestClientInterfaceClientsConfiguration {
 
 		@Bean
@@ -67,6 +70,12 @@ public class HttpInterfaceClientsAutoConfiguration {
 			return new RestClientPropertiesHttpServiceGroupConfigurer(httpClientProperties, groupsProperties,
 					clientFactoryBuilder.getIfAvailable(), clientHttpRequestFactorySettings.getIfAvailable(),
 					sslBundles);
+		}
+
+		@Bean
+		RestClientCustomizerHttpServiceGroupConfigurer restClientCustomizerHttpServiceGroupConfigurer(
+				ObjectProvider<RestClientCustomizer> customizers) {
+			return new RestClientCustomizerHttpServiceGroupConfigurer(customizers.orderedStream().toList());
 		}
 
 	}
