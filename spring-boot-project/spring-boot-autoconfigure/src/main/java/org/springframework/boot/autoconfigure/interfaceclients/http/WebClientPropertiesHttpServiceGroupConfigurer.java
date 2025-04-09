@@ -19,6 +19,7 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.Ordered;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
 import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
@@ -30,7 +31,7 @@ import org.springframework.web.reactive.function.client.support.WebClientHttpSer
  * @author Olga Maciaszek-Sharma
  * @since 4.0.0
  */
-public class WebClientPropertiesHttpServiceGroupConfigurer implements WebClientHttpServiceGroupConfigurer {
+public class WebClientPropertiesHttpServiceGroupConfigurer implements WebClientHttpServiceGroupConfigurer, Ordered {
 
 	private final HttpInterfaceGroupsProperties clientGroupProperties;
 
@@ -53,6 +54,11 @@ public class WebClientPropertiesHttpServiceGroupConfigurer implements WebClientH
 				builder.defaultHeader(headerName, defaultHeaders.get(headerName).toArray(String[]::new));
 			}
 		});
+	}
+
+	@Override
+	public int getOrder() {
+		return Ordered.HIGHEST_PRECEDENCE;
 	}
 
 }

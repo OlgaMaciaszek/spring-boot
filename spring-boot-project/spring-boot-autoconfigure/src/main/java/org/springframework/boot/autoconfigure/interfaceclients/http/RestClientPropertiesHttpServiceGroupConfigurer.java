@@ -46,7 +46,7 @@ import org.springframework.web.client.support.RestClientHttpServiceGroupConfigur
  * @author Olga Maciaszek-Sharma
  * @since 4.0.0
  */
-public class RestClientPropertiesHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
+public class RestClientPropertiesHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer, Ordered {
 
 	private final HttpClientProperties httpClientProperties;
 
