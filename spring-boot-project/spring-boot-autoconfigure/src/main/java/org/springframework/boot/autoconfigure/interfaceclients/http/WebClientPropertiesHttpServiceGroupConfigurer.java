@@ -31,7 +31,7 @@ import org.springframework.web.reactive.function.client.support.WebClientHttpSer
  * @author Olga Maciaszek-Sharma
  * @since 4.0.0
  */
-public class WebClientPropertiesHttpServiceGroupConfigurer implements WebClientHttpServiceGroupConfigurer, Ordered {
+public class WebClientPropertiesHttpServiceGroupConfigurer implements WebClientHttpServiceGroupConfigurer {
 
 	private final HttpInterfaceGroupsProperties clientGroupProperties;
 

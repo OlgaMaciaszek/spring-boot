@@ -19,7 +19,6 @@ package org.springframework.boot.autoconfigure.interfaceclients.http;
 import java.util.List;
 
 import org.springframework.boot.web.client.RestClientCustomizer;
-import org.springframework.core.Ordered;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClient.Builder;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
@@ -32,7 +31,7 @@ import org.springframework.web.client.support.RestClientHttpServiceGroupConfigur
  * @author Phillip Webb
  * @since 4.0.0
  */
-public class RestClientCustomizerHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer, Ordered {
+public class RestClientCustomizerHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
 
 	private final List<RestClientCustomizer> customizers;
 
