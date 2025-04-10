@@ -30,12 +30,9 @@ import org.springframework.boot.ssl.SslBundles;
 import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
-import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import org.springframework.web.service.registry.HttpServiceProxyRegistry;
 import org.springframework.web.service.registry.ImportHttpServices;
 
@@ -56,7 +53,7 @@ import org.springframework.web.service.registry.ImportHttpServices;
 public class HttpInterfaceClientsAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass({ RestClient.class, RestClientAdapter.class, HttpServiceProxyFactory.class })
+	@ConditionalOnClass({ RestClientAdapter.class })
 	protected static class RestClientInterfaceClientsConfiguration {
 
 		@Bean
@@ -79,7 +76,7 @@ public class HttpInterfaceClientsAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass({ WebClient.class, WebClientAdapter.class, HttpServiceProxyFactory.class })
+	@ConditionalOnClass({ WebClientAdapter.class })
 	protected static class WebClientInterfaceClientsConfiguration {
 
 		@Bean
